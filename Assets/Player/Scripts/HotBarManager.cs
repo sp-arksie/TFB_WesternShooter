@@ -4,19 +4,22 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.PlasticSCM.Editor.WebApi;
 using UnityEngine;
+using UnityEngine.Animations;
+using UnityEngine.Animations.Rigging;
 using UnityEngine.InputSystem;
 
 public class HotBarManager : MonoBehaviour
 {
     [SerializeField] Transform hotBarItems;
-
     [SerializeField] CinemachineVirtualCamera virtualCamera;
 
-    int startingIndex = 0;
-    int currentIndex = 0;
-
-    InputManager input;
-    CameraShakeController cameraShakeController;
+    [Header("Grab Points")]
+    [SerializeField] ParentConstraint leftArmTarget;
+    [SerializeField] ParentConstraint leftArmHint;
+    [SerializeField] ParentConstraint RightArmTarget;
+    [SerializeField] ParentConstraint RightArmHint;
+    [SerializeField] TwoBoneIKConstraint leftArmRig;
+    [SerializeField] TwoBoneIKConstraint rightArmRig;
 
     [Header("Aiming")]
     [SerializeField] float ironSightFOV = 35f;
@@ -25,8 +28,14 @@ public class HotBarManager : MonoBehaviour
     float defaultFOV;
     float currentFOV;
 
-    [SerializeField] float recoilAnimationSpeed = 0.1f;
-    Coroutine shootingAnimationCoroutine;
+    int startingIndex = 0;
+    int currentIndex = 0;
+
+    InputManager input;
+    Animator animator;
+
+    int hasGunHash;
+    int rightArmOnlyHash;
 
     public event Action<WeaponBase> WeaponSelectedEvent;
     public event Action<WeaponBase> WeaponUnselectedEvent;
@@ -35,7 +44,7 @@ public class HotBarManager : MonoBehaviour
     private void Awake()
     {
         input = InputManager.Instance;
-        cameraShakeController = GetComponent<CameraShakeController>();
+        animator = GetComponentInChildren<Animator>();
         defaultFOV = currentFOV = virtualCamera.m_Lens.FieldOfView;
     }
 
@@ -55,18 +64,28 @@ public class HotBarManager : MonoBehaviour
 
     private void Start()
     {
+        hasGunHash = Animator.StringToHash("HasGun");
+        rightArmOnlyHash = Animator.StringToHash("RightHandOnly");
+
         for(int i = 0; i < hotBarItems.childCount; i++)
         {
             hotBarItems.GetChild(i).gameObject.SetActive(false);
         }
         currentIndex = startingIndex;
         hotBarItems.GetChild(currentIndex).gameObject.SetActive(true);
-        WeaponSelectedEvent?.Invoke(hotBarItems.GetChild(currentIndex).GetComponent<WeaponBase>());
+        WeaponBase weapon = hotBarItems.GetChild(currentIndex).GetComponent<WeaponBase>();
+        animator.SetBool(hasGunHash, true);
+        animator.SetBool(rightArmOnlyHash, weapon.RightArmOnly);
+        WeaponSelectedEvent?.Invoke(weapon);
+        GrabPoints();
     }
 
+    float desiredRightArmWeight = 0;
+    float desiredLeftArmWeight = 0;
     private void Update()
     {
-
+        if(rightArmRig.weight != desiredRightArmWeight) { rightArmRig.weight = desiredRightArmWeight; }
+        if(leftArmRig.weight != desiredLeftArmWeight) { leftArmRig.weight = desiredLeftArmWeight; }
     }
 
     private void OnDisable()
@@ -100,41 +119,12 @@ public class HotBarManager : MonoBehaviour
             if (weapon.CanShoot())
             {
                 weapon.NotifyAttack();
-                //if (cameraShakeController && weapon.TryGetComponent<RecoilBehaviour>(out RecoilBehaviour recoilStats))
-                //{
-                //    cameraShakeController.StartRecoil(recoilStats);
-                //}
             }
-        }
-    }
-
-    private IEnumerator ShootingAnimationCoroutine(ProjectileWeapon weapon)
-    {
-        float dt = 0f;
-        float t = 0f;
-        Quaternion start = weapon.transform.localRotation;
-        Quaternion finish = weapon.ShootingRotationTransform.localRotation;
-
-        while(t <= 1)
-        {
-            dt += Time.deltaTime;
-            t = dt / recoilAnimationSpeed;
-            weapon.transform.localRotation = Quaternion.Lerp(start, finish, t);
-            yield return new WaitForEndOfFrame();
-        }
-        dt = t = 0f;
-        while(t <= 1)
-        {
-            dt += Time.deltaTime;
-            t = dt / weapon.GetComponent<RecoilBehaviour>().recoilRecoveryTime;
-            weapon.transform.localRotation = Quaternion.Lerp(finish, start, t);
-            yield return new WaitForEndOfFrame();
         }
     }
 
     private void OnAim(InputAction.CallbackContext context)
     {
-        // TODO: ADS
         if (hotBarItems.GetChild(currentIndex).TryGetComponent<ProjectileWeapon>(out ProjectileWeapon weapon))
         {
             if (context.started)
@@ -213,6 +203,7 @@ public class HotBarManager : MonoBehaviour
         WeaponBase weapon = hotBarItems.GetChild(currentIndex).GetComponent<WeaponBase>();
         weapon.NotifyUnselected();
         WeaponUnselectedEvent?.Invoke(weapon);
+        UngrabPoints();
         hotBarItems.GetChild(currentIndex).gameObject.SetActive(false);
 
         if(index < 0)
@@ -224,7 +215,79 @@ public class HotBarManager : MonoBehaviour
         weapon = hotBarItems.GetChild(currentIndex).GetComponent<WeaponBase>();
         weapon.NotifySelected();
         WeaponSelectedEvent?.Invoke(weapon);
+        animator.SetBool(rightArmOnlyHash, weapon.RightArmOnly);
+        GrabPoints();
         hotBarItems.GetChild(currentIndex).gameObject.SetActive(true);
+    }
+
+    private void UngrabPoints()
+    {
+        WeaponBase weapon = hotBarItems.GetChild(currentIndex).GetComponent<WeaponBase>();
+        Transform grabPointsParent = weapon.GrabPointsParent;
+        if (weapon.RightArmOnly)
+        {
+            UnapplyConstraint(grabPointsParent.GetChild(0), RightArmTarget);
+            UnapplyConstraint(grabPointsParent.GetChild(1), RightArmHint);
+        }
+        else
+        {
+            UnapplyConstraint(grabPointsParent.GetChild(0), leftArmTarget);
+            UnapplyConstraint(grabPointsParent.GetChild(1), leftArmHint);
+            UnapplyConstraint(grabPointsParent.GetChild(2), RightArmTarget);
+            UnapplyConstraint(grabPointsParent.GetChild(3), RightArmHint);
+        }
+        desiredLeftArmWeight = 0;
+        desiredRightArmWeight = 0;
+    }
+
+    private void UnapplyConstraint(Transform target, ParentConstraint constrainedObject)
+    {
+        if (constrainedObject)
+        {
+            constrainedObject.constraintActive = false;
+            for (int i = 0; i < constrainedObject.sourceCount; i++)
+            {
+                constrainedObject.RemoveSource(i);
+            }
+        }
+        else throw new System.Exception("Arm rigs are missing ParentConstraints");
+    }
+
+    private void GrabPoints()
+    {
+        WeaponBase weapon = hotBarItems.GetChild(currentIndex).GetComponent<WeaponBase>();
+        Transform grabPointsParent = weapon.GrabPointsParent;
+        if (weapon.RightArmOnly)
+        {
+            ApplyConstraint(grabPointsParent.GetChild(0), RightArmTarget);
+            ApplyConstraint(grabPointsParent.GetChild(1), RightArmHint);
+            desiredRightArmWeight = 1;
+        }
+        else
+        {
+            ApplyConstraint(grabPointsParent.GetChild(0), leftArmTarget);
+            ApplyConstraint(grabPointsParent.GetChild(1), leftArmHint);
+            ApplyConstraint(grabPointsParent.GetChild(2), RightArmTarget);
+            ApplyConstraint(grabPointsParent.GetChild(3), RightArmHint);
+            desiredLeftArmWeight = 1;
+            desiredRightArmWeight = 1;
+        }
+    }
+
+    private void ApplyConstraint(Transform target, ParentConstraint constrainedObject)
+    {
+        if (constrainedObject)
+        {
+            ConstraintSource source = new();
+            source.sourceTransform = target;
+            source.weight = 1f;
+            constrainedObject.AddSource(source);
+            constrainedObject.SetTranslationOffset(0, Vector3.zero);
+            constrainedObject.SetRotationOffset(0, Vector3.zero);
+            constrainedObject.constraintActive = true;
+
+        }
+        else throw new System.Exception("Arm rigs are missing ParentConstraints");
     }
 
     private void OnHotBarSelect(int i)

@@ -4,7 +4,8 @@ using UnityEngine;
 
 public abstract class WeaponBase : MonoBehaviour
 {
-    [SerializeField] Transform GrabPointsParent;
+    [SerializeField] public Transform GrabPointsParent;
+    [SerializeField] public bool RightArmOnly = false;
 
     internal abstract void NotifyAttack();
 

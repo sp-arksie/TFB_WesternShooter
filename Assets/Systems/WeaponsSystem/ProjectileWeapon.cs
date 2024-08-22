@@ -78,7 +78,7 @@ public class ProjectileWeapon : WeaponBase
 
     internal override void NotifySelected()
     {
-        SelectedEvent.Invoke();
+        SelectedEvent?.Invoke();
     }
 
     internal override void NotifyUnselected()
