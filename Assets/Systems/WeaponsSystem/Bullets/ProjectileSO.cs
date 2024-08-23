@@ -6,7 +6,7 @@ using UnityEngine;
 public class ProjectileSO : ScriptableObject
 {
     public WeaponCalliber calliber;
-    public BulletType bulletType;
+    public DamageType bulletType;
 
     [Space(10)]
     public float baseDamage;

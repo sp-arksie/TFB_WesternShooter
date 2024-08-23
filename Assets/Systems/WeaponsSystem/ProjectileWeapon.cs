@@ -35,14 +35,11 @@ public class ProjectileWeapon : WeaponBase
     public event Action ShootEvent;
     public event Action SelectedEvent;
 
-
-    int currentBulletsInMagazine = 1;
-    float timeOfLastShot = -10f;
+    ShootingBehaviour shootingBehaviour;
+    AmmoBehaviour ammoBehaviour;
+    DamageBehaviour damageBehaviour;
     
     Barrel barrel;
-    Animator animator;
-    int isAiming;
-    int isShooting;
 
     #region DEBUG
 
@@ -63,17 +60,19 @@ public class ProjectileWeapon : WeaponBase
     private void Awake()
     {
         barrel = GetComponentInChildren<Barrel>();
+        shootingBehaviour = GetComponent<ShootingBehaviour>();
+        ammoBehaviour = GetComponent<AmmoBehaviour>();
+        damageBehaviour = GetComponent<DamageBehaviour>();
     }
 
     private void Start()
     {
-        isAiming = Animator.StringToHash("IsAiming");
-        isShooting = Animator.StringToHash("IsShooting");
+
     }
 
     internal override void NotifyAttack()
     {
-        Shoot();
+        if(CanShoot()) Shoot();
     }
 
     internal override void NotifySelected()
@@ -86,30 +85,30 @@ public class ProjectileWeapon : WeaponBase
         // NOOP
     }
 
-    private void Shoot()
+    internal void NotifyReload()
     {
-        barrel.Shoot(muzzleVelocity);
-        ShootEvent?.Invoke();
-        InstantiateParticles();
+        if (CanReload()) Reload();
     }
-
     public bool CanShoot()
     {
         bool canShoot = false;
 
         if (barrel != null)
         {
-            float difference = Time.time - timeOfLastShot;
-            if (difference >= secondsBetweenShot && currentBulletsInMagazine > 0)
-            {
-                canShoot = true;
-                timeOfLastShot = Time.time;
-            }
+            canShoot = ammoBehaviour.GetHasBulletInMagazine();
+            canShoot = shootingBehaviour.GetCanShoot();
         }
         else
             throw new System.Exception("No barrel attached, or incorrectly placed.");
 
         return canShoot;
+    }
+
+    private void Shoot()
+    {
+        barrel.Shoot(muzzleVelocity);
+        ShootEvent?.Invoke();
+        InstantiateParticles();
     }
 
     private void InstantiateParticles()
@@ -127,13 +126,14 @@ public class ProjectileWeapon : WeaponBase
         }
     }
 
-    public void NotifyIsAiming(bool value)
+    private bool CanReload()
     {
-        animator.SetBool(isAiming, value);
+        return ammoBehaviour.CanReload();
     }
 
-    public void NotifyReload()
+    private void Reload()
     {
-        currentBulletsInMagazine++;
+        //  TODO: some kind of delay for each reload (1 reload = 1 bullet -for example-, and is on a loop > reload finished > start new reload)
+        //  => reload started? have to wait for finish (no shooting, item switching etc). + global reload can be canceled
     }
 }

@@ -215,6 +215,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""Reload"",
+                    ""type"": ""Button"",
+                    ""id"": ""544b03c1-c862-49c7-8fb3-8046acb40597"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""Scroll"",
                     ""type"": ""Value"",
                     ""id"": ""3948a973-249a-4aff-9ce8-14943164ce4d"",
@@ -428,6 +437,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""Use"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d861573f-e33b-438d-979f-2090916d2519"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Reload"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -448,6 +468,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Actions_Use = m_Actions.FindAction("Use", throwIfNotFound: true);
         m_Actions_Shoot = m_Actions.FindAction("Shoot", throwIfNotFound: true);
         m_Actions_Aim = m_Actions.FindAction("Aim", throwIfNotFound: true);
+        m_Actions_Reload = m_Actions.FindAction("Reload", throwIfNotFound: true);
         m_Actions_Scroll = m_Actions.FindAction("Scroll", throwIfNotFound: true);
         m_Actions_HotBarSlot1 = m_Actions.FindAction("HotBarSlot1", throwIfNotFound: true);
         m_Actions_HotBarSlot2 = m_Actions.FindAction("HotBarSlot2", throwIfNotFound: true);
@@ -637,6 +658,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Actions_Use;
     private readonly InputAction m_Actions_Shoot;
     private readonly InputAction m_Actions_Aim;
+    private readonly InputAction m_Actions_Reload;
     private readonly InputAction m_Actions_Scroll;
     private readonly InputAction m_Actions_HotBarSlot1;
     private readonly InputAction m_Actions_HotBarSlot2;
@@ -653,6 +675,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @Use => m_Wrapper.m_Actions_Use;
         public InputAction @Shoot => m_Wrapper.m_Actions_Shoot;
         public InputAction @Aim => m_Wrapper.m_Actions_Aim;
+        public InputAction @Reload => m_Wrapper.m_Actions_Reload;
         public InputAction @Scroll => m_Wrapper.m_Actions_Scroll;
         public InputAction @HotBarSlot1 => m_Wrapper.m_Actions_HotBarSlot1;
         public InputAction @HotBarSlot2 => m_Wrapper.m_Actions_HotBarSlot2;
@@ -680,6 +703,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Aim.started += instance.OnAim;
             @Aim.performed += instance.OnAim;
             @Aim.canceled += instance.OnAim;
+            @Reload.started += instance.OnReload;
+            @Reload.performed += instance.OnReload;
+            @Reload.canceled += instance.OnReload;
             @Scroll.started += instance.OnScroll;
             @Scroll.performed += instance.OnScroll;
             @Scroll.canceled += instance.OnScroll;
@@ -720,6 +746,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Aim.started -= instance.OnAim;
             @Aim.performed -= instance.OnAim;
             @Aim.canceled -= instance.OnAim;
+            @Reload.started -= instance.OnReload;
+            @Reload.performed -= instance.OnReload;
+            @Reload.canceled -= instance.OnReload;
             @Scroll.started -= instance.OnScroll;
             @Scroll.performed -= instance.OnScroll;
             @Scroll.canceled -= instance.OnScroll;
@@ -780,6 +809,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnUse(InputAction.CallbackContext context);
         void OnShoot(InputAction.CallbackContext context);
         void OnAim(InputAction.CallbackContext context);
+        void OnReload(InputAction.CallbackContext context);
         void OnScroll(InputAction.CallbackContext context);
         void OnHotBarSlot1(InputAction.CallbackContext context);
         void OnHotBarSlot2(InputAction.CallbackContext context);

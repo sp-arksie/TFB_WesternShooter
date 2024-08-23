@@ -12,8 +12,6 @@ public class InputManager : MonoBehaviour
         get { return instance; }
     }
 
-
-
     PlayerControls playerControls;
 
     List<InputAction> hotBarSlots = new();
@@ -72,16 +70,8 @@ public class InputManager : MonoBehaviour
     public InputAction GetUseAction() { return playerControls.Actions.Use; }
     public InputAction GetShootAction() { return playerControls.Actions.Shoot; }
     public InputAction GetAimAction() {  return playerControls.Actions.Aim; }
+    public InputAction GetReloadAction() { return playerControls.Actions.Reload; }
     public InputAction GetScrollAction() { return playerControls.Actions.Scroll; }
     public List<InputAction> GetHotBarSlotActions() { return hotBarSlots; }
-    //public InputAction GetHotBarSlot1Action() { return playerControls.Actions.HotBarSlot1; }
-    //public InputAction GetHotBarSlot2Action() { return playerControls.Actions.HotBarSlot2; }
-    //public InputAction GetHotBarSlot3Action() { return playerControls.Actions.HotBarSlot3; }
-    //public InputAction GetHotBarSlot4Action() { return playerControls.Actions.HotBarSlot4; }
-    //public InputAction GetHotBarSlot5Action() { return playerControls.Actions.HotBarSlot5; }
-    //public InputAction GetHotBarSlot6Action() { return playerControls.Actions.HotBarSlot6; }
-    //public InputAction GetHotBarSlot7Action() { return playerControls.Actions.HotBarSlot7; }
-    //public InputAction GetHotBarSlot8Action() { return playerControls.Actions.HotBarSlot8; }
-
     #endregion
 }

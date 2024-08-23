@@ -441,7 +441,7 @@ AnimatorController:
   - serializedVersion: 5
     m_Name: HoldingWeapon
     m_StateMachine: {fileID: -3942518240912153233}
-    m_Mask: {fileID: 31900000, guid: ee76109d531871a49abd333fa933dd17, type: 2}
+    m_Mask: {fileID: 31900000, guid: 97705667c0bd28e40b648a0714664cec, type: 2}
     m_Motions: []
     m_Behaviours: []
     m_BlendingMode: 0

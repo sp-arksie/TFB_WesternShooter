@@ -50,11 +50,12 @@ public class HotBarManager : MonoBehaviour
 
     private void OnEnable()
     {
-        input.GetAimAction().started += OnUse;
-        input.GetAimAction().canceled += OnUse;
+        input.GetUseAction().started += OnUse;
+        input.GetUseAction().canceled += OnUse;
         input.GetShootAction().performed += OnShoot;
         input.GetAimAction().started += OnAim;
         input.GetAimAction().canceled += OnAim;
+        input.GetReloadAction().performed += OnReload;
         input.GetScrollAction().performed += OnScroll;
         for(int i = 0; i < input.GetHotBarSlotActions().Count; i++)
         {
@@ -116,10 +117,7 @@ public class HotBarManager : MonoBehaviour
     {
         if(hotBarItems.GetChild(currentIndex).TryGetComponent<ProjectileWeapon>(out ProjectileWeapon weapon))
         {
-            if (weapon.CanShoot())
-            {
-                weapon.NotifyAttack();
-            }
+            weapon.NotifyAttack();
         }
     }
 
@@ -131,14 +129,12 @@ public class HotBarManager : MonoBehaviour
             {
                 if (aimingCoroutine != null) StopCoroutine(aimingCoroutine);
                 aimingCoroutine = StartCoroutine(AimingCoroutine(currentFOV, ironSightFOV, weapon));
-                //weapon.NotifyIsAiming(true);
 
             }
             else if (context.canceled)
             {
                 if (aimingCoroutine != null) StopCoroutine(aimingCoroutine);
                 aimingCoroutine = StartCoroutine(AimingCoroutine(currentFOV, defaultFOV, weapon));
-                //weapon.NotifyIsAiming(false);
             }
         }
     }
@@ -185,6 +181,14 @@ public class HotBarManager : MonoBehaviour
         weapon.transform.localPosition = Vector3.Lerp(current.localPosition, target.localPosition, time);
     }
 
+    private void OnReload(InputAction.CallbackContext context)
+    {
+        if(hotBarItems.GetChild(currentIndex).TryGetComponent<ProjectileWeapon>(out var weapon))
+        {
+            weapon.NotifyReload();
+        }
+    }
+
     private void OnScroll(InputAction.CallbackContext context)
     {
         Vector2 value = context.ReadValue<Vector2>();
@@ -219,7 +223,7 @@ public class HotBarManager : MonoBehaviour
         GrabPoints();
         hotBarItems.GetChild(currentIndex).gameObject.SetActive(true);
     }
-
+    
     private void UngrabPoints()
     {
         WeaponBase weapon = hotBarItems.GetChild(currentIndex).GetComponent<WeaponBase>();
