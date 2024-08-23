@@ -10,13 +10,55 @@ public class AmmoBehaviour : MonoBehaviour
     int ammoInMagazine;
     int reserveAmmo;
 
-    public bool GetHasBulletInMagazine()
+    bool shouldReload = false;
+    bool reloadInProgress = false;
+    Coroutine reloadCoroutine;
+
+    private void Start()
+    {
+        ammoInMagazine = 100;
+        reserveAmmo = 100;
+    }
+
+    internal bool GetHasBulletInMagazine()
     {
         return ammoInMagazine > 0;
     }
 
-    public bool CanReload()
+    internal bool CanReload()
     {
         return (reserveAmmo > 0) && (ammoInMagazine < magazineSize);
+    }
+
+    internal void StartReload()
+    {
+        if (!reloadInProgress)
+        {
+            shouldReload = true;
+            reloadCoroutine = StartCoroutine(PerformReloads());
+        }
+    }
+
+    internal void CancelReload()
+    {
+        shouldReload = false;
+    }
+
+    private IEnumerator PerformReloads()
+    {
+        reloadInProgress = true;
+        while(shouldReload)
+        {
+            yield return new WaitForSeconds(reloadTime);
+            AddAmmoToMagazine();
+        }
+        reloadInProgress = false;
+        yield return null;
+    }
+
+    private void AddAmmoToMagazine()
+    {
+        ammoInMagazine++;
+        reserveAmmo--;
     }
 }

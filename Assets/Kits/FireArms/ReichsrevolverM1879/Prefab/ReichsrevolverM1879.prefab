@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 23141531898047168}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.09, z: 0.36}
+  m_LocalPosition: {x: 0, y: -0.085, z: 0.36}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -88,7 +88,7 @@ Transform:
   m_GameObject: {fileID: 1791395161654890431}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.0665, z: 0.164}
+  m_LocalPosition: {x: 0, y: 0.068, z: 0.164}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -132,13 +132,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2776540478977752993}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.08760318, y: 0.04761958, z: 0.004192557, w: 0.99500775}
+  m_LocalRotation: {x: -0.08488503, y: 0.047630854, z: 0.0040624705, w: 0.9952433}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6054330030991651632}
-  m_LocalEulerAnglesHint: {x: -10.063, y: 5.48, z: 0}
+  m_LocalEulerAnglesHint: {x: -9.75, y: 5.48, z: 0}
 --- !u!1 &3625101827198157682
 GameObject:
   m_ObjectHideFlags: 0
@@ -247,6 +247,9 @@ GameObject:
   m_Component:
   - component: {fileID: 836496661908994862}
   - component: {fileID: 8642982967482717018}
+  - component: {fileID: 2263995623025307130}
+  - component: {fileID: 685148311279531722}
+  - component: {fileID: 1533708357364442446}
   - component: {fileID: 327123814307586961}
   m_Layer: 0
   m_Name: ReichsrevolverM1879
@@ -254,7 +257,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &836496661908994862
 Transform:
   m_ObjectHideFlags: 0
@@ -288,10 +291,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GrabPointsParent: {fileID: 7163200014956644466}
   RightArmOnly: 1
-  magazineSize: 5
-  weaponCalliber: 1
-  secondsBetweenShot: 1
-  muzzleVelocity: 60
   muzzleFlashParent: {fileID: 3431075343281487734}
   smokeEmissionPointsParent: {fileID: 0}
   muzzleFlashPrefab: {fileID: 2982679562053618356, guid: 9cd3b93a8eac2cc42a6a907b9d640942,
@@ -302,6 +301,48 @@ MonoBehaviour:
   shootingRotationTransform: {fileID: 4722298096884174761}
   baseRotationTransform: {fileID: 7388046166536495654}
   debugShoot: 0
+--- !u!114 &2263995623025307130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7260630852269034988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e6fe7e9c7633714e90ee08154a2f1ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  secondsBetweenShot: 0.8
+  muzzlevelocity: 60
+--- !u!114 &685148311279531722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7260630852269034988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fc463f11a5832a4aa3d2f2b19023057, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseDamage: 50
+  weaponCalliber: 2
+--- !u!114 &1533708357364442446
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7260630852269034988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 917f1d2590ce02f41bc5b99b6491a20b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  magazineSize: 5
+  reloadTime: 1
 --- !u!114 &327123814307586961
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -8,14 +8,6 @@ using UnityEngine.Video;
 
 public class ProjectileWeapon : WeaponBase
 {
-    [Header("Ammo Stats")]
-    [SerializeField] int magazineSize;
-    [SerializeField] WeaponCalliber weaponCalliber;
-
-    [Header("Firing Stats")]
-    [SerializeField] float secondsBetweenShot = 1f;
-    [SerializeField] float muzzleVelocity = 30f;
-
     [Header("VFX")]
     [SerializeField] Transform muzzleFlashParent;
     [SerializeField] Transform smokeEmissionPointsParent;
@@ -91,24 +83,24 @@ public class ProjectileWeapon : WeaponBase
     }
     public bool CanShoot()
     {
-        bool canShoot = false;
-
-        if (barrel != null)
-        {
-            canShoot = ammoBehaviour.GetHasBulletInMagazine();
-            canShoot = shootingBehaviour.GetCanShoot();
-        }
-        else
-            throw new System.Exception("No barrel attached, or incorrectly placed.");
-
-        return canShoot;
+        return ammoBehaviour.GetHasBulletInMagazine() && shootingBehaviour.GetCanShoot();
     }
 
     private void Shoot()
     {
-        barrel.Shoot(muzzleVelocity);
+        barrel.Shoot(shootingBehaviour.GetMuzzleVelocity(), GetHitInfoToSend());
         ShootEvent?.Invoke();
         InstantiateParticles();
+    }
+
+    private HitInfo GetHitInfoToSend()
+    {
+        HitInfo hitInfo = new();
+        hitInfo.baseDamage = damageBehaviour.GetBaseDamage();
+        hitInfo.locationOfDamageSource = transform.position;
+        hitInfo.weaponCalliber = damageBehaviour.GetWeaponCalliber();
+
+        return hitInfo;
     }
 
     private void InstantiateParticles()
@@ -135,5 +127,7 @@ public class ProjectileWeapon : WeaponBase
     {
         //  TODO: some kind of delay for each reload (1 reload = 1 bullet -for example-, and is on a loop > reload finished > start new reload)
         //  => reload started? have to wait for finish (no shooting, item switching etc). + global reload can be canceled
+
+
     }
 }

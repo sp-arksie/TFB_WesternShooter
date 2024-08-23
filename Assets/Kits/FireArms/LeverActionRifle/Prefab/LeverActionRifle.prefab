@@ -41,6 +41,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2686919177704536439}
   - component: {fileID: 650078146620449070}
+  - component: {fileID: 4572864266642243423}
+  - component: {fileID: 4736833304556221048}
+  - component: {fileID: 2393483858730466525}
   - component: {fileID: 8882396038411299631}
   m_Layer: 0
   m_Name: LeverActionRifle
@@ -48,7 +51,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2686919177704536439
 Transform:
   m_ObjectHideFlags: 0
@@ -82,10 +85,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GrabPointsParent: {fileID: 4637301546933006745}
   RightArmOnly: 0
-  magazineSize: 8
-  weaponCalliber: 2
-  secondsBetweenShot: 0.6
-  muzzleVelocity: 70
   muzzleFlashParent: {fileID: 5429343938445309289}
   smokeEmissionPointsParent: {fileID: 0}
   muzzleFlashPrefab: {fileID: 2982679562053618356, guid: 9cd3b93a8eac2cc42a6a907b9d640942,
@@ -96,6 +95,48 @@ MonoBehaviour:
   shootingRotationTransform: {fileID: 3070275513736993230}
   baseRotationTransform: {fileID: 6225582994124850260}
   debugShoot: 0
+--- !u!114 &4572864266642243423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2220275747470407050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 917f1d2590ce02f41bc5b99b6491a20b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  magazineSize: 10
+  reloadTime: 1
+--- !u!114 &4736833304556221048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2220275747470407050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e6fe7e9c7633714e90ee08154a2f1ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  secondsBetweenShot: 0.6
+  muzzlevelocity: 60
+--- !u!114 &2393483858730466525
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2220275747470407050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fc463f11a5832a4aa3d2f2b19023057, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseDamage: 70
+  weaponCalliber: 3
 --- !u!114 &8882396038411299631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -299,7 +340,7 @@ Transform:
   m_GameObject: {fileID: 8942204080803808672}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.086, z: 1.117}
+  m_LocalPosition: {x: 0, y: 0.086, z: 0.941}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -395,7 +436,7 @@ PrefabInstance:
     - target: {fileID: 3273092920193640997, guid: b3a3d3598b3a85844988cb2fe51f0759,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.028
+      value: -0.03
       objectReference: {fileID: 0}
     - target: {fileID: 3273092920193640997, guid: b3a3d3598b3a85844988cb2fe51f0759,
         type: 3}
@@ -405,7 +446,7 @@ PrefabInstance:
     - target: {fileID: 3273092920193640997, guid: b3a3d3598b3a85844988cb2fe51f0759,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.258
+      value: 0.203
       objectReference: {fileID: 0}
     - target: {fileID: 3273092920193640997, guid: b3a3d3598b3a85844988cb2fe51f0759,
         type: 3}

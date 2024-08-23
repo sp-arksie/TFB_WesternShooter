@@ -2052,50 +2052,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3431075343281487734, guid: 08b15bc18ebb69b40a219382144b72ab,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.068
-      objectReference: {fileID: 0}
-    - target: {fileID: 4722298096884174761, guid: 08b15bc18ebb69b40a219382144b72ab,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.9952433
-      objectReference: {fileID: 0}
-    - target: {fileID: 4722298096884174761, guid: 08b15bc18ebb69b40a219382144b72ab,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0.08488503
-      objectReference: {fileID: 0}
-    - target: {fileID: 4722298096884174761, guid: 08b15bc18ebb69b40a219382144b72ab,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0.047630854
-      objectReference: {fileID: 0}
-    - target: {fileID: 4722298096884174761, guid: 08b15bc18ebb69b40a219382144b72ab,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0.0040624705
-      objectReference: {fileID: 0}
-    - target: {fileID: 4722298096884174761, guid: 08b15bc18ebb69b40a219382144b72ab,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: -9.75
-      objectReference: {fileID: 0}
-    - target: {fileID: 7133511857174959042, guid: 08b15bc18ebb69b40a219382144b72ab,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0.085
-      objectReference: {fileID: 0}
     - target: {fileID: 7260630852269034988, guid: 08b15bc18ebb69b40a219382144b72ab,
         type: 3}
       propertyPath: m_Name
       value: ReichsrevolverM1879
-      objectReference: {fileID: 0}
-    - target: {fileID: 7260630852269034988, guid: 08b15bc18ebb69b40a219382144b72ab,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2120,11 +2080,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: LeverActionRifle
-      objectReference: {fileID: 0}
-    - target: {fileID: 2220275747470407050, guid: 15b846141d117f34f852f53f8f3a04e1,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2686919177704536439, guid: 15b846141d117f34f852f53f8f3a04e1,
         type: 3}
@@ -2175,11 +2130,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5429343938445309289, guid: 15b846141d117f34f852f53f8f3a04e1,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.941
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

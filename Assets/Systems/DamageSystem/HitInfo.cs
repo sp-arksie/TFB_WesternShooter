@@ -6,7 +6,7 @@ public class HitInfo
 {
     public float baseDamage;
 
-    public Transform locationOfDamageSource;
+    public Vector3 locationOfDamageSource;
 
     public WeaponCalliber weaponCalliber;
 

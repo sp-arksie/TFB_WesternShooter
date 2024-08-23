@@ -5,8 +5,9 @@ using UnityEngine;
 public class ShootingBehaviour : MonoBehaviour
 {
     [SerializeField] float secondsBetweenShot = 1f;
+    [SerializeField] float muzzlevelocity = 60f;
 
-    private float timeSinceLastShot = -100;
+    float timeSinceLastShot = -100;
 
     public bool GetCanShoot()
     {
@@ -20,4 +21,6 @@ public class ShootingBehaviour : MonoBehaviour
 
         return canShoot;
     }
+
+    public float GetMuzzleVelocity() { return muzzlevelocity; }
 }

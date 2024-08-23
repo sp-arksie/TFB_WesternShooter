@@ -5,11 +5,13 @@ using UnityEngine;
 
 public class DamageReceiver : MonoBehaviour
 {
-    public event Action<HitInfo> onHit;
+    [SerializeField] float damageModifer = 1f;
+
+    public event Action<HitInfo, float> onHit;
 
     public void NotifyHit(IHitNotifier hitNotifier)
     {
         HitInfo hitInfo = hitNotifier.GetHitInfo();
-        onHit.Invoke(hitInfo);
+        onHit?.Invoke(hitInfo, damageModifer);
     }
 }
