@@ -34,7 +34,7 @@ public class CameraShakeController : MonoBehaviour
         hotBarManager.WeaponUnselectedEvent -= UnregisterWeapon;
     }
 
-    private void RegisterWeapon(WeaponBase weapon)
+    private void RegisterWeapon(ItemBase weapon)
     {
         if(weapon.TryGetComponent<RecoilBehaviour>(out recoilBehaviour))
         {
@@ -42,7 +42,7 @@ public class CameraShakeController : MonoBehaviour
         }
     }
 
-    private void UnregisterWeapon(WeaponBase weapon)
+    private void UnregisterWeapon(ItemBase weapon)
     {
         if(recoilBehaviour) recoilBehaviour.OnRecoil -= StartRecoil;
     }

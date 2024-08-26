@@ -28,13 +28,12 @@ public class RecoilBehaviour : MonoBehaviour
 
     private void OnEnable()
     {
-        weapon.SelectedEvent += OnSelected;
         weapon.ShootEvent += OnShoot;
     }
 
-    private void OnSelected()
+    private void OnDisable()
     {
-        
+        weapon.ShootEvent -= OnShoot;
     }
 
     private void OnShoot()
@@ -67,10 +66,5 @@ public class RecoilBehaviour : MonoBehaviour
             weapon.transform.localRotation = Quaternion.Lerp(finish, start, t);
             yield return new WaitForEndOfFrame();
         }
-    }
-
-    private void OnDisable()
-    {
-        weapon.ShootEvent -= OnShoot;
     }
 }

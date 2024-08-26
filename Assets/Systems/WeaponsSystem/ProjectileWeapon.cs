@@ -3,10 +3,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Video;
 
-public class ProjectileWeapon : WeaponBase
+public class ProjectileWeapon : ItemBase
 {
     [Header("VFX")]
     [SerializeField] Transform muzzleFlashParent;
@@ -16,22 +17,28 @@ public class ProjectileWeapon : WeaponBase
 
     [Header("Animation")]
     [SerializeField] Transform adsPositionTransform;
-    [SerializeField] Transform hipPositionTransform;
     [SerializeField] Transform shootingRotationTransform;
     [SerializeField] Transform baseRotationTransform;
     public Transform AdsPositionTransform { get { return adsPositionTransform; } private set { adsPositionTransform = value; } }
-    public Transform HipPositionTransform { get { return hipPositionTransform; } private set { hipPositionTransform = value; } }
     public Transform ShootingRotationTransform { get { return shootingRotationTransform; } private set { shootingRotationTransform = value; } }
     public Transform BaseRotationTransform { get { return baseRotationTransform; } private set { baseRotationTransform = value; } }
 
     public event Action ShootEvent;
     public event Action SelectedEvent;
-
+    
+    Barrel barrel;
     ShootingBehaviour shootingBehaviour;
     AmmoBehaviour ammoBehaviour;
     DamageBehaviour damageBehaviour;
-    
-    Barrel barrel;
+    Animator animator;
+
+    int shootHash;
+    int reloadHash;
+    int isReloadinghash;
+    int reloadStartDelayHash;
+    Coroutine reloadStartDelay;
+
+    bool isReloading = false;
 
     #region DEBUG
 
@@ -55,16 +62,31 @@ public class ProjectileWeapon : WeaponBase
         shootingBehaviour = GetComponent<ShootingBehaviour>();
         ammoBehaviour = GetComponent<AmmoBehaviour>();
         damageBehaviour = GetComponent<DamageBehaviour>();
+        animator = GetComponentInChildren<Animator>();
+    }
+
+    private void OnEnable()
+    {
+        ammoBehaviour.ReloadComplete += StopReload;
     }
 
     private void Start()
     {
+        shootHash = Animator.StringToHash("Shoot");
+        reloadHash = Animator.StringToHash("Reload");
+        isReloadinghash = Animator.StringToHash("IsReloading");
+        reloadStartDelayHash = Animator.StringToHash("ReloadStartDelay");
+    }
 
+    private void OnDisable()
+    {
+        ammoBehaviour.ReloadComplete -= StopReload;
     }
 
     internal override void NotifyAttack()
     {
         if(CanShoot()) Shoot();
+        else if (isReloading) { StopReload(); }
     }
 
     internal override void NotifySelected()
@@ -79,17 +101,19 @@ public class ProjectileWeapon : WeaponBase
 
     internal void NotifyReload()
     {
-        if (CanReload()) Reload();
+        if (ammoBehaviour.CanReload() && !isReloading) Reload();
     }
     public bool CanShoot()
     {
-        return ammoBehaviour.GetHasBulletInMagazine() && shootingBehaviour.GetCanShoot();
+        return ammoBehaviour.GetHasBulletInMagazine() && shootingBehaviour.GetCanShoot() && !isReloading;
     }
 
     private void Shoot()
     {
         barrel.Shoot(shootingBehaviour.GetMuzzleVelocity(), GetHitInfoToSend());
         ShootEvent?.Invoke();
+        ammoBehaviour.ConsumeAmmo();
+        animator?.SetTrigger(shootHash);
         InstantiateParticles();
     }
 
@@ -118,16 +142,46 @@ public class ProjectileWeapon : WeaponBase
         }
     }
 
-    private bool CanReload()
-    {
-        return ammoBehaviour.CanReload();
-    }
-
     private void Reload()
     {
-        //  TODO: some kind of delay for each reload (1 reload = 1 bullet -for example-, and is on a loop > reload finished > start new reload)
-        //  => reload started? have to wait for finish (no shooting, item switching etc). + global reload can be canceled
+        isReloading = true;
+        animator.SetTrigger(reloadHash);
+        animator.SetBool(isReloadinghash, true);
+        float delay = ammoBehaviour.GetReloadStartDelay();
+        if (delay > 0)
+        {
+            if(reloadStartDelay != null) StopCoroutine(reloadStartDelay);
+            reloadStartDelay = StartCoroutine(StartDelayReloadAnimation(delay));
+            DOVirtual.DelayedCall(delay, () => ammoBehaviour.StartReload());
+        }
+        else
+        {
+            ammoBehaviour.StartReload();
+        }
+    }
 
+    private void StopReload()
+    {
+        animator.SetBool(isReloadinghash, false);
+        ammoBehaviour.CancelReload();
+        float delay = ammoBehaviour.GetReloadStartDelay();
+        if (delay > 0)
+        {
+            if (reloadStartDelay != null) StopCoroutine(reloadStartDelay);
+            reloadStartDelay = StartCoroutine(StartDelayReloadAnimation(delay));
+        }
+        isReloading = false;
+    }
 
+    private IEnumerator StartDelayReloadAnimation(float delay)
+    {
+        float t = 0f;
+        while (t / delay <= 1)
+        {
+            animator.SetFloat(reloadStartDelayHash, t/delay);
+            t += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
+        yield return null;
     }
 }

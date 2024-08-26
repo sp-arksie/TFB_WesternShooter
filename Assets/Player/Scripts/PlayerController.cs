@@ -16,7 +16,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float baseSpeed = 5f;
     [SerializeField] float runSpeedMultiplier = 2f;
     [SerializeField] float crouchSpeedMultiplier = 0.5f;
-    [SerializeField] float verticalVelocity = 0f;
 
     [Header("Orientation")]
     [SerializeField] float angularSpeed = 360f;
@@ -34,15 +33,17 @@ public class PlayerController : MonoBehaviour
 
     // Movement
     const float gravity = -9.81f;
+    float verticalVelocity = 0f;
     Vector3 previousXZMovementValue = Vector3.zero;
+    bool playerBusy = false;
 
     // Animation
     Vector3 smoothedLocalMovementToApply = Vector3.zero;
-    int xSpeed;
-    int zSpeed;
-    int ySpeed;
-    int grounded;
-    int crouching;
+    int xSpeedHash;
+    int zSpeedHash;
+    int ySpeedHash;
+    int groundedHash;
+    int crouchingHash;
     float normalisedVerticalSpeed = 0f;
     float oldNormalisedVerticalSpeed = 0f;
 
@@ -56,11 +57,11 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        xSpeed = Animator.StringToHash("XSpeed");
-        zSpeed = Animator.StringToHash("ZSpeed");
-        ySpeed = Animator.StringToHash("YSpeed");
-        grounded = Animator.StringToHash("Grounded");
-        crouching = Animator.StringToHash("Crouching");
+        xSpeedHash = Animator.StringToHash("XSpeed");
+        zSpeedHash = Animator.StringToHash("ZSpeed");
+        ySpeedHash = Animator.StringToHash("YSpeed");
+        groundedHash = Animator.StringToHash("Grounded");
+        crouchingHash = Animator.StringToHash("Crouching");
     }
 
     private void Update()
@@ -145,20 +146,20 @@ public class PlayerController : MonoBehaviour
             smoothedLocalMovementToApply = Vector3.Lerp(smoothedLocalMovementToApply, smoothedLocalMovementToApply * 2, t);
         }
         
-        animator.SetBool(crouching, input.GetIsCrouching());
-        animator.SetFloat(xSpeed, smoothedLocalMovementToApply.x);
-        animator.SetFloat(zSpeed, smoothedLocalMovementToApply.z);
+        animator.SetBool(crouchingHash, input.GetIsCrouching());
+        animator.SetFloat(xSpeedHash, smoothedLocalMovementToApply.x);
+        animator.SetFloat(zSpeedHash, smoothedLocalMovementToApply.z);
 
-        animator.SetBool(grounded, characterController.isGrounded);
+        animator.SetBool(groundedHash, characterController.isGrounded);
         normalisedVerticalSpeed = Mathf.InverseLerp(jumpSpeed, -jumpSpeed, verticalVelocity);
         
         if(characterController.isGrounded)
         {
-            animator.SetFloat(ySpeed, oldNormalisedVerticalSpeed);
+            animator.SetFloat(ySpeedHash, oldNormalisedVerticalSpeed);
         }
         else
         {
-            animator.SetFloat(ySpeed, normalisedVerticalSpeed);
+            animator.SetFloat(ySpeedHash, normalisedVerticalSpeed);
             oldNormalisedVerticalSpeed = normalisedVerticalSpeed;
         }
     }

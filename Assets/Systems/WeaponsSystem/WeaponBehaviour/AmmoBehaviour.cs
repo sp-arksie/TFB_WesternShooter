@@ -1,11 +1,14 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class AmmoBehaviour : MonoBehaviour
 {
     [SerializeField] int magazineSize = 5;
     [SerializeField] float reloadTime = 1f;
+    [SerializeField] float reloadStartDelay = 0f;
 
     int ammoInMagazine;
     int reserveAmmo;
@@ -14,10 +17,23 @@ public class AmmoBehaviour : MonoBehaviour
     bool reloadInProgress = false;
     Coroutine reloadCoroutine;
 
+    public event Action ReloadComplete;
+
+    #region DEBUG
+
+    [SerializeField] TextMeshProUGUI debugAmmo;
+
+    #endregion
+
     private void Start()
     {
-        ammoInMagazine = 100;
+        ammoInMagazine = 2;
         reserveAmmo = 100;
+    }
+
+    private void OnEnable()
+    {
+        debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}";
     }
 
     internal bool GetHasBulletInMagazine()
@@ -51,8 +67,11 @@ public class AmmoBehaviour : MonoBehaviour
         {
             yield return new WaitForSeconds(reloadTime);
             AddAmmoToMagazine();
+            debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}";
+            if ((reserveAmmo <= 0) || (ammoInMagazine >= magazineSize)) shouldReload = false;
         }
         reloadInProgress = false;
+        ReloadComplete.Invoke();
         yield return null;
     }
 
@@ -60,5 +79,12 @@ public class AmmoBehaviour : MonoBehaviour
     {
         ammoInMagazine++;
         reserveAmmo--;
+    }
+
+    internal void ConsumeAmmo() { ammoInMagazine--; debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}"; }
+
+    internal float GetReloadStartDelay()
+    {
+        return reloadStartDelay;
     }
 }
