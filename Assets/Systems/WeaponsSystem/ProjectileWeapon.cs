@@ -23,22 +23,27 @@ public class ProjectileWeapon : ItemBase
     public Transform ShootingRotationTransform { get { return shootingRotationTransform; } private set { shootingRotationTransform = value; } }
     public Transform BaseRotationTransform { get { return baseRotationTransform; } private set { baseRotationTransform = value; } }
 
-    public event Action ShootEvent;
+    //public event Action ShootEvent;
     public event Action SelectedEvent;
     
     Barrel barrel;
     ShootingBehaviour shootingBehaviour;
     AmmoBehaviour ammoBehaviour;
     DamageBehaviour damageBehaviour;
+    RecoilBehaviour recoilBehaviour;
     Animator animator;
 
     int shootHash;
     int reloadHash;
-    int isReloadinghash;
+    int isReloadingHash;
     int reloadStartDelayHash;
+    int cockGunHash;
+    int timeToCockHash;
     Coroutine reloadStartDelay;
+    Coroutine cockWeapon;
 
     bool isReloading = false;
+    float shotTime = 0f;
 
     #region DEBUG
 
@@ -62,25 +67,30 @@ public class ProjectileWeapon : ItemBase
         shootingBehaviour = GetComponent<ShootingBehaviour>();
         ammoBehaviour = GetComponent<AmmoBehaviour>();
         damageBehaviour = GetComponent<DamageBehaviour>();
+        recoilBehaviour = GetComponent<RecoilBehaviour>();
         animator = GetComponentInChildren<Animator>();
     }
 
     private void OnEnable()
     {
         ammoBehaviour.ReloadComplete += StopReload;
+        recoilBehaviour.OnRecoilComplete += ProceedGunAnimation;
     }
 
     private void Start()
     {
         shootHash = Animator.StringToHash("Shoot");
         reloadHash = Animator.StringToHash("Reload");
-        isReloadinghash = Animator.StringToHash("IsReloading");
+        isReloadingHash = Animator.StringToHash("IsReloading");
         reloadStartDelayHash = Animator.StringToHash("ReloadStartDelay");
+        cockGunHash = Animator.StringToHash("CockGun");
+        timeToCockHash = Animator.StringToHash("TimeToCock");
     }
 
     private void OnDisable()
     {
         ammoBehaviour.ReloadComplete -= StopReload;
+        recoilBehaviour.OnRecoilComplete -= ProceedGunAnimation;
     }
 
     internal override void NotifyAttack()
@@ -110,8 +120,10 @@ public class ProjectileWeapon : ItemBase
 
     private void Shoot()
     {
+        shotTime = Time.time;
         barrel.Shoot(shootingBehaviour.GetMuzzleVelocity(), GetHitInfoToSend());
-        ShootEvent?.Invoke();
+        //ShootEvent?.Invoke();
+        recoilBehaviour.ApplyRecoil();
         ammoBehaviour.ConsumeAmmo();
         animator?.SetTrigger(shootHash);
         InstantiateParticles();
@@ -146,7 +158,7 @@ public class ProjectileWeapon : ItemBase
     {
         isReloading = true;
         animator.SetTrigger(reloadHash);
-        animator.SetBool(isReloadinghash, true);
+        animator.SetBool(isReloadingHash, true);
         float delay = ammoBehaviour.GetReloadStartDelay();
         if (delay > 0)
         {
@@ -162,7 +174,7 @@ public class ProjectileWeapon : ItemBase
 
     private void StopReload()
     {
-        animator.SetBool(isReloadinghash, false);
+        animator.SetBool(isReloadingHash, false);
         ammoBehaviour.CancelReload();
         float delay = ammoBehaviour.GetReloadStartDelay();
         if (delay > 0)
@@ -183,5 +195,26 @@ public class ProjectileWeapon : ItemBase
             yield return new WaitForEndOfFrame();
         }
         yield return null;
+    }
+
+    private void ProceedGunAnimation()
+    {
+        animator.SetTrigger(cockGunHash);
+        if(cockWeapon != null) { StopCoroutine(cockWeapon); }
+        cockWeapon = StartCoroutine(CockWeapon());
+    }
+
+    private IEnumerator CockWeapon()
+    {
+        float dt = 0f;
+        float t = 0f;
+        float timeToCock = shootingBehaviour.SecondsBetweenShot - (Time.time - shotTime);
+        while (t <= 1)
+        {
+            t = dt / timeToCock;
+            animator.SetFloat(timeToCockHash, t);
+            yield return new WaitForEndOfFrame();
+            dt += Time.deltaTime;
+        }
     }
 }

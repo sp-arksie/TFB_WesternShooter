@@ -7,6 +7,8 @@ public class ShootingBehaviour : MonoBehaviour
     [SerializeField] float secondsBetweenShot = 1f;
     [SerializeField] float muzzlevelocity = 60f;
 
+    public float SecondsBetweenShot { get => secondsBetweenShot; set =>  secondsBetweenShot = value; }
+
     float timeSinceLastShot = -100;
 
     public bool GetCanShoot()

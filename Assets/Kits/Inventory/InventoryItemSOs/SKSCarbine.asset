@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c2f3e0a892b2574daa06839b8796cda, type: 3}
+  m_Name: SKSCarbine
+  m_EditorClassIdentifier: 
+  itemName: SKSCarbine
+  description: 
+  itemVisual: {fileID: 8433656044884083818, guid: 9c30613d1847be040a17888925df4590,
+    type: 3}
+  maximumStacks: 1
+  itemSizeInInventory: {x: 4, y: 2}
+  canRotate: 1

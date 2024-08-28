@@ -7,7 +7,7 @@ public class CameraShakeController : MonoBehaviour
 {
     [SerializeField] CinemachineVirtualCamera virtualCamera;
     [SerializeField] float lerpTime = 0.2f;
-    [SerializeField] float attenuateRecovery = 0.5f;
+    [SerializeField] float attenuateRecovery = 1f;
 
     [NoSaveDuringPlay] CinemachinePOV cinemachinePOV;
     HotBarManager hotBarManager;
@@ -57,10 +57,10 @@ public class CameraShakeController : MonoBehaviour
     {
         float dt = 0f;
         float t = 0f;
-        
-        Vector2 recoil = recoilStats.recoilDirection.normalized * recoilStats.recoilStrength;
+
+        Vector2 recoil = new Vector2(-recoilStats.RecoilDirection.normalized.y, recoilStats.RecoilDirection.normalized.x) * recoilStats.RecoilStrength;
         Vector2 start = new Vector2(cinemachinePOV.m_VerticalAxis.Value, cinemachinePOV.m_HorizontalAxis.Value);
-        Vector2 end = new Vector2(start.x - recoil.x, start.y + recoil.y);
+        Vector2 end = new Vector2(start.x + recoil.x, start.y + recoil.y);
 
         while (t <= 1)
         {
@@ -73,18 +73,18 @@ public class CameraShakeController : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
 
-        yield return new WaitForSeconds(recoilStats.recoveryStartDelay);
+        yield return new WaitForSeconds(recoilStats.RecoveryStartDelay);
 
         dt = 0f;
         t = 0f;
 
-        Vector2 difference = new Vector2(-recoil.x, recoil.y) * attenuateRecovery;
+        Vector2 difference = new Vector2(recoil.x, recoil.y) * attenuateRecovery;
         Vector2 previous = Vector2.zero;
 
         while (t <= 1)
         {
             dt += Time.deltaTime;
-            t = dt / recoilStats.recoilRecoveryTime;
+            t = dt / recoilStats.RecoilRecoveryTime;
 
             float x = Mathf.SmoothStep(0f, -difference.x, t);
             float y = Mathf.SmoothStep(0f, -difference.y, t);

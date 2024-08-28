@@ -13,8 +13,14 @@ public class InputManager : MonoBehaviour
     }
 
     PlayerControls playerControls;
+    List<InputActionMap> inputActionMaps = new();
 
     List<InputAction> hotBarSlots = new();
+
+    string locomotionActionMap = "Locomotion";
+    string aimActionMap = "Aim";
+    string actionsActionMap = "Actions";
+    string uiActionMap = "UI";
 
     private void Awake()
     {
@@ -24,6 +30,11 @@ public class InputManager : MonoBehaviour
             instance = this;
 
         playerControls = new();
+
+        inputActionMaps.Add( playerControls.asset.FindActionMap(locomotionActionMap) );
+        inputActionMaps.Add( playerControls.asset.FindActionMap(aimActionMap) );
+        inputActionMaps.Add( playerControls.asset.FindActionMap(aimActionMap) );
+        inputActionMaps.Add( playerControls.asset.FindActionMap(uiActionMap) );
     }
 
     private void Start()
@@ -58,13 +69,6 @@ public class InputManager : MonoBehaviour
     #endregion
 
 
-    #region POINTER AIM
-
-    public Vector2 GetMouseDelta() { return playerControls.Aim.Mouse.ReadValue<Vector2>(); }
-
-    #endregion
-
-
     #region ACTIONS
 
     public InputAction GetUseAction() { return playerControls.Actions.Use; }
@@ -74,4 +78,34 @@ public class InputManager : MonoBehaviour
     public InputAction GetScrollAction() { return playerControls.Actions.Scroll; }
     public List<InputAction> GetHotBarSlotActions() { return hotBarSlots; }
     #endregion
+
+    #region UI
+
+    public Vector2 GetMousePosition() { return playerControls.UI.MousePosition.ReadValue<Vector2>(); }
+    public InputAction GetRotatedAction() { return playerControls.UI.Rotate; }
+
+    #endregion
+
+    private void RestrictSprint() { playerControls.Locomotion.Run.Disable(); }
+    private void UnrestrictSprint() { playerControls.Locomotion.Run.Enable(); }
+    private void SetUIActionMap()
+    {
+        foreach(InputActionMap iam in inputActionMaps)
+        {
+            if(iam.name != uiActionMap)
+                iam.Disable();
+            else
+                iam.Enable();
+        }
+    }
+    private void SetGameplayActionMap()
+    {
+        foreach (InputActionMap iam in inputActionMaps)
+        {
+            if (iam.name != uiActionMap)
+                iam.Enable();
+            else
+                iam.Disable();
+        }
+    }
 }
