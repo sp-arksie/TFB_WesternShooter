@@ -6387,11 +6387,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerGroup
       objectReference: {fileID: 0}
-    - target: {fileID: 7022794473356480525, guid: de9242323fa440c4aa55e88cb16d67d5,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 7084727824044649120, guid: de9242323fa440c4aa55e88cb16d67d5,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -6442,61 +6437,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7841456829703853333, guid: de9242323fa440c4aa55e88cb16d67d5,
-        type: 3}
-      propertyPath: m_Active
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7841456829703853333, guid: de9242323fa440c4aa55e88cb16d67d5,
-        type: 3}
-      propertyPath: m_Sources.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7841456829703853333, guid: de9242323fa440c4aa55e88cb16d67d5,
-        type: 3}
-      propertyPath: m_RotationOffsets.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7841456829703853333, guid: de9242323fa440c4aa55e88cb16d67d5,
-        type: 3}
-      propertyPath: m_TranslationOffsets.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7841456829703853333, guid: de9242323fa440c4aa55e88cb16d67d5,
-        type: 3}
-      propertyPath: m_Sources.Array.data[0].sourceTransform
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 8037571379419307157, guid: de9242323fa440c4aa55e88cb16d67d5,
         type: 3}
       propertyPath: debugAmmo
       value: 
       objectReference: {fileID: 2117620973}
-    - target: {fileID: 8722420425820019860, guid: de9242323fa440c4aa55e88cb16d67d5,
-        type: 3}
-      propertyPath: m_Active
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8722420425820019860, guid: de9242323fa440c4aa55e88cb16d67d5,
-        type: 3}
-      propertyPath: m_Sources.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8722420425820019860, guid: de9242323fa440c4aa55e88cb16d67d5,
-        type: 3}
-      propertyPath: m_RotationOffsets.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8722420425820019860, guid: de9242323fa440c4aa55e88cb16d67d5,
-        type: 3}
-      propertyPath: m_TranslationOffsets.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8722420425820019860, guid: de9242323fa440c4aa55e88cb16d67d5,
-        type: 3}
-      propertyPath: m_Sources.Array.data[0].sourceTransform
-      value: 
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

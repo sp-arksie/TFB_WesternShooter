@@ -1080,21 +1080,17 @@ ParentConstraint:
   m_Weight: 1
   m_TranslationAtRest: {x: 0.540894, y: 0.70181036, z: -0.3131294}
   m_RotationAtRest: {x: 13.887997, y: 0.0071132137, z: 0}
-  m_TranslationOffsets:
-  - {x: -0.00036168098, y: 0.08957541, z: -0.22634324}
-  m_RotationOffsets:
-  - {x: 13.887999, y: 0.0071132146, z: 0}
+  m_TranslationOffsets: []
+  m_RotationOffsets: []
   m_AffectTranslationX: 1
   m_AffectTranslationY: 1
   m_AffectTranslationZ: 1
   m_AffectRotationX: 1
   m_AffectRotationY: 1
   m_AffectRotationZ: 1
-  m_Active: 1
+  m_Active: 0
   m_IsLocked: 0
-  m_Sources:
-  - sourceTransform: {fileID: 4415735438108108894}
-    weight: 1
+  m_Sources: []
 --- !u!1 &1108821281902298791
 GameObject:
   m_ObjectHideFlags: 0
@@ -3955,21 +3951,17 @@ ParentConstraint:
   m_Weight: 1
   m_TranslationAtRest: {x: 0.15357429, y: 1.4088712, z: 0.3314729}
   m_RotationAtRest: {x: -10.076356, y: 90.10706, z: 107.7024}
-  m_TranslationOffsets:
-  - {x: -0.046341777, y: -0.034870356, z: -0.006162852}
-  m_RotationOffsets:
-  - {x: -2.3690488, y: 0.4804271, z: 13.667072}
+  m_TranslationOffsets: []
+  m_RotationOffsets: []
   m_AffectTranslationX: 1
   m_AffectTranslationY: 1
   m_AffectTranslationZ: 1
   m_AffectRotationX: 1
   m_AffectRotationY: 1
   m_AffectRotationZ: 1
-  m_Active: 1
+  m_Active: 0
   m_IsLocked: 0
-  m_Sources:
-  - sourceTransform: {fileID: 1805801104195868063}
-    weight: 1
+  m_Sources: []
 --- !u!1 &4494200440278779522
 GameObject:
   m_ObjectHideFlags: 0
@@ -5875,7 +5867,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &7084727824044649120
 Transform:
   m_ObjectHideFlags: 0
