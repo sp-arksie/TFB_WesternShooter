@@ -290,6 +290,19 @@ public class HotBarManager : MonoBehaviour
         desiredRightArmWeight = 0;
     }
 
+    private void UnapplyConstraint(Transform target, ParentConstraint constrainedObject)
+    {
+        if (constrainedObject)
+        {
+            constrainedObject.constraintActive = false;
+            for (int i = 0; i < constrainedObject.sourceCount; i++)
+            {
+                constrainedObject.RemoveSource(i);
+            }
+        }
+        else throw new System.Exception("Arm rigs are missing ParentConstraints");
+    }
+
     private void GrabPoints()
     {
         ItemBase weapon = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
@@ -309,19 +322,6 @@ public class HotBarManager : MonoBehaviour
             desiredLeftArmWeight = 1;
             desiredRightArmWeight = 1;
         }
-    }
-
-    private void UnapplyConstraint(Transform target, ParentConstraint constrainedObject)
-    {
-        if (constrainedObject)
-        {
-            constrainedObject.constraintActive = false;
-            for (int i = 0; i < constrainedObject.sourceCount; i++)
-            {
-                constrainedObject.RemoveSource(i);
-            }
-        }
-        else throw new System.Exception("Arm rigs are missing ParentConstraints");
     }
 
     private void ApplyConstraint(Transform target, ParentConstraint constrainedObject)

@@ -191,8 +191,8 @@ AnimatorStateMachine:
   m_EntryTransitions: []
   m_StateMachineTransitions: {}
   m_StateMachineBehaviours: []
-  m_AnyStatePosition: {x: 50, y: 20, z: 0}
-  m_EntryPosition: {x: 50, y: 120, z: 0}
+  m_AnyStatePosition: {x: 50, y: -20, z: 0}
+  m_EntryPosition: {x: 50, y: 40, z: 0}
   m_ExitPosition: {x: 800, y: 120, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
   m_DefaultState: {fileID: -7972153493614019482}
@@ -441,12 +441,12 @@ AnimatorController:
   - serializedVersion: 5
     m_Name: HoldingWeapon
     m_StateMachine: {fileID: -3942518240912153233}
-    m_Mask: {fileID: 31900000, guid: 97705667c0bd28e40b648a0714664cec, type: 2}
+    m_Mask: {fileID: 31900000, guid: ee76109d531871a49abd333fa933dd17, type: 2}
     m_Motions: []
     m_Behaviours: []
     m_BlendingMode: 0
     m_SyncedLayerIndex: -1
-    m_DefaultWeight: 1
+    m_DefaultWeight: 0
     m_IKPass: 0
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}

@@ -1,11 +1,12 @@
 using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.HighDefinition;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IAnimatableEntity
 {
     [Header("Locomotion")]
     [SerializeField] float jumpSpeed = 7f;
@@ -45,7 +46,6 @@ public class PlayerController : MonoBehaviour
     int groundedHash;
     int crouchingHash;
     float normalisedVerticalSpeed = 0f;
-    float oldNormalisedVerticalSpeed = 0f;
 
     private void Awake()
     {
@@ -146,21 +146,43 @@ public class PlayerController : MonoBehaviour
             smoothedLocalMovementToApply = Vector3.Lerp(smoothedLocalMovementToApply, smoothedLocalMovementToApply * 2, t);
         }
         
-        animator.SetBool(crouchingHash, input.GetIsCrouching());
-        animator.SetFloat(xSpeedHash, smoothedLocalMovementToApply.x);
-        animator.SetFloat(zSpeedHash, smoothedLocalMovementToApply.z);
+        //animator.SetBool(crouchingHash, input.GetIsCrouching());
+        //animator.SetFloat(xSpeedHash, smoothedLocalMovementToApply.x);
+        //animator.SetFloat(zSpeedHash, smoothedLocalMovementToApply.z);
 
-        animator.SetBool(groundedHash, characterController.isGrounded);
+        //animator.SetBool(groundedHash, characterController.isGrounded);
+
         normalisedVerticalSpeed = Mathf.InverseLerp(jumpSpeed, -jumpSpeed, verticalVelocity);
-        
-        if(characterController.isGrounded)
-        {
-            animator.SetFloat(ySpeedHash, oldNormalisedVerticalSpeed);
-        }
-        else
-        {
-            animator.SetFloat(ySpeedHash, normalisedVerticalSpeed);
-            oldNormalisedVerticalSpeed = normalisedVerticalSpeed;
-        }
+        //animator.SetFloat(ySpeedHash, normalisedVerticalSpeed);
+    }
+
+    float IAnimatableEntity.GetXSpeed()
+    {
+        return smoothedLocalMovementToApply.x;
+    }
+
+    float IAnimatableEntity.GetYSpeed()
+    {
+        return normalisedVerticalSpeed;
+    }
+
+    float IAnimatableEntity.GetZSpeed()
+    {
+        return smoothedLocalMovementToApply.z;
+    }
+
+    bool IAnimatableEntity.GetIsCrouching()
+    {
+        return input.GetIsCrouching();
+    }
+
+    bool IAnimatableEntity.GetIsRunning()
+    {
+        return input.GetIsRunning();
+    }
+
+    bool IAnimatableEntity.GetIsGrounded()
+    {
+        return characterController.isGrounded;
     }
 }

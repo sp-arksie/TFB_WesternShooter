@@ -33,7 +33,7 @@ public class AmmoBehaviour : MonoBehaviour
 
     private void OnEnable()
     {
-        debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}";
+        if(debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}";
     }
 
     internal bool GetHasBulletInMagazine()
@@ -67,7 +67,7 @@ public class AmmoBehaviour : MonoBehaviour
         {
             yield return new WaitForSeconds(reloadTime);
             AddAmmoToMagazine();
-            debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}";
+            if (debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}";
             if ((reserveAmmo <= 0) || (ammoInMagazine >= magazineSize)) shouldReload = false;
         }
         reloadInProgress = false;
@@ -81,7 +81,7 @@ public class AmmoBehaviour : MonoBehaviour
         reserveAmmo--;
     }
 
-    internal void ConsumeAmmo() { ammoInMagazine--; debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}"; }
+    internal void ConsumeAmmo() { ammoInMagazine--; if(debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}"; }
 
     internal float GetReloadStartDelay()
     {
