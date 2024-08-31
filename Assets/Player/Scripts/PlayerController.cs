@@ -36,7 +36,6 @@ public class PlayerController : MonoBehaviour, IAnimatableEntity
     const float gravity = -9.81f;
     float verticalVelocity = 0f;
     Vector3 previousXZMovementValue = Vector3.zero;
-    bool playerBusy = false;
 
     // Animation
     Vector3 smoothedLocalMovementToApply = Vector3.zero;
@@ -145,15 +144,7 @@ public class PlayerController : MonoBehaviour, IAnimatableEntity
             float t = Mathf.Min(animationSmoothingRate, Time.deltaTime) / animationSmoothingRate;
             smoothedLocalMovementToApply = Vector3.Lerp(smoothedLocalMovementToApply, smoothedLocalMovementToApply * 2, t);
         }
-        
-        //animator.SetBool(crouchingHash, input.GetIsCrouching());
-        //animator.SetFloat(xSpeedHash, smoothedLocalMovementToApply.x);
-        //animator.SetFloat(zSpeedHash, smoothedLocalMovementToApply.z);
-
-        //animator.SetBool(groundedHash, characterController.isGrounded);
-
         normalisedVerticalSpeed = Mathf.InverseLerp(jumpSpeed, -jumpSpeed, verticalVelocity);
-        //animator.SetFloat(ySpeedHash, normalisedVerticalSpeed);
     }
 
     float IAnimatableEntity.GetXSpeed()

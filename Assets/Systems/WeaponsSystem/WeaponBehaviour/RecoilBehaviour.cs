@@ -7,19 +7,17 @@ using UnityEngine;
 
 public class RecoilBehaviour : MonoBehaviour
 {
-    [SerializeField] float recoilAnimationSpeed = 0.1f;
-
     [SerializeField] float recoilStrength = 12f;
+
+    [SerializeField] Vector2 recoilDirection = Vector2.up;
+
+    [SerializeField] float recoilAnimationSpeed = 0.1f;
 
     [SerializeField] float recoilRecoveryTime = 0.5f;
 
     [SerializeField] float recoveryStartDelay = 0f;
 
-    [SerializeField] Vector2 recoilDirection = Vector2.up;
-    public float RecoilStrength { get => recoilStrength; private set => recoilStrength = value; }
-    public float RecoilRecoveryTime { get => recoilRecoveryTime; private set => recoilRecoveryTime = value; }
-    public float RecoveryStartDelay { get => recoveryStartDelay; private set => recoveryStartDelay = value; }
-    public Vector2 RecoilDirection { get => recoilDirection; private set => recoilDirection = value; }
+    [SerializeField] [Range(0f, 1f)] float recoveryPercent = 0.9f;
 
     public event Action<RecoilBehaviour> OnRecoil;
     public event Action OnRecoilComplete;
@@ -30,16 +28,6 @@ public class RecoilBehaviour : MonoBehaviour
     private void Awake()
     {
         weapon = GetComponent<ProjectileWeapon>();
-    }
-
-    private void OnEnable()
-    {
-        //weapon.ShootEvent += OnShoot;
-    }
-
-    private void OnDisable()
-    {
-        //weapon.ShootEvent -= OnShoot;
     }
 
     internal void ApplyRecoil()
@@ -79,5 +67,10 @@ public class RecoilBehaviour : MonoBehaviour
         }
         OnRecoilComplete?.Invoke();
         yield return null;
+    }
+
+    internal CameraShakeInfo GetCameraShakeInfo()
+    {
+        return new CameraShakeInfo(recoilStrength, recoilDirection, recoilAnimationSpeed, recoilRecoveryTime, recoveryStartDelay, recoveryPercent);
     }
 }

@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Animations.Rigging;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Interactions;
 
 public class HotBarManager : MonoBehaviour
 {
@@ -33,6 +34,7 @@ public class HotBarManager : MonoBehaviour
     [SerializeField] float timeToSwitch = 0.6f;
     Coroutine selectItem;
     Coroutine animateItemSwitch;
+    bool currentItemBusy = false;
 
     // Items index
     int startingIndex = 0;
@@ -46,8 +48,8 @@ public class HotBarManager : MonoBehaviour
     int hasGunHash;
     int rightArmOnlyHash;
 
-    public event Action<ItemBase> WeaponSelectedEvent;
-    public event Action<ItemBase> WeaponUnselectedEvent;
+    public event Action<ItemBase> ItemSelectedEvent;
+    public event Action<ItemBase> ItemUnselectedEvent;
 
 
     private void Awake()
@@ -59,9 +61,13 @@ public class HotBarManager : MonoBehaviour
 
     private void OnEnable()
     {
-        input.GetUseAction().started += OnUse;
-        input.GetUseAction().canceled += OnUse;
-        input.GetShootAction().performed += OnShoot;
+        //input.GetShootAction().performed += OnClick;
+        //input.GetUseAction().started += OnPressStarted;
+        //input.GetUseAction().canceled += OnPressFinished;
+        input.GetUseAction().performed += OnClick;
+        input.GetUseAction().started += OnPressStarted;
+        input.GetUseAction().performed += OnPressFinished;
+
         input.GetAimAction().started += OnAim;
         input.GetAimAction().canceled += OnAim;
         input.GetReloadAction().performed += OnReload;
@@ -83,10 +89,10 @@ public class HotBarManager : MonoBehaviour
         }
         currentIndex = startingIndex;
         hotBarItems.GetChild(currentIndex).gameObject.SetActive(true);
-        ItemBase weapon = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
+        ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
         animator.SetBool(hasGunHash, true);
-        animator.SetBool(rightArmOnlyHash, weapon.RightArmOnly);
-        WeaponSelectedEvent?.Invoke(weapon);
+        animator.SetBool(rightArmOnlyHash, item.RightArmOnly);
+        ItemSelectedEvent?.Invoke(item);
         GrabPoints();
     }
 
@@ -100,9 +106,13 @@ public class HotBarManager : MonoBehaviour
 
     private void OnDisable()
     {
-        input.GetAimAction().started -= OnUse;
-        input.GetAimAction().canceled -= OnUse;
-        input.GetShootAction().performed -= OnShoot;
+        //input.GetShootAction().performed -= OnClick;
+        //input.GetUseAction().started -= OnPressStarted;
+        //input.GetUseAction().canceled -= OnPressFinished;
+        input.GetUseAction().performed -= OnClick;
+        input.GetUseAction().started -= OnPressStarted;
+        input.GetUseAction().performed -= OnPressFinished;
+
         input.GetAimAction().started -= OnAim;
         input.GetAimAction().canceled -= OnAim;
         input.GetScrollAction().performed -= OnScroll;
@@ -112,21 +122,29 @@ public class HotBarManager : MonoBehaviour
         }
     }
 
-    private void OnApplicationQuit()
+    private void OnClick(InputAction.CallbackContext context)
     {
-        virtualCamera.m_Lens.FieldOfView = defaultFOV;
-    }
-
-    private void OnUse(InputAction.CallbackContext context)
-    {
-        // TODO: press and hold to use item (item takes, eg: 3s to consume)
-    }
-
-    private void OnShoot(InputAction.CallbackContext context)
-    {
-        if(hotBarItems.GetChild(currentIndex).TryGetComponent<ProjectileWeapon>(out ProjectileWeapon weapon))
+        //hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyClick();
+        if(context.interaction is TapInteraction)
         {
-            weapon.NotifyAttack();
+            hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyClick();
+        }
+    }
+
+    private void OnPressStarted(InputAction.CallbackContext context)
+    {
+        //hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyPressStart();
+        if (context.interaction is SlowTapInteraction)
+        {
+            hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyPressStart();
+        }
+    }
+
+    private void OnPressFinished(InputAction.CallbackContext context)
+    {
+        if (context.interaction is SlowTapInteraction)
+        {
+            hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyPressFinish();
         }
     }
 
@@ -207,16 +225,19 @@ public class HotBarManager : MonoBehaviour
     #region Item Switching
     private void OnScroll(InputAction.CallbackContext context)
     {
-        Vector2 value = context.ReadValue<Vector2>();
-        if (value.y > 0f)
+        if (!currentItemBusy)
         {
-            if(selectItem != null) { StopCoroutine(selectItem); }
-            StartCoroutine(SelectItem(currentIndex + 1));
-        }
-        if (value.y < 0f)
-        {
-            if (selectItem != null) { StopCoroutine(selectItem); }
-            StartCoroutine(SelectItem(currentIndex - 1));
+            Vector2 value = context.ReadValue<Vector2>();
+            if (value.y > 0f)
+            {
+                if (selectItem != null) { StopCoroutine(selectItem); }
+                StartCoroutine(SelectItem(currentIndex + 1));
+            }
+            if (value.y < 0f)
+            {
+                if (selectItem != null) { StopCoroutine(selectItem); }
+                StartCoroutine(SelectItem(currentIndex - 1));
+            }
         }
     }
 
@@ -224,7 +245,8 @@ public class HotBarManager : MonoBehaviour
     {
         ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
         item.NotifyUnselected();
-        WeaponUnselectedEvent?.Invoke(item);
+        item.onUnskippableActionInProgress -= SetItemBusy;
+        ItemUnselectedEvent?.Invoke(item);
 
         Transform current = item.transform;
         Transform goal = item.HiddenTransform;
@@ -246,13 +268,19 @@ public class HotBarManager : MonoBehaviour
         GrabPoints();
         item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
         item.NotifySelected();
-        WeaponSelectedEvent?.Invoke(item);
+        item.onUnskippableActionInProgress += SetItemBusy;
+        ItemSelectedEvent?.Invoke(item);
         animator.SetBool(rightArmOnlyHash, item.RightArmOnly);
 
         current = item.transform;
         goal = item.HipPositionTransform;
         if (animateItemSwitch != null) StopCoroutine(animateItemSwitch);
         yield return StartCoroutine(AnimateItemSwitch(item, current, goal));
+    }
+
+    private void SetItemBusy(bool itemBusy)
+    {
+        this.currentItemBusy = itemBusy;
     }
 
     private IEnumerator AnimateItemSwitch(ItemBase item, Transform current, Transform goal)
@@ -345,4 +373,9 @@ public class HotBarManager : MonoBehaviour
         throw new NotImplementedException();
     }
     #endregion
+
+    private void OnApplicationQuit()
+    {
+        virtualCamera.m_Lens.FieldOfView = defaultFOV;
+    }
 }

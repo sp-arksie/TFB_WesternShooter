@@ -7,7 +7,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Video;
 
-public class ProjectileWeapon : ItemBase
+public class ProjectileWeapon : ItemBase, ICameraShaker
 {
     [Header("VFX")]
     [SerializeField] Transform muzzleFlashParent;
@@ -15,7 +15,7 @@ public class ProjectileWeapon : ItemBase
     [SerializeField] GameObject muzzleFlashPrefab;
     [SerializeField] GameObject gunSmokePrefab;
 
-    [Header("Animation")]
+    [Header("Shooting + Aiming Transform")]
     [SerializeField] Transform adsPositionTransform;
     [SerializeField] Transform shootingRotationTransform;
     [SerializeField] Transform baseRotationTransform;
@@ -55,7 +55,7 @@ public class ProjectileWeapon : ItemBase
         if (debugShoot)
         {
             debugShoot = false;
-            NotifyAttack();
+            NotifyClick();
         }
     }
 
@@ -93,10 +93,20 @@ public class ProjectileWeapon : ItemBase
         recoilBehaviour.OnRecoilComplete -= ProceedGunAnimation;
     }
 
-    internal override void NotifyAttack()
+    internal override void NotifyClick()
     {
         if(CanShoot()) Shoot();
         else if (isReloading) { StopReload(); }
+    }
+
+    internal override void NotifyPressStart()
+    {
+        // NOOP / TODO: only shoot once on first press (not when releasing also)
+    }
+
+    internal override void NotifyPressFinish()
+    {
+
     }
 
     internal override void NotifySelected()
@@ -107,6 +117,11 @@ public class ProjectileWeapon : ItemBase
     internal override void NotifyUnselected()
     {
         // NOOP
+    }
+
+    protected override void OnShakeCamera(ICameraShaker cameraShakeInfo)
+    {
+        base.OnShakeCamera(cameraShakeInfo);
     }
 
     internal void NotifyReload()
@@ -122,7 +137,7 @@ public class ProjectileWeapon : ItemBase
     {
         shotTime = Time.time;
         barrel.Shoot(shootingBehaviour.GetMuzzleVelocity(), GetHitInfoToSend());
-        //ShootEvent?.Invoke();
+        OnShakeCamera(this);
         recoilBehaviour.ApplyRecoil();
         ammoBehaviour.ConsumeAmmo();
         animator?.SetTrigger(shootHash);
@@ -216,5 +231,10 @@ public class ProjectileWeapon : ItemBase
             yield return new WaitForEndOfFrame();
             dt += Time.deltaTime;
         }
+    }
+
+    CameraShakeInfo ICameraShaker.ReturnCameraShakeInfo()
+    {
+        return recoilBehaviour.GetCameraShakeInfo();
     }
 }
