@@ -9,13 +9,13 @@ public class DamageGiver : MonoBehaviour, IHitNotifier
     private void OnTriggerEnter(Collider other)
     {
         CheckCollider(other);
-        this.gameObject.SetActive(false);
+        //this.gameObject.SetActive(false);
     }
 
     private void OnCollisionEnter(Collision other)
     {
         CheckCollider(other.collider);
-        this.gameObject.SetActive(false);
+        //this.gameObject.SetActive(false);
     }
 
     private void CheckCollider(Collider other)

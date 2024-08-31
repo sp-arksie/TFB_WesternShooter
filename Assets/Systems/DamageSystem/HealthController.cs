@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using UnityEngine;
 
 public class HealthController : MonoBehaviour
@@ -45,7 +46,8 @@ public class HealthController : MonoBehaviour
             currentHealth -= GetDamage(hitInfo, damageModifier);
             Debug.Log($"BaseDamage:  {hitInfo.baseDamage}");
             Debug.Log($"Bodypart damage modifier:  {damageModifier}");
-            Debug.Log($"Final damage:   {hitInfo.baseDamage * DamageFalloffDefinitions.GetDamageFalloffModifier(hitInfo, transform.position) * damageModifier}");
+            Debug.Log($"Final damage:  {GetDamage(hitInfo, damageModifier)}");
+            
             if(currentHealth <= 0)
             {
                 OnHealthDepleted();

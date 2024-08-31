@@ -8,6 +8,7 @@ public class MeleeWeapon : ItemBase, ICameraShaker
 {
     [Header("Light Attack")]
     [SerializeField] float lightBaseDamage = 40f;
+    [SerializeField] DamageType lightDamageType = DamageType.None;
     [SerializeField] float lightTimeToStartAnimation = 0.5f;
     [SerializeField] float lightAnimationDuration = 0.5f;
     [SerializeField] Transform lightStartTransform;
@@ -15,6 +16,7 @@ public class MeleeWeapon : ItemBase, ICameraShaker
 
     [Header("HeavyAttack")]
     [SerializeField] float heavyBaseDamage = 70f;
+    [SerializeField] DamageType heavyDamageType = DamageType.None;
     [SerializeField] float heavyTimeToStartAnimation = 1f;
     [SerializeField] float heavyAnimationDuration = 0.8f;
     [SerializeField] Transform heavyStartTransform;
@@ -37,22 +39,26 @@ public class MeleeWeapon : ItemBase, ICameraShaker
 
     bool attackReady = false;
 
+    DamageGiver[] damageGivers;
+
     Coroutine lightMeleeAttack;
     Coroutine prepareMeleeAttack;
     Coroutine startMeleeAttack;
 
     InputManager input;
 
-    //public override event Action<bool> OnUnskippableActionInProgress;
-
     private void Awake()
     {
         input = InputManager.Instance;
 
         colliders = new Collider[collidersParent.childCount];
+        damageGivers = new DamageGiver[collidersParent.childCount];
         for (int i = 0; i < colliders.Length; i++)
         {
-            colliders[i] = collidersParent.GetChild(i).GetComponent<Collider>();
+            GameObject go = collidersParent.GetChild(i).gameObject;
+            colliders[i] = go.GetComponent<Collider>();
+            damageGivers[i] = go.GetComponent<DamageGiver>();
+            if (damageGivers[i] == null) throw new System.Exception($"A collider on {this.gameObject.name} is missing a DamageReceiver component");
             colliders[i].enabled = false;
         }
     }
@@ -95,6 +101,7 @@ public class MeleeWeapon : ItemBase, ICameraShaker
 
     private IEnumerator PerformLightAttack()
     {
+        SetHitInfoOnAttack(lightBaseDamage, WeaponCalliber.Melee, lightDamageType);
         if (prepareMeleeAttack != null) StopCoroutine(prepareMeleeAttack);
         yield return prepareMeleeAttack = StartCoroutine(PrepareMeleeAttack(lightStartTransform, lightTimeToStartAnimation));
 
@@ -104,6 +111,7 @@ public class MeleeWeapon : ItemBase, ICameraShaker
 
     private void PrepareHeavyAttack()
     {
+        SetHitInfoOnAttack(heavyBaseDamage, WeaponCalliber.Melee, heavyDamageType);
         if (prepareMeleeAttack != null) StopCoroutine(prepareMeleeAttack);
         prepareMeleeAttack = StartCoroutine(PrepareMeleeAttack(heavyStartTransform, heavyTimeToStartAnimation));
     }
@@ -182,6 +190,20 @@ public class MeleeWeapon : ItemBase, ICameraShaker
         OnUnskippableActionInProgress(false);
         attackReady = false;
         yield return null;
+    }
+
+    private void SetHitInfoOnAttack(float baseDamage, WeaponCalliber calliber, DamageType damageType)
+    {
+        HitInfo hitInfo = new();
+        hitInfo.baseDamage = baseDamage;
+        hitInfo.locationOfDamageSource = Vector3.zero;
+        hitInfo.weaponCalliber = calliber;
+        hitInfo.damageType = damageType;
+
+        foreach (DamageGiver dg in damageGivers)
+        {
+            dg.SetHitInfo(hitInfo);
+        }
     }
 
     CameraShakeInfo ICameraShaker.ReturnCameraShakeInfo()
