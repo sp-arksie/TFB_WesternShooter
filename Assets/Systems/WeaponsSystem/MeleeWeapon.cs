@@ -45,12 +45,9 @@ public class MeleeWeapon : ItemBase, ICameraShaker
     Coroutine prepareMeleeAttack;
     Coroutine startMeleeAttack;
 
-    InputManager input;
 
     private void Awake()
     {
-        input = InputManager.Instance;
-
         colliders = new Collider[collidersParent.childCount];
         damageGivers = new DamageGiver[collidersParent.childCount];
         for (int i = 0; i < colliders.Length; i++)

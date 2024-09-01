@@ -2,17 +2,42 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DecisionNode : MonoBehaviour
+public abstract class DecisionNode : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    protected EntityController entityController;
+
+    internal void Init(EntityController entityController)
     {
-        
+        this.entityController = entityController;
     }
 
-    // Update is called once per frame
-    void Update()
+    internal StateNode Evaluate()
     {
-        
+        StateNode stateNode = null;
+
+        if (CheckCondition())
+        {
+            stateNode = ProcessChild(0);
+        }
+        else
+        {
+            stateNode = ProcessChild(1);
+        }
+
+        return stateNode;
     }
+
+    private StateNode ProcessChild(int childIndex)
+    {
+        Transform child = transform.GetChild(childIndex);
+        StateNode stateNode = child.GetComponent<StateNode>();
+
+        if (!stateNode)
+            stateNode = child.GetComponent<DecisionNode>().Evaluate();
+        
+        return stateNode;
+    }
+
+    protected abstract bool CheckCondition();
+
 }
