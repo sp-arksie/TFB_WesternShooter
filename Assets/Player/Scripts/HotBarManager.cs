@@ -106,9 +106,6 @@ public class HotBarManager : MonoBehaviour
 
     private void OnDisable()
     {
-        //input.GetShootAction().performed -= OnClick;
-        //input.GetUseAction().started -= OnPressStarted;
-        //input.GetUseAction().canceled -= OnPressFinished;
         input.GetUseAction().performed -= OnClick;
         input.GetUseAction().started -= OnPressStarted;
         input.GetUseAction().performed -= OnPressFinished;
@@ -124,19 +121,17 @@ public class HotBarManager : MonoBehaviour
 
     private void OnClick(InputAction.CallbackContext context)
     {
-        //hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyClick();
         if(context.interaction is TapInteraction)
         {
-            hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyClick();
+            hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyQuickAction();
         }
     }
 
     private void OnPressStarted(InputAction.CallbackContext context)
     {
-        //hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyPressStart();
         if (context.interaction is SlowTapInteraction)
         {
-            hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyPressStart();
+            hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyChargeStart();
         }
     }
 
@@ -144,7 +139,7 @@ public class HotBarManager : MonoBehaviour
     {
         if (context.interaction is SlowTapInteraction)
         {
-            hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyPressFinish();
+            hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyChargeRelease();
         }
     }
 

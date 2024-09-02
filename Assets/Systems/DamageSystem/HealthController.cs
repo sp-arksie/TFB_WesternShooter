@@ -2,32 +2,44 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using UnityEngine;
+using UnityEngine.AI;
+using static DamageModifierDefinitions;
 
 public class HealthController : MonoBehaviour
 {
     [SerializeField] float baseHealth = 100f;
-    [SerializeField] DamageReceiver[] damageReceivers;
+    [SerializeField] Transform damageReceiversParent;
 
     public enum ActionOnHealthDepleted
     {
         None,
         Deactivate,
-        Destroy
+        Destroy,
+        EnableRagdoll,
     }
     [SerializeField] ActionOnHealthDepleted actionOnHealthDepleted = ActionOnHealthDepleted.Deactivate;
+
+    RagdollController ragdollController;
+    DamageReceiver[] damageReceivers;
 
     float currentHealth;
 
     private void Awake()
     {
         currentHealth = baseHealth;
+
+        damageReceivers = damageReceiversParent.GetComponentsInChildren<DamageReceiver>();
+        if(actionOnHealthDepleted == ActionOnHealthDepleted.EnableRagdoll)
+        {
+            ragdollController = GetComponent<RagdollController>();
+        }
     }
 
     private void OnEnable()
     {
         foreach(DamageReceiver dr in damageReceivers)
         {
-            dr.onHit += OnHit;
+            dr.OnHit += OnHit;
         }
     }
 
@@ -35,18 +47,19 @@ public class HealthController : MonoBehaviour
     {
         foreach(DamageReceiver dr in damageReceivers)
         {
-            dr.onHit -= OnHit;
+            dr.OnHit -= OnHit;
         }
     }
 
-    private void OnHit(HitInfo hitInfo, float damageModifier)
+    private void OnHit(HitInfo hitInfo, DamageModifier damageModifier)
     {
         if(currentHealth > 0)
         {
-            currentHealth -= GetDamage(hitInfo, damageModifier);
+            float damageModifierValue = GetDamageModifierValue(damageModifier);
+            currentHealth -= GetDamage(hitInfo, damageModifierValue);
             Debug.Log($"BaseDamage:  {hitInfo.baseDamage}");
-            Debug.Log($"Bodypart damage modifier:  {damageModifier}");
-            Debug.Log($"Final damage:  {GetDamage(hitInfo, damageModifier)}");
+            Debug.Log($"Bodypart damage modifier:  {damageModifierValue}");
+            Debug.Log($"Final damage:  {GetDamage(hitInfo, damageModifierValue)}");
             
             if(currentHealth <= 0)
             {
@@ -86,6 +99,11 @@ public class HealthController : MonoBehaviour
             case ActionOnHealthDepleted.Destroy:
                 Destroy(gameObject);
                 break;
+            case ActionOnHealthDepleted.EnableRagdoll:
+                ragdollController.EnableRagdoll();
+                break;
         }
     }
+
+
 }

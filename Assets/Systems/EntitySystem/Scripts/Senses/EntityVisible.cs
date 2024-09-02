@@ -4,15 +4,7 @@ using UnityEngine;
 
 public class EntityVisible : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [SerializeField] Transform visibilityPointsParent;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public Transform VisibilityPointsParent { get => visibilityPointsParent; private set => visibilityPointsParent = value; }
 }

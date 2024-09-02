@@ -10,20 +10,21 @@ public class MeleeAttackState : BaseState
     private void OnEnable()
     {
         meleeWeapon.onUnskippableActionInProgress += SetUnskippableAction;
-        GetAgent().isStopped = true;
+        GetAgent().SetDestination(transform.position);
     }
 
     private void Update()
     {
         if(!attackInProgress)
         {
-            meleeWeapon.NotifyClick();
+            meleeWeapon.NotifyQuickAction();
         }
     }
 
     private void OnDisable()
     {
         meleeWeapon.onUnskippableActionInProgress -= SetUnskippableAction;
+        attackInProgress = false;
     }
 
     private void SetUnskippableAction(bool inProgress)

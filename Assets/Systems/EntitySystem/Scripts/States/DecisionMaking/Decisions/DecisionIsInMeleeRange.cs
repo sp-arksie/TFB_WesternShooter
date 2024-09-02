@@ -8,7 +8,7 @@ public class DecisionIsInMeleeRange : DecisionNode
     {
         float distance = Vector3.Distance(
             entityController.transform.position, 
-            entityController.sight.GetCurrentlyVisiblesToEntity()[0].transform.position);
+            entityController.sight.GetCurrentlyVisiblesToEntity()[0].entityVisible.transform.position);
         float minMeleeRange = entityController.GetMinimumMeleeRange();
 
         return distance < minMeleeRange;

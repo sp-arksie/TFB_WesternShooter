@@ -90,7 +90,7 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
 
     internal Vector3 GetLastSeenTargetPosition() { return lastSeenTargetPosition; }
 
-    internal EntityVisible GetTarget() { return sight.GetCurrentlyVisiblesToEntity().Count > 0 ? sight.GetCurrentlyVisiblesToEntity()[0] : null; }
+    internal EntitySight.VisibleInMemory GetTarget() { return sight.GetCurrentlyVisiblesToEntity().Count > 0 ? sight.GetCurrentlyVisiblesToEntity()[0] : null; }
 
     internal float GetMinimumMeleeRange() { return minimumMeleeRange; }
 

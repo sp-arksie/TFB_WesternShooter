@@ -55,7 +55,7 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
         if (debugShoot)
         {
             debugShoot = false;
-            NotifyClick();
+            NotifyQuickAction();
         }
     }
 
@@ -93,18 +93,18 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
         recoilBehaviour.OnRecoilComplete -= ProceedGunAnimation;
     }
 
-    internal override void NotifyClick()
+    internal override void NotifyQuickAction()
     {
         if(CanShoot()) Shoot();
         else if (isReloading) { StopReload(); }
     }
 
-    internal override void NotifyPressStart()
+    internal override void NotifyChargeStart()
     {
         // NOOP / TODO: only shoot once on first press (not when releasing also)
     }
 
-    internal override void NotifyPressFinish()
+    internal override void NotifyChargeRelease()
     {
 
     }

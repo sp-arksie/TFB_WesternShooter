@@ -17,7 +17,7 @@ public class SeekState : BaseState
     {
         if(GetSight().GetCurrentlyVisiblesToEntity().Count >= 1)
         {
-            GetAgent().SetDestination(GetSight().GetCurrentlyVisiblesToEntity()[0].transform.position);
+            GetAgent().SetDestination(GetSight().GetCurrentlyVisiblesToEntity()[0].entityVisible.transform.position);
         }
     }
 

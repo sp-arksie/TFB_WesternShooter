@@ -60,18 +60,18 @@ public class MeleeWeapon : ItemBase, ICameraShaker
         }
     }
 
-    internal override void NotifyClick()
+    internal override void NotifyQuickAction()
     {
         if (lightMeleeAttack != null) StopCoroutine(lightMeleeAttack);
         lightMeleeAttack = StartCoroutine(PerformLightAttack());
     }
 
-    internal override void NotifyPressStart()
+    internal override void NotifyChargeStart()
     {
         PrepareHeavyAttack();
     }
 
-    internal override void NotifyPressFinish()
+    internal override void NotifyChargeRelease()
     {
         PerformHeavyAttack();
     }

@@ -20,11 +20,11 @@ public abstract class ItemBase : MonoBehaviour
     public event Action<bool> onUnskippableActionInProgress;
     public event Action<ICameraShaker> onShakeCamera;
 
-    internal abstract void NotifyClick();
+    internal abstract void NotifyQuickAction();
 
-    internal abstract void NotifyPressStart();
+    internal abstract void NotifyChargeStart();
 
-    internal abstract void NotifyPressFinish();
+    internal abstract void NotifyChargeRelease();
 
     internal abstract void NotifySelected();
 
