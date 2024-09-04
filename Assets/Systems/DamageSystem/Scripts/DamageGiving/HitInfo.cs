@@ -8,5 +8,5 @@ public class HitInfo
 
     public WeaponCalliber weaponCalliber;
 
-    public DamageType damageType;
+    public StatusEffect statusEffect;
 }

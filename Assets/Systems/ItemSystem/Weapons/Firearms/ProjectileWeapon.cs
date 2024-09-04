@@ -23,15 +23,15 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
     public Transform ShootingRotationTransform { get { return shootingRotationTransform; } private set { shootingRotationTransform = value; } }
     public Transform BaseRotationTransform { get { return baseRotationTransform; } private set { baseRotationTransform = value; } }
 
-    //public event Action ShootEvent;
     public event Action SelectedEvent;
     
     Barrel barrel;
+    Animator animator;
+
     ShootingBehaviour shootingBehaviour;
     AmmoBehaviour ammoBehaviour;
     DamageBehaviour damageBehaviour;
     RecoilBehaviour recoilBehaviour;
-    Animator animator;
 
     int shootHash;
     int reloadHash;
@@ -101,15 +101,15 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
 
     internal override void NotifyChargeStart()
     {
-        // NOOP / TODO: only shoot once on first press (not when releasing also)
+        // NOOP
     }
 
     internal override void NotifyChargeRelease()
     {
-
+        // NOOP
     }
 
-    internal override void NotifySelected()
+    internal override void NotifySelected(HotBarManager hotBarManager)
     {
         SelectedEvent?.Invoke();
     }

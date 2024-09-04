@@ -28,7 +28,8 @@ public static class DamageModifierDefinitions
             case DamageModifier.Arms:
                 return 0.6f;
             default:
-                throw new System.Exception($"{modifier} is an invalid DamageModifier or value in DamageModifierDefinitions has not been set.");
+                Debug.LogWarning($"{modifier} is an invalid DamageModifier or value in DamageModifierDefinitions has not been set.");
+                return -1f;
         }
     }
 }

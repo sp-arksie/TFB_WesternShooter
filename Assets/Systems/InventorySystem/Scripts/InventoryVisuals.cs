@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEditor;
 
 public class InventoryVisuals : MonoBehaviour
 {
@@ -333,11 +334,11 @@ public class InventoryVisuals : MonoBehaviour
         return itemAmount == 1 ? "" : itemAmount.ToString();
     }
 
-    public void ClearLog()
-    {
-        var assembly = Assembly.GetAssembly(typeof(UnityEditor.Editor));
-        var type = assembly.GetType("UnityEditor.LogEntries");
-        var method = type.GetMethod("Clear");
-        method.Invoke(new object(), null);
-    }
+    //public void ClearLog()
+    //{
+    //    var assembly = Assembly.GetAssembly(typeof(Editor));
+    //    var type = assembly.GetType("UnityEditor.LogEntries");
+    //    var method = type.GetMethod("Clear");
+    //    method.Invoke(new object(), null);
+    //}
 }

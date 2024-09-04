@@ -1,9 +1,6 @@
 using Cinemachine;
-using DG.Tweening;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using Unity.PlasticSCM.Editor.WebApi;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Animations.Rigging;
@@ -43,6 +40,7 @@ public class HotBarManager : MonoBehaviour
     // References
     InputManager input;
     Animator animator;
+    HealthController healthController;
 
     // Animator hashes
     int hasGunHash;
@@ -56,14 +54,12 @@ public class HotBarManager : MonoBehaviour
     {
         input = InputManager.Instance;
         animator = GetComponentInChildren<Animator>();
+        healthController = GetComponent<HealthController>();
         defaultFOV = currentFOV = virtualCamera.m_Lens.FieldOfView;
     }
 
     private void OnEnable()
     {
-        //input.GetShootAction().performed += OnClick;
-        //input.GetUseAction().started += OnPressStarted;
-        //input.GetUseAction().canceled += OnPressFinished;
         input.GetUseAction().performed += OnClick;
         input.GetUseAction().started += OnPressStarted;
         input.GetUseAction().performed += OnPressFinished;
@@ -89,9 +85,10 @@ public class HotBarManager : MonoBehaviour
         }
         currentIndex = startingIndex;
         hotBarItems.GetChild(currentIndex).gameObject.SetActive(true);
+
         ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
-        animator.SetBool(hasGunHash, true);
-        animator.SetBool(rightArmOnlyHash, item.RightArmOnly);
+        animator.SetBool(hasGunHash, true); // TODO: dont hardcode this
+        animator.SetBool(rightArmOnlyHash, item.RightArmOnly); // here also
         ItemSelectedEvent?.Invoke(item);
         GrabPoints();
     }
@@ -223,12 +220,12 @@ public class HotBarManager : MonoBehaviour
         if (!currentItemBusy)
         {
             Vector2 value = context.ReadValue<Vector2>();
-            if (value.y > 0f)
+            if (value.y < 0f)
             {
                 if (selectItem != null) { StopCoroutine(selectItem); }
                 StartCoroutine(SelectItem(currentIndex + 1));
             }
-            if (value.y < 0f)
+            if (value.y > 0f)
             {
                 if (selectItem != null) { StopCoroutine(selectItem); }
                 StartCoroutine(SelectItem(currentIndex - 1));
@@ -262,7 +259,7 @@ public class HotBarManager : MonoBehaviour
         hotBarItems.GetChild(currentIndex).gameObject.SetActive(true);
         GrabPoints();
         item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
-        item.NotifySelected();
+        item.NotifySelected(this);
         item.onUnskippableActionInProgress += SetItemBusy;
         ItemSelectedEvent?.Invoke(item);
         animator.SetBool(rightArmOnlyHash, item.RightArmOnly);
@@ -367,6 +364,10 @@ public class HotBarManager : MonoBehaviour
     {
         throw new NotImplementedException();
     }
+    #endregion
+
+    #region Helper Functions
+    public HealthController GetHealthController() { return healthController; }
     #endregion
 
     private void OnApplicationQuit()

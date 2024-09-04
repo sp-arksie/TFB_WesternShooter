@@ -56,6 +56,7 @@ public static class DamageFalloffDefinitions
                 else if (distance < LargeCalliberFalloffPoint_End) return SmallCalliberFalloffPoint_3Damage;
                 else return 0f;
             default:
+                Debug.LogWarning($"{hitInfo.weaponCalliber} is returning 0 in GetDamageFaloffModifier. Check that all switch cases are defined.");
                 return 0f;
         }
     }

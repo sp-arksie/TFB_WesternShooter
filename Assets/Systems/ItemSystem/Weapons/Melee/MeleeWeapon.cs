@@ -8,7 +8,7 @@ public class MeleeWeapon : ItemBase, ICameraShaker
 {
     [Header("Light Attack")]
     [SerializeField] float lightBaseDamage = 40f;
-    [SerializeField] DamageType lightDamageType = DamageType.None;
+    [SerializeField] StatusEffect lightDamageType = StatusEffect.None;
     [SerializeField] float lightTimeToStartAnimation = 0.5f;
     [SerializeField] float lightAnimationDuration = 0.5f;
     [SerializeField] Transform lightStartTransform;
@@ -16,7 +16,7 @@ public class MeleeWeapon : ItemBase, ICameraShaker
 
     [Header("HeavyAttack")]
     [SerializeField] float heavyBaseDamage = 70f;
-    [SerializeField] DamageType heavyDamageType = DamageType.None;
+    [SerializeField] StatusEffect heavyDamageType = StatusEffect.None;
     [SerializeField] float heavyTimeToStartAnimation = 1f;
     [SerializeField] float heavyAnimationDuration = 0.8f;
     [SerializeField] Transform heavyStartTransform;
@@ -76,7 +76,7 @@ public class MeleeWeapon : ItemBase, ICameraShaker
         PerformHeavyAttack();
     }
 
-    internal override void NotifySelected()
+    internal override void NotifySelected(HotBarManager hotBarManager)
     {
         // NOOP
     }
@@ -189,13 +189,13 @@ public class MeleeWeapon : ItemBase, ICameraShaker
         yield return null;
     }
 
-    private void SetHitInfoOnAttack(float baseDamage, WeaponCalliber calliber, DamageType damageType)
+    private void SetHitInfoOnAttack(float baseDamage, WeaponCalliber calliber, StatusEffect damageType)
     {
         HitInfo hitInfo = new();
         hitInfo.baseDamage = baseDamage;
         hitInfo.locationOfDamageSource = Vector3.zero;
         hitInfo.weaponCalliber = calliber;
-        hitInfo.damageType = damageType;
+        hitInfo.statusEffect = damageType;
 
         foreach (DamageGiver dg in damageGivers)
         {

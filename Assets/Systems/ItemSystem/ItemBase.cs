@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class ItemBase : MonoBehaviour
@@ -26,7 +24,7 @@ public abstract class ItemBase : MonoBehaviour
 
     internal abstract void NotifyChargeRelease();
 
-    internal abstract void NotifySelected();
+    internal abstract void NotifySelected(HotBarManager hotBarManager);
 
     internal abstract void NotifyUnselected();
 
