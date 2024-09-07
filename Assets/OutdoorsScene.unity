@@ -975,6 +975,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   baseHealth: 100
   damageReceiversParent: {fileID: 167446921}
+  receivesStatusEffects: 1
   actionOnHealthDepleted: 1
   debugDamageAmount: 50
   debugDamageModifier: 0
@@ -1772,6 +1773,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   baseHealth: 100
   damageReceiversParent: {fileID: 1056253435}
+  receivesStatusEffects: 1
   actionOnHealthDepleted: 3
   debugDamageAmount: 50
   debugDamageModifier: 0
@@ -5242,6 +5244,7 @@ MonoBehaviour:
   isQuickAction: 0
   statusEffectCures: 
   healthRestoreAmount: 50
+  burnedHealthRestoreAmount: 0
   damageAbsorb: 0.6
   damageAbsorbDuration: 15
   regenerationPerSecond: 5
@@ -6877,6 +6880,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   baseHealth: 500
   damageReceiversParent: {fileID: 1847216015}
+  receivesStatusEffects: 1
   actionOnHealthDepleted: 0
   debugDamageAmount: 50
   debugDamageModifier: 0
@@ -6895,6 +6899,18 @@ MonoBehaviour:
   debugCureBurning: 0
   debugApplyPoison: 0
   debugCurePoison: 0
+--- !u!114 &1647986622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1647986602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f24e59b0e19031479a822144a31e12f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1681394691
 GameObject:
   m_ObjectHideFlags: 0
@@ -9815,6 +9831,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1647986612}
+    - targetCorrespondingSourceObject: {fileID: 3235928413076521751, guid: de9242323fa440c4aa55e88cb16d67d5,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1647986622}
   m_SourcePrefab: {fileID: 100100000, guid: de9242323fa440c4aa55e88cb16d67d5, type: 3}
 --- !u!1001 &4834864217544803837
 PrefabInstance:

@@ -13,6 +13,9 @@ public class MedicalItem : ItemBase
     [Header("Health Restore")]
     [SerializeField] protected float healthRestoreAmount = 50f;
 
+    [Header("Burned health restore")]
+    [SerializeField] protected float burnedHealthRestoreAmount = 0f;
+
     [Header("Damage absorb")]
     [SerializeField] [Range(0f, 1f)] protected float damageAbsorb = 0.6f;
     [SerializeField] protected float damageAbsorbDuration = 15f;

@@ -10,6 +10,7 @@ public class HealthController : MonoBehaviour
 {
     [SerializeField] float baseHealth = 100f;
     [SerializeField] Transform damageReceiversParent;
+    [SerializeField] bool receivesStatusEffects = true;
 
     public enum ActionOnHealthDepleted
     {
@@ -20,25 +21,17 @@ public class HealthController : MonoBehaviour
     }
     [SerializeField] ActionOnHealthDepleted actionOnHealthDepleted = ActionOnHealthDepleted.Deactivate;
 
+    float currentHealth;
+    float burnedHealth = 0f;
+    float currentDamageAbsorb = 1f;
+    float currentRegenerationTime = 0f;
+
     RagdollController ragdollController;
     DamageReceiver[] damageReceivers;
+    StatusEffectsController statusEffectsController;
 
-    float currentHealth;
-
-    float statusEffectTickRate = 1f;
-    float burnedHealth = 0f;
-    bool isBleeding = false;
-    bool isBurning = false;
-    bool isPoisoned = false;
-    Coroutine applyBleeding;
-    Coroutine applyBurning;
-    Coroutine applyPoison;
-
-    float damageAbsorb = 1f;
-    Coroutine damageAbsorbCoroutine;
-
-    float currentRegenerationTime = 0f;
-    Coroutine healthRegenerationCoroutine;
+    Coroutine applyHealthRegeneration;
+    Coroutine applyDamageAbsorb;
 
     #region DEBUG
 
@@ -81,58 +74,62 @@ public class HealthController : MonoBehaviour
         if(debugApplyBleeding)
         {
             debugApplyBleeding = false;
-            ApplyStatusEffect(StatusEffect.Bleeding);
+            statusEffectsController.ApplyStatusEffect(StatusEffect.Bleeding);
         }
         if (debugCureBleeding)
         {
             debugCureBleeding = false;
             StatusEffect[] se = new StatusEffect[1];
             se[0] = StatusEffect.Bleeding;
-            ApplyStatusEffectsCures(se);
+            statusEffectsController.ApplyStatusEffectsCures(se);
         }
         if(debugApplyBurning)
         {
             debugApplyBurning = false;
-            ApplyStatusEffect(StatusEffect.Burning);
+            statusEffectsController.ApplyStatusEffect(StatusEffect.Burning);
         }
         if(debugCureBurning)
         {
             debugCureBurning = false;
             StatusEffect[] se = new StatusEffect[1];
             se[0] = StatusEffect.Burning;
-            ApplyStatusEffectsCures(se);
+            statusEffectsController.ApplyStatusEffectsCures(se);
         }
         if (debugApplyPoison)
         {
             debugApplyPoison = false;
-            ApplyStatusEffect(StatusEffect.Poison);
+            statusEffectsController.ApplyStatusEffect(StatusEffect.Poison);
         }
         if (debugCurePoison)
         {
             debugCurePoison = false;
             StatusEffect[] se = new StatusEffect[1];
             se[0] = StatusEffect.Poison;
-            ApplyStatusEffectsCures(se);
+            statusEffectsController.ApplyStatusEffectsCures(se);
         }
     }
 
     private void Update()
     {
-        if(debugDAbsorbDuration > 0f)
+        if (debugHP)
         {
-            float t = 0f;
-            t += Time.deltaTime;
-            debugDAbsorbDuration -= t;
-            debugdAbsorbDuration.text = debugDAbsorbDuration.ToString();
-            if (debugDAbsorbDuration <= 0f) debugdAbsorbDuration.text = "0";
-        }
-        if(currentRegenerationTime > 0f)
-        {
-            float t = 0f;
-            t += Time.deltaTime;
-            currentRegenerationTime -= t;
-            debugRegenTime.text = currentRegenerationTime.ToString();
-            if(currentRegenerationTime <= 0f) debugRegenTime.text = "0";
+            if (debugDAbsorbDuration > 0f)
+            {
+                float t = 0f;
+                t += Time.deltaTime;
+                debugDAbsorbDuration -= t;
+                debugdAbsorbDuration.text = debugDAbsorbDuration.ToString();
+                if (debugDAbsorbDuration <= 0f) debugdAbsorbDuration.text = "0";
+            }
+            if (currentRegenerationTime > 0f)
+            {
+                float t = 0f;
+                t += Time.deltaTime;
+                currentRegenerationTime -= t;
+                debugRegenTime.text = currentRegenerationTime.ToString();
+                if (currentRegenerationTime <= 0f) debugRegenTime.text = "0";
+            }
+            debugHP.text = currentHealth.ToString();
         }
     }
 
@@ -147,12 +144,13 @@ public class HealthController : MonoBehaviour
         {
             ragdollController = GetComponent<RagdollController>();
         }
+        statusEffectsController = GetComponent<StatusEffectsController>();
 
         //DEBUG
         if (debugHP)
         {
             debugHP.text = $"HP: {currentHealth}";
-            debugDAbsorbVal.text = damageAbsorb.ToString();
+            debugDAbsorbVal.text = currentDamageAbsorb.ToString();
             debugdAbsorbDuration.text = "-";
             debugRegenVal.text = "0";
             debugRegenTime.text = "-";
@@ -180,17 +178,16 @@ public class HealthController : MonoBehaviour
         if(currentHealth > 0)
         {
             float damageModifierValue = DamageModifierDefinitions.GetDamageModifierValue(damageModifier);
-            currentHealth -= GetDamage(hitInfo, damageModifierValue);
+            float finaldamage = GetDamage(hitInfo, damageModifierValue);
+            ReduceHealth(finaldamage);
 
-            if (hitInfo.statusEffect != StatusEffect.None) { ApplyStatusEffect(hitInfo.statusEffect); }
+            if (hitInfo.statusEffect != StatusEffect.None && receivesStatusEffects) { statusEffectsController.ApplyStatusEffect(hitInfo.statusEffect); }
 
             Debug.Log($"BaseDamage:  {hitInfo.baseDamage}");
             Debug.Log($"Bodypart damage modifier:  {damageModifierValue}");
             Debug.Log($"Final damage:  {GetDamage(hitInfo, damageModifierValue)}");
 
             if (debugHP) debugHP.text = $"HP: {currentHealth}";
-
-            CheckHealth();
         }
     }
 
@@ -199,27 +196,118 @@ public class HealthController : MonoBehaviour
         float damage = 0f;
         if(hitInfo.weaponCalliber == WeaponCalliber.None)
         {
-            damage = damageAbsorb * hitInfo.baseDamage;
+            damage = currentDamageAbsorb * hitInfo.baseDamage;
         }
         else if(hitInfo.weaponCalliber == WeaponCalliber.Melee)
         {
-            damage = damageAbsorb * hitInfo.baseDamage * damageModifier;
+            damage = currentDamageAbsorb * hitInfo.baseDamage * damageModifier;
         }
         else
         {
-            damage = damageAbsorb * hitInfo.baseDamage * damageModifier * DamageFalloffDefinitions.GetDamageFalloffModifier(hitInfo, transform.position);
+            damage = currentDamageAbsorb * hitInfo.baseDamage * damageModifier * DamageFalloffDefinitions.GetDamageFalloffModifier(hitInfo, transform.position);
         }
         
         return damage;
     }
 
-    private void CheckHealth()
+    #region Health
+    private void ReduceHealth(float amount)
     {
+        currentHealth -= amount;
+
         if (currentHealth <= 0)
-        {
             OnHealthDepleted();
+    }
+
+
+    public void NotifyReduceHealth(float amount)
+    {
+        ReduceHealth(amount);
+    }
+
+    private void RestoreHealth(float amount)
+    {
+        currentHealth += amount;
+
+        if(currentHealth > baseHealth - burnedHealth)
+            currentHealth = baseHealth - burnedHealth;
+    }
+
+    public void NotifyRestoreHealth(float amount)
+    {
+        RestoreHealth(amount);
+    }
+
+    public void NotifyRegenerateHealth(float regenerationRate, float duration)
+    {
+        if (applyHealthRegeneration != null) { StopCoroutine(applyHealthRegeneration); }
+        applyHealthRegeneration = StartCoroutine(ApplyRegeneration(regenerationRate, duration));
+    }
+
+    private IEnumerator ApplyRegeneration(float regenerationRate, float duration)
+    {
+        currentRegenerationTime += duration;
+        float startTime = Time.time;
+        float t = 0f;
+
+        while (currentRegenerationTime > 0)
+        {
+            t += Time.deltaTime;
+            currentRegenerationTime -= t;
+            RestoreHealth(regenerationRate);
+            yield return new WaitForSeconds(1f);
+        }
+        currentRegenerationTime = 0f;
+        yield return null;
+    }
+    #endregion
+
+    #region Burned health
+    private void IncreaseBurnedHealth(float amount)
+    {
+        burnedHealth += amount;
+
+        if (burnedHealth >= baseHealth)
+            OnHealthDepleted();
+    }
+
+    public void NotifyIncreaseBurnedHealth(float amount)
+    {
+        IncreaseBurnedHealth(amount);
+    }
+
+    private void RecoverBurnedHealth(float amount)
+    {
+        burnedHealth -= amount;
+
+        if(burnedHealth < 0)
+            burnedHealth = 0;
+    }
+
+    public void NotifyRecoverBurnedHealth(float amount)
+    {
+        RecoverBurnedHealth(amount);
+    }
+    #endregion
+
+    #region Damage absorb
+    public void NotifyDamageAbsorbChange(float newValue, float duration)
+    {
+        if (currentDamageAbsorb < newValue)
+        {
+            if (applyDamageAbsorb != null) { StopCoroutine(applyDamageAbsorb); }
+            applyDamageAbsorb = StartCoroutine(DamageAbsorbCoroutine(newValue, duration));
         }
     }
+
+    private IEnumerator DamageAbsorbCoroutine(float newValue, float duration)
+    {
+        currentDamageAbsorb = newValue;
+        yield return new WaitForSeconds(duration);
+        currentDamageAbsorb = 1f;
+        yield return null;
+    }
+    #endregion
 
     private void OnHealthDepleted()
     {
@@ -238,163 +326,4 @@ public class HealthController : MonoBehaviour
                 break;
         }
     }
-
-    #region Status effects
-
-    private void ApplyStatusEffect(StatusEffect statusEffect)
-    {
-        switch (statusEffect)
-        {
-            case StatusEffect.Bleeding:
-                if (!isBleeding) { isBleeding = true; applyBleeding = StartCoroutine(ApplyBleeding(statusEffect)); }
-                break;
-            case StatusEffect.Burning:
-                if (!isBurning) { isBurning = true; applyBurning = StartCoroutine(ApplyBurning(statusEffect)); }
-                break;
-            case StatusEffect.Poison:
-                if(applyPoison != null) StopCoroutine(applyPoison);
-                isPoisoned = true;
-                StartCoroutine(ApplyPoison());
-                break;
-        }
-    }
-
-    private IEnumerator ApplyBleeding(StatusEffect statusEffect)
-    {
-        float effectStart = Time.time;
-        float elapsedTime = 0f;
-
-        while (isBleeding)
-        {
-            elapsedTime = Time.time - effectStart;
-            float damage = StatusEffectsDefinitions.GetStatusEffectDamage(statusEffect, elapsedTime);
-            DealStatusEffectDamage(damage);
-            yield return new WaitForSeconds(statusEffectTickRate);
-        }
-    }
-
-    private IEnumerator ApplyBurning(StatusEffect statusEffect)
-    {
-        float effectStart = Time.time;
-        float elapsedTime = 0f;
-        while (isBurning)
-        {
-            elapsedTime = Time.time - effectStart;
-            float damage = StatusEffectsDefinitions.GetStatusEffectDamage(statusEffect, elapsedTime);
-            burnedHealth += damage;
-            if(debugBurningDamage) debugBurningDamage.text = burnedHealth.ToString();
-            DealStatusEffectDamage(damage);
-            yield return new WaitForSeconds(statusEffectTickRate);
-        }
-    }
-
-    private IEnumerator ApplyPoison()
-    {
-        isPoisoned = true;
-        yield return new WaitForSeconds(StatusEffectsDefinitions.poisonEffectDuration);
-        isPoisoned = false;
-    }
-
-    public void ApplyStatusEffectsCures(StatusEffect[] statusEffectsToCure)
-    {
-        foreach(StatusEffect se in statusEffectsToCure)
-        {
-            CureStatusEffect(se);
-        }
-    }
-
-    private void CureStatusEffect(StatusEffect statusEffect)
-    {
-        switch (statusEffect)
-        {
-            case StatusEffect.Bleeding:
-                isBleeding = false;
-                StopCoroutine(applyBleeding);
-                break;
-            case StatusEffect.Burning:
-                isBurning = false;
-                StopCoroutine(applyBurning);
-                break;
-            case StatusEffect.Poison:
-                isPoisoned = false;
-                StopCoroutine(applyPoison);
-                break;
-            default:
-                Debug.LogWarning($"{statusEffect} cure not implemented in {this}");
-                break;
-        }
-    }
-
-    private void DealStatusEffectDamage(float damage)
-    {
-        if (currentHealth > 0)
-        {
-            currentHealth -= damage;
-            if(debugHP) debugHP.text = $"HP: {currentHealth}";
-            CheckHealth();
-        }
-    }
-
-    #endregion
-
-    #region Health restoring
-    public void NotifyRestoreHealth(float amount)
-    {
-        RestoreHealth(amount);
-    }
-
-    private void RestoreHealth(float amount)
-    {
-        if(!isPoisoned)
-        {
-            currentHealth += amount;
-            if (currentHealth > baseHealth) { currentHealth = baseHealth; }
-            debugHP.text = $"HP: {currentHealth}";
-        }
-    }
-
-    public void NotifyRegenerateHealth(float regenerationRate, float duration)
-    {
-        if(healthRegenerationCoroutine != null) { StopCoroutine(healthRegenerationCoroutine); }
-        healthRegenerationCoroutine = StartCoroutine(HealthRegenerationCoroutine(regenerationRate, duration));
-    }
-
-    private IEnumerator HealthRegenerationCoroutine(float regenerationRate, float duration)
-    {
-        currentRegenerationTime += duration;
-        float startTime = Time.time;
-        float t = 0f;
-        debugRegenVal.text = regenerationRate.ToString();
-
-        while(currentRegenerationTime > 0)
-        {
-            t += Time.deltaTime;
-            currentRegenerationTime -= t;
-            RestoreHealth(regenerationRate);
-            yield return new WaitForSeconds(1f);
-        }
-        currentRegenerationTime = 0f;
-        debugRegenVal.text = "0";
-        yield return null;
-    }
-    #endregion
-
-    #region Damage absorb
-    public void NotifyDamageAbsorbChange(float newValue, float duration)
-    {
-        if(damageAbsorbCoroutine != null) { StopCoroutine(damageAbsorbCoroutine); }
-        damageAbsorbCoroutine = StartCoroutine(DamageAbsorbCoroutine(newValue, duration));
-    }
-
-    private IEnumerator DamageAbsorbCoroutine(float newValue, float duration)
-    {
-        damageAbsorb = newValue;
-        debugDAbsorbVal.text = damageAbsorb.ToString();
-        debugDAbsorbDuration = duration;
-        yield return new WaitForSeconds(duration);
-        damageAbsorb = 1f;
-        debugDAbsorbVal.text = damageAbsorb.ToString();
-        yield return null;
-    }
-    #endregion
 }
