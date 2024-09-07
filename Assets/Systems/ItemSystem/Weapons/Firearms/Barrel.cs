@@ -10,7 +10,7 @@ public class Barrel : MonoBehaviour
 
     public void Shoot(float muzzleVelocity, HitInfo hitInfoToSend)
     {
-        GameObject go = Instantiate(projectile, transform.position, transform.rotation);
+        GameObject go = Instantiate(projectile, transform.position, transform.localRotation);
         go.GetComponent<DamageGiver>().SetHitInfo(hitInfoToSend);
         rb = go.GetComponent<Rigidbody>();
         rb.AddForce(this.transform.forward * muzzleVelocity, ForceMode.VelocityChange);

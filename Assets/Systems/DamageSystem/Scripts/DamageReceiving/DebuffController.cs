@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StatusEffectsController : MonoBehaviour
+public class DebuffController : MonoBehaviour
 {
     Dictionary<StatusEffect, bool> currentStatusEffects = new Dictionary<StatusEffect, bool>();
 
@@ -26,7 +26,7 @@ public class StatusEffectsController : MonoBehaviour
     }
 
 
-    public void ApplyStatusEffect(StatusEffect statusEffect)
+    public void ApplyDebuff(StatusEffect statusEffect)
     {
         switch (statusEffect)
         {
@@ -45,7 +45,7 @@ public class StatusEffectsController : MonoBehaviour
                 }
                 break;
             case StatusEffect.Poison:
-                if (currentStatusEffects[StatusEffect.Poison] == false) StopCoroutine(applyPoison);
+                if (currentStatusEffects[StatusEffect.Poison] == false && applyPoison != null) StopCoroutine(applyPoison);
                 currentStatusEffects[StatusEffect.Poison] = true;
                 applyPoison = StartCoroutine(ApplyPoison());
                 break;
@@ -104,15 +104,15 @@ public class StatusEffectsController : MonoBehaviour
         {
             case StatusEffect.Bleeding:
                 currentStatusEffects[StatusEffect.Bleeding] = false;
-                StopCoroutine(applyBleeding);
+                if(applyBleeding != null) StopCoroutine(applyBleeding);
                 break;
             case StatusEffect.Burning:
                 currentStatusEffects[StatusEffect.Burning] = false;
-                StopCoroutine(applyBurning);
+                if(applyBurning != null) StopCoroutine(applyBurning);
                 break;
             case StatusEffect.Poison:
                 currentStatusEffects[StatusEffect.Poison] = false;
-                StopCoroutine(applyPoison);
+                if(applyPoison != null) StopCoroutine(applyPoison);
                 break;
             default:
                 Debug.LogWarning($"{statusEffect} cure not implemented in {this}");

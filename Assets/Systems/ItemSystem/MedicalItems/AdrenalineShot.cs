@@ -8,8 +8,8 @@ public class AdrenalineShot : MedicalItem
     {
         yield return new WaitForSeconds(timeToUseItem);
 
-        healthController.NotifyDamageAbsorbChange(damageAbsorb, damageAbsorbDuration);
-        healthController.NotifyRegenerateHealth(regenerationPerSecond, regenerationDuration);
+        //healthController.NotifyDamageAbsorbChange(damageAbsorbPercent, damageAbsorbDuration);
+        //healthController.NotifyRegenerateHealth(regenerationPerSecond, regenerationDuration);
 
         yield return null;
     }

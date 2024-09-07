@@ -24,14 +24,11 @@ public class HealthController : MonoBehaviour
     float currentHealth;
     float burnedHealth = 0f;
     float currentDamageAbsorb = 1f;
-    float currentRegenerationTime = 0f;
 
     RagdollController ragdollController;
     DamageReceiver[] damageReceivers;
-    StatusEffectsController statusEffectsController;
-
-    Coroutine applyHealthRegeneration;
-    Coroutine applyDamageAbsorb;
+    DebuffController debuffController;
+    BuffController buffController;
 
     #region DEBUG
 
@@ -74,38 +71,38 @@ public class HealthController : MonoBehaviour
         if(debugApplyBleeding)
         {
             debugApplyBleeding = false;
-            statusEffectsController.ApplyStatusEffect(StatusEffect.Bleeding);
+            debuffController.ApplyDebuff(StatusEffect.Bleeding);
         }
         if (debugCureBleeding)
         {
             debugCureBleeding = false;
             StatusEffect[] se = new StatusEffect[1];
             se[0] = StatusEffect.Bleeding;
-            statusEffectsController.ApplyStatusEffectsCures(se);
+            debuffController.ApplyStatusEffectsCures(se);
         }
         if(debugApplyBurning)
         {
             debugApplyBurning = false;
-            statusEffectsController.ApplyStatusEffect(StatusEffect.Burning);
+            debuffController.ApplyDebuff(StatusEffect.Burning);
         }
         if(debugCureBurning)
         {
             debugCureBurning = false;
             StatusEffect[] se = new StatusEffect[1];
             se[0] = StatusEffect.Burning;
-            statusEffectsController.ApplyStatusEffectsCures(se);
+            debuffController.ApplyStatusEffectsCures(se);
         }
         if (debugApplyPoison)
         {
             debugApplyPoison = false;
-            statusEffectsController.ApplyStatusEffect(StatusEffect.Poison);
+            debuffController.ApplyDebuff(StatusEffect.Poison);
         }
         if (debugCurePoison)
         {
             debugCurePoison = false;
             StatusEffect[] se = new StatusEffect[1];
             se[0] = StatusEffect.Poison;
-            statusEffectsController.ApplyStatusEffectsCures(se);
+            debuffController.ApplyStatusEffectsCures(se);
         }
     }
 
@@ -113,23 +110,8 @@ public class HealthController : MonoBehaviour
     {
         if (debugHP)
         {
-            if (debugDAbsorbDuration > 0f)
-            {
-                float t = 0f;
-                t += Time.deltaTime;
-                debugDAbsorbDuration -= t;
-                debugdAbsorbDuration.text = debugDAbsorbDuration.ToString();
-                if (debugDAbsorbDuration <= 0f) debugdAbsorbDuration.text = "0";
-            }
-            if (currentRegenerationTime > 0f)
-            {
-                float t = 0f;
-                t += Time.deltaTime;
-                currentRegenerationTime -= t;
-                debugRegenTime.text = currentRegenerationTime.ToString();
-                if (currentRegenerationTime <= 0f) debugRegenTime.text = "0";
-            }
             debugHP.text = currentHealth.ToString();
+            debugBurningDamage.text = burnedHealth.ToString();
         }
     }
 
@@ -144,7 +126,8 @@ public class HealthController : MonoBehaviour
         {
             ragdollController = GetComponent<RagdollController>();
         }
-        statusEffectsController = GetComponent<StatusEffectsController>();
+        debuffController = GetComponent<DebuffController>();
+        buffController = GetComponent<BuffController>();
 
         //DEBUG
         if (debugHP)
@@ -181,7 +164,7 @@ public class HealthController : MonoBehaviour
             float finaldamage = GetDamage(hitInfo, damageModifierValue);
             ReduceHealth(finaldamage);
 
-            if (hitInfo.statusEffect != StatusEffect.None && receivesStatusEffects) { statusEffectsController.ApplyStatusEffect(hitInfo.statusEffect); }
+            if (hitInfo.statusEffect != StatusEffect.None && receivesStatusEffects) { debuffController.ApplyDebuff(hitInfo.statusEffect); }
 
             Debug.Log($"BaseDamage:  {hitInfo.baseDamage}");
             Debug.Log($"Bodypart damage modifier:  {damageModifierValue}");
@@ -210,6 +193,11 @@ public class HealthController : MonoBehaviour
         return damage;
     }
 
+    public void NotifyBuff(MedicalItem item)
+    {
+        buffController.ApplyBuff(item);
+    }
+
     #region Health
     private void ReduceHealth(float amount)
     {
@@ -236,29 +224,6 @@ public class HealthController : MonoBehaviour
     public void NotifyRestoreHealth(float amount)
     {
         RestoreHealth(amount);
-    }
-
-    public void NotifyRegenerateHealth(float regenerationRate, float duration)
-    {
-        if (applyHealthRegeneration != null) { StopCoroutine(applyHealthRegeneration); }
-        applyHealthRegeneration = StartCoroutine(ApplyRegeneration(regenerationRate, duration));
-    }
-
-    private IEnumerator ApplyRegeneration(float regenerationRate, float duration)
-    {
-        currentRegenerationTime += duration;
-        float startTime = Time.time;
-        float t = 0f;
-
-        while (currentRegenerationTime > 0)
-        {
-            t += Time.deltaTime;
-            currentRegenerationTime -= t;
-            RestoreHealth(regenerationRate);
-            yield return new WaitForSeconds(1f);
-        }
-        currentRegenerationTime = 0f;
-        yield return null;
     }
     #endregion
 
@@ -290,24 +255,15 @@ public class HealthController : MonoBehaviour
     }
     #endregion
 
-    #region Damage absorb
-    public void NotifyDamageAbsorbChange(float newValue, float duration)
-    {
-        if (currentDamageAbsorb < newValue)
-        {
-            if (applyDamageAbsorb != null) { StopCoroutine(applyDamageAbsorb); }
-            applyDamageAbsorb = StartCoroutine(DamageAbsorbCoroutine(newValue, duration));
-        }
-    }
-
-    private IEnumerator DamageAbsorbCoroutine(float newValue, float duration)
+    public void NotifyDamageAbsorbChange(float newValue)
     {
         currentDamageAbsorb = newValue;
-        yield return new WaitForSeconds(duration);
-        currentDamageAbsorb = 1f;
-        yield return null;
     }
-    #endregion
+
+    public void NotifyDebuffCure(StatusEffect[] statusEffects)
+    {
+        debuffController.ApplyStatusEffectsCures(statusEffects);
+    }
 
     private void OnHealthDepleted()
     {
