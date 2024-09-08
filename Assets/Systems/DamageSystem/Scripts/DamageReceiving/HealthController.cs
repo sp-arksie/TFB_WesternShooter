@@ -25,7 +25,7 @@ public class HealthController : MonoBehaviour
     float burnedHealth = 0f;
     float currentDamageAbsorb = 1f;
 
-    RagdollController ragdollController;
+    RagdollEnabler ragdollEnabler;
     DamageReceiver[] damageReceivers;
     DebuffController debuffController;
     BuffController buffController;
@@ -124,7 +124,7 @@ public class HealthController : MonoBehaviour
         damageReceivers = damageReceiversParent.GetComponentsInChildren<DamageReceiver>();
         if(actionOnHealthDepleted == ActionOnHealthDepleted.EnableRagdoll)
         {
-            ragdollController = GetComponent<RagdollController>();
+            ragdollEnabler = GetComponent<RagdollEnabler>();
         }
         debuffController = GetComponent<DebuffController>();
         buffController = GetComponent<BuffController>();
@@ -278,7 +278,7 @@ public class HealthController : MonoBehaviour
                 Destroy(gameObject);
                 break;
             case ActionOnHealthDepleted.EnableRagdoll:
-                ragdollController.EnableRagdoll();
+                ragdollEnabler.EnableRagdoll();
                 break;
         }
     }

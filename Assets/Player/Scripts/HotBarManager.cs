@@ -57,12 +57,19 @@ public class HotBarManager : MonoBehaviour
             hotBarItems.GetChild(i).gameObject.SetActive(false);
         }
         currentIndex = startingIndex;
+        PrepareStartingItem();
+    }
+
+    private void PrepareStartingItem()
+    {
         hotBarItems.GetChild(currentIndex).gameObject.SetActive(true);
 
         ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
+
         animator.SetBool(hasGunHash, true); // TODO: dont hardcode this
-        animator.SetBool(rightArmOnlyHash, item.RightArmOnly); // here also
+        animator.SetBool(rightArmOnlyHash, item.RightArmOnly);
         ItemSelectedEvent?.Invoke(item);
+        item.onUnskippableActionInProgress += SetItemBusy;
         GrabPoints();
     }
 

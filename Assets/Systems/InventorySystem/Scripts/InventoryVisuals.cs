@@ -21,7 +21,7 @@ public class InventoryVisuals : MonoBehaviour
     float timeSinceLastRotation;
     Coroutine rotationCoroutine;
 
-    GridLayoutGroup[] gridLayoutGroup;
+    GridLayoutGroup[] inventoryGridLayoutGroups;
     List<RectTransform> firstCellRectTransform = new() { null, null };
 
     BufferItemData bufferItemData;
@@ -51,13 +51,15 @@ public class InventoryVisuals : MonoBehaviour
 
     private void Awake()
     {
-        gridLayoutGroup = new GridLayoutGroup[InventoryCellsParent.childCount];
+        inventoryGridLayoutGroups = new GridLayoutGroup[InventoryCellsParent.childCount];
         for (int i = 0; i < InventoryCellsParent.childCount; i++)
         {
-            gridLayoutGroup[i] = InventoryCellsParent.GetChild(i).GetComponent<GridLayoutGroup>();
+            inventoryGridLayoutGroups[i] = InventoryCellsParent.GetChild(i).GetComponent<GridLayoutGroup>();
         }
         input = InputManager.Instance;
         inventoryManager = InventoryManager.Instance;
+
+        PrepareGridCells(true);
     }
 
     private void OnEnable()
@@ -68,7 +70,8 @@ public class InventoryVisuals : MonoBehaviour
             InventoryVisualsParent.GetChild(1).gameObject.SetActive(true);
             PrepareGridCells(false);
         }
-        DrawInventory();
+
+        StartCoroutine(DrawInventoryEndOfFrame());
     }
 
     private void OnDisable()
@@ -80,9 +83,11 @@ public class InventoryVisuals : MonoBehaviour
         }
     }
 
-    private void Start()
+    private IEnumerator DrawInventoryEndOfFrame()
     {
-        PrepareGridCells(true);
+        yield return new WaitForEndOfFrame();
+
+        DrawInventory();
     }
 
     private void Update()
@@ -104,15 +109,18 @@ public class InventoryVisuals : MonoBehaviour
 
         Vector2Int dimensions = inventoryManager.inventories[i].GetInventoryDimensions();
 
-        gridLayoutGroup[i].constraint = GridLayoutGroup.Constraint.FixedRowCount;
-        gridLayoutGroup[i].constraintCount = dimensions.y;
+        inventoryGridLayoutGroups[i].constraint = GridLayoutGroup.Constraint.FixedRowCount;
+        inventoryGridLayoutGroups[i].constraintCount = dimensions.y;
 
         for (int y = 0; y < dimensions.y; y++)
         {
             for (int x = 0; x < dimensions.x; x++)
             {
                 GameObject go = Instantiate(cellVisualPrefab, Vector3.zero, Quaternion.identity, InventoryCellsParent.GetChild(i).transform);
-                if (x == 0 && y == 0) firstCellRectTransform[i] = go.GetComponent<RectTransform>();
+                RectTransform rectCell = go.GetComponent<RectTransform>();
+                rectCell.anchorMin = new(0, 1);
+                rectCell.anchorMax = new(0, 1);
+                if (x == 0 && y == 0) firstCellRectTransform[i] = rectCell;
                 go.GetComponentInChildren<TextMeshProUGUI>().text = $"{x}, {y}";
                 GridCellUI gcui = go.GetComponent<GridCellUI>();
                 gcui.SetLocationInGrid(x, y);
@@ -129,7 +137,7 @@ public class InventoryVisuals : MonoBehaviour
 
     private void DrawInventory()
     {
-        for (int i = 0; i < gridLayoutGroup.Length && gridLayoutGroup[i].gameObject.activeSelf; i++)
+        for (int i = 0; i < inventoryGridLayoutGroups.Length && inventoryGridLayoutGroups[i].gameObject.activeSelf; i++)
         {
             for (int k = InventoryVisualsParent.GetChild(i).transform.childCount - 1; k >= 0; k--)
             {
@@ -146,6 +154,9 @@ public class InventoryVisuals : MonoBehaviour
                 int itemWidth = container[kvp.Value[0]].CurrentItemOrientation.x;
                 int itemHeight = container[kvp.Value[0]].CurrentItemOrientation.y;
 
+                rectItem.anchorMin = firstCellRectTransform[i].anchorMin;
+                rectItem.anchorMax = firstCellRectTransform[i].anchorMax;
+
                 if (itemWidth != container[kvp.Value[0]].InventoryItem.ItemSizeInInventory.x || itemHeight != container[kvp.Value[0]].InventoryItem.ItemSizeInInventory.y)
                     rectItem.rotation = RotateDrawnitem();
 
@@ -157,13 +168,13 @@ public class InventoryVisuals : MonoBehaviour
 
     private Vector2 GetAnchoredPosition(KeyValuePair<string, List<Vector2Int>> kvp, int i)
     {
-        return new Vector2(firstCellRectTransform[i].anchoredPosition.x + kvp.Value[0].x * gridLayoutGroup[i].cellSize.x,
-                           firstCellRectTransform[i].anchoredPosition.y + kvp.Value[0].y * gridLayoutGroup[i].cellSize.y);
+        return new Vector2(firstCellRectTransform[i].anchoredPosition.x + kvp.Value[0].x * inventoryGridLayoutGroups[i].cellSize.x,
+                           firstCellRectTransform[i].anchoredPosition.y + kvp.Value[0].y * inventoryGridLayoutGroups[i].cellSize.y);
     }
 
     private Vector2 GetItemPosition(Vector2 anchoredPosition, int itemWidth, int itemHeight, int i)
     {
-        return anchoredPosition + new Vector2((gridLayoutGroup[i].cellSize.x * 0.5f * (itemWidth - 1)), (gridLayoutGroup[i].cellSize.y * 0.5f * (itemHeight - 1)));
+        return anchoredPosition + new Vector2((inventoryGridLayoutGroups[i].cellSize.x * 0.5f * (itemWidth - 1)), (inventoryGridLayoutGroups[i].cellSize.y * 0.5f * (itemHeight - 1)));
     }
 
     private void AddEvent(GameObject cell, EventTriggerType eventTriggerType, UnityAction<BaseEventData> callback)

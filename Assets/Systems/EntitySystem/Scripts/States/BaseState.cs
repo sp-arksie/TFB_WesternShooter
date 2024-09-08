@@ -18,4 +18,6 @@ public class BaseState : MonoBehaviour
     protected NavMeshAgent GetAgent() { return entityController.agent; }
     protected Vector3 GetLastSeenTargetPosition() { return entityController.GetLastSeenTargetPosition(); }
     protected void ForgetLastSeenTargetPosition() { entityController.ForgetLastSeenTargetPosition(); }
+    protected HotBarManagerForEntity GetHotBarManager() { return entityController.GetHotBarManager(); }
+    protected bool GetCurrentItemBusy() { return entityController.GetHotBarManager().GetCurrentItemBusy(); }
 }

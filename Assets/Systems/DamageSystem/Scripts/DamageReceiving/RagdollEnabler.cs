@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class RagdollController : MonoBehaviour
+public class RagdollEnabler : MonoBehaviour
 {
     [SerializeField] Transform ragdollRoot;
     [SerializeField] bool startInRagdoll = false;

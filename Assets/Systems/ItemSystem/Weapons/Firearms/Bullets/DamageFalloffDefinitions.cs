@@ -60,4 +60,19 @@ public static class DamageFalloffDefinitions
                 return 0f;
         }
     }
+
+    public static float GetEffectiveRange(WeaponCalliber weaponCalliber)
+    {
+        switch (weaponCalliber)
+        {
+            case WeaponCalliber.SmallCalliber:
+                return SmallCalliberFalloffPoint_2;
+            case WeaponCalliber.MediumCalliber:
+                return MediumCalliberFalloffPoint_2;
+            case WeaponCalliber.LargeCalliber:
+                return LargeCalliberFalloffPoint_2;
+            default:
+                return 0f;
+        }
+    }
 }

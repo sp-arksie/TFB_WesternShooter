@@ -10,15 +10,12 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
     [SerializeField] internal EntitySight sight;
 
     [Header("Melee")]
-    [SerializeField] float minimumMeleeRange = 1f;
+    [SerializeField] float minimumMeleeRange = 0.5f;
 
     internal NavMeshAgent agent;
+    HotBarManagerForEntity hotBarManager;
 
     BaseState currentState;
-    PatrolState patrolState;
-    SeekState seekState;
-    GotoLastTargetPositionState gotoLastTargetPositionState;
-    MeleeAttackState meleeAttackState;
 
     Vector3 lastSeenTargetPosition = Vector3.zero;
     bool hasLastSeenTargetPosition = false;
@@ -26,43 +23,16 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
     //float minimumMeleeRange = 1f;
 
     Vector3 smoothedLocalMovement = Vector3.zero;
-    bool isRunning = false;
+    //bool isRunning = false;
 
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
-        patrolState =  GetComponent<PatrolState>();
-        seekState = GetComponent<SeekState>();
-        gotoLastTargetPositionState = GetComponent<GotoLastTargetPositionState>();
-        meleeAttackState = GetComponent<MeleeAttackState>();
+        hotBarManager = GetComponent<HotBarManagerForEntity>();
     }
 
     private void Update()
     {
-        //List<EntityVisible> currentVisiblesToEntity = sight.GetCurrentlyVisiblesToEntity();
-
-        //if (currentVisiblesToEntity.Count > 0)
-        //{
-        //    hasLastSeenTargetPosition = true;
-        //    lastSeenTargetPosition = currentVisiblesToEntity[0].transform.position;
-        //    if (Vector3.Distance(transform.position, currentVisiblesToEntity[0].transform.position) < minimumMeleeRange)
-        //    {
-        //        SetOrMaintainState(meleeAttackState);
-        //    }
-        //    else
-        //    {
-        //        SetOrMaintainState(seekState);
-        //    }
-        //}
-        //else if (hasLastSeenTargetPosition)
-        //{
-        //    SetOrMaintainState(gotoLastTargetPositionState);
-        //}
-        //else
-        //{
-        //    SetOrMaintainState(patrolState);
-        //}
-
         UpdateAnimation(agent.velocity);
     }
 
@@ -93,6 +63,8 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
     internal EntitySight.VisibleInMemory GetTarget() { return sight.GetCurrentlyVisiblesToEntity().Count > 0 ? sight.GetCurrentlyVisiblesToEntity()[0] : null; }
 
     internal float GetMinimumMeleeRange() { return minimumMeleeRange; }
+
+    internal HotBarManagerForEntity GetHotBarManager() { return hotBarManager; }
 
     #endregion
 

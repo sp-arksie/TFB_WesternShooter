@@ -5,30 +5,23 @@ using UnityEngine;
 public class MeleeAttackState : BaseState
 {
     [SerializeField] MeleeWeapon meleeWeapon;
-    bool attackInProgress = false;
 
     private void OnEnable()
     {
-        meleeWeapon.onUnskippableActionInProgress += SetUnskippableAction;
         GetAgent().SetDestination(transform.position);
     }
 
     private void Update()
     {
-        if(!attackInProgress)
+        if(!GetCurrentItemBusy())
         {
-            meleeWeapon.NotifyQuickAction();
+            //meleeWeapon.NotifyQuickAction();
+            GetHotBarManager().DoQuickAction();
         }
     }
 
     private void OnDisable()
     {
-        meleeWeapon.onUnskippableActionInProgress -= SetUnskippableAction;
-        attackInProgress = false;
-    }
 
-    private void SetUnskippableAction(bool inProgress)
-    {
-        attackInProgress = inProgress;
     }
 }

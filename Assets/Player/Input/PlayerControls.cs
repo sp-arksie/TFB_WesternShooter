@@ -498,6 +498,34 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""InventoryActivator"",
+            ""id"": ""4b4696e7-c4ba-44d3-a9c3-e651cd07cbc0"",
+            ""actions"": [
+                {
+                    ""name"": ""OpenInventory"",
+                    ""type"": ""Button"",
+                    ""id"": ""684fd7c1-83f9-419c-a6ab-f8079192c7a8"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""76f97eb6-0b19-4e7d-9cdd-ed84dd2c902a"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""OpenInventory"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -530,6 +558,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_MousePosition = m_UI.FindAction("MousePosition", throwIfNotFound: true);
         m_UI_Rotate = m_UI.FindAction("Rotate", throwIfNotFound: true);
+        // InventoryActivator
+        m_InventoryActivator = asset.FindActionMap("InventoryActivator", throwIfNotFound: true);
+        m_InventoryActivator_OpenInventory = m_InventoryActivator.FindAction("OpenInventory", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -899,6 +930,52 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         }
     }
     public UIActions @UI => new UIActions(this);
+
+    // InventoryActivator
+    private readonly InputActionMap m_InventoryActivator;
+    private List<IInventoryActivatorActions> m_InventoryActivatorActionsCallbackInterfaces = new List<IInventoryActivatorActions>();
+    private readonly InputAction m_InventoryActivator_OpenInventory;
+    public struct InventoryActivatorActions
+    {
+        private @PlayerControls m_Wrapper;
+        public InventoryActivatorActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @OpenInventory => m_Wrapper.m_InventoryActivator_OpenInventory;
+        public InputActionMap Get() { return m_Wrapper.m_InventoryActivator; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(InventoryActivatorActions set) { return set.Get(); }
+        public void AddCallbacks(IInventoryActivatorActions instance)
+        {
+            if (instance == null || m_Wrapper.m_InventoryActivatorActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_InventoryActivatorActionsCallbackInterfaces.Add(instance);
+            @OpenInventory.started += instance.OnOpenInventory;
+            @OpenInventory.performed += instance.OnOpenInventory;
+            @OpenInventory.canceled += instance.OnOpenInventory;
+        }
+
+        private void UnregisterCallbacks(IInventoryActivatorActions instance)
+        {
+            @OpenInventory.started -= instance.OnOpenInventory;
+            @OpenInventory.performed -= instance.OnOpenInventory;
+            @OpenInventory.canceled -= instance.OnOpenInventory;
+        }
+
+        public void RemoveCallbacks(IInventoryActivatorActions instance)
+        {
+            if (m_Wrapper.m_InventoryActivatorActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IInventoryActivatorActions instance)
+        {
+            foreach (var item in m_Wrapper.m_InventoryActivatorActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_InventoryActivatorActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public InventoryActivatorActions @InventoryActivator => new InventoryActivatorActions(this);
     public interface ILocomotionActions
     {
         void OnMovement(InputAction.CallbackContext context);
@@ -930,5 +1007,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     {
         void OnMousePosition(InputAction.CallbackContext context);
         void OnRotate(InputAction.CallbackContext context);
+    }
+    public interface IInventoryActivatorActions
+    {
+        void OnOpenInventory(InputAction.CallbackContext context);
     }
 }

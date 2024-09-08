@@ -116,7 +116,7 @@ public class MeleeWeapon : ItemBase, ICameraShaker
     private void PerformHeavyAttack()
     {
         if (startMeleeAttack != null) StopCoroutine(startMeleeAttack);
-        startMeleeAttack = StartCoroutine(StartMeleeAttack(heavyEndTransform, lightAnimationDuration));
+        startMeleeAttack = StartCoroutine(StartMeleeAttack(heavyEndTransform, heavyAnimationDuration));
     }
 
     private IEnumerator PrepareMeleeAttack(Transform startTransform, float timeToStartAnimation)

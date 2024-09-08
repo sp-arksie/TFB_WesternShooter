@@ -21,6 +21,13 @@ public class InputManager : MonoBehaviour
     string aimActionMap = "Aim";
     string actionsActionMap = "Actions";
     string uiActionMap = "UI";
+    string inventoryActivatorActionMap = "InventoryActivator";
+
+    public string LocomotionActionMap { get => locomotionActionMap; private set => locomotionActionMap = value; }
+    public string AimActionMap { get => aimActionMap; private set => aimActionMap = value; }
+    public string ActionsActionMap { get => actionsActionMap; private set => actionsActionMap = value; }
+    public string UiActionMap { get => uiActionMap; private set => uiActionMap = value; }
+    public string InventoryActivatorActionMap { get => inventoryActivatorActionMap; private set => inventoryActivatorActionMap = value; }
 
     private void Awake()
     {
@@ -33,8 +40,9 @@ public class InputManager : MonoBehaviour
 
         inputActionMaps.Add( playerControls.asset.FindActionMap(locomotionActionMap) );
         inputActionMaps.Add( playerControls.asset.FindActionMap(aimActionMap) );
-        inputActionMaps.Add( playerControls.asset.FindActionMap(aimActionMap) );
+        inputActionMaps.Add( playerControls.asset.FindActionMap(actionsActionMap) );
         inputActionMaps.Add( playerControls.asset.FindActionMap(uiActionMap) );
+        inputActionMaps.Add(playerControls.asset.FindActionMap(inventoryActivatorActionMap));
     }
 
     private void Start()
@@ -86,6 +94,10 @@ public class InputManager : MonoBehaviour
 
     #endregion
 
+    #region InventoryActivator
+    public InputAction GetInventoryActivated() { return playerControls.InventoryActivator.OpenInventory; }
+    #endregion
+
     private void RestrictSprint() { playerControls.Locomotion.Run.Disable(); }
     private void UnrestrictSprint() { playerControls.Locomotion.Run.Enable(); }
     private void SetUIActionMap()
@@ -107,5 +119,48 @@ public class InputManager : MonoBehaviour
             else
                 iam.Disable();
         }
+    }
+
+    public void SetActionMaps(string[] actionMaps, bool shouldSetActive)
+    {
+        foreach (InputActionMap iam in inputActionMaps)
+        {
+            bool shouldDeactivate = true;
+            foreach (string actionMapToBeActive in actionMaps)
+            {
+                if (iam == playerControls.asset.FindActionMap(actionMapToBeActive))
+                    shouldDeactivate = false;
+            }
+
+            if (shouldSetActive)
+            {
+                if (shouldDeactivate)
+                    iam.Disable();
+                else
+                    iam.Enable();
+            }
+            else
+            {
+                if (!shouldDeactivate)
+                    iam.Disable();
+                else
+                    iam.Enable();
+            }
+        }
+
+        //foreach (InputActionMap iam in inputActionMaps)
+        //{
+            
+        //    foreach (string actionMapToBeActive in actionMaps)
+        //    {
+        //        if (iam == playerControls.asset.FindActionMap(actionMapToBeActive))
+        //            shouldSetActive = !shouldSetActive;
+        //    }
+
+        //    if (shouldSetActive)
+        //        iam.Disable();
+        //    else
+        //        iam.Enable();
+        //}
     }
 }

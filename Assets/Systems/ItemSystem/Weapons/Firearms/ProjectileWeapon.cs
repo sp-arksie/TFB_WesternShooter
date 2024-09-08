@@ -23,6 +23,7 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
     public Transform ShootingRotationTransform { get { return shootingRotationTransform; } private set { shootingRotationTransform = value; } }
     public Transform BaseRotationTransform { get { return baseRotationTransform; } private set { baseRotationTransform = value; } }
 
+
     public event Action SelectedEvent;
     
     Barrel barrel;
@@ -44,6 +45,9 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
 
     bool isReloading = false;
     float shotTime = 0f;
+
+    float effectiveRange;
+    public float EffectiveRange { get => effectiveRange; private set => effectiveRange = value; }
 
     #region DEBUG
 
@@ -69,6 +73,8 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
         damageBehaviour = GetComponent<DamageBehaviour>();
         recoilBehaviour = GetComponent<RecoilBehaviour>();
         animator = GetComponentInChildren<Animator>();
+
+        effectiveRange = DamageFalloffDefinitions.GetEffectiveRange(damageBehaviour.GetWeaponCalliber());
     }
 
     private void OnEnable()
