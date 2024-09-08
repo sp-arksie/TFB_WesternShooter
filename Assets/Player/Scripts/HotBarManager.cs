@@ -9,8 +9,7 @@ using UnityEngine.InputSystem.Interactions;
 
 public class HotBarManager : MonoBehaviour
 {
-    [SerializeField] Transform hotBarItems;
-    [SerializeField] CinemachineVirtualCamera virtualCamera;
+    [SerializeField] protected Transform hotBarItems;
 
     [Header("Grab Points")]
     [SerializeField] ParentConstraint leftArmTarget;
@@ -20,25 +19,17 @@ public class HotBarManager : MonoBehaviour
     [SerializeField] TwoBoneIKConstraint leftArmRig;
     [SerializeField] TwoBoneIKConstraint rightArmRig;
 
-    [Header("Aiming")]
-    [SerializeField] float ironSightFOV = 35f;
-    [SerializeField] float fovLerpSpeed = 2f;
-    Coroutine aimingCoroutine;
-    float defaultFOV;
-    float currentFOV;
-
     [Header("Item switching")]
     [SerializeField] float timeToSwitch = 0.6f;
-    Coroutine selectItem;
-    Coroutine animateItemSwitch;
-    bool currentItemBusy = false;
+    protected Coroutine selectItem;
+    protected Coroutine animateItemSwitch;
+    protected bool currentItemBusy = false;
 
     // Items index
     int startingIndex = 0;
-    int currentIndex = 0;
+    protected int currentIndex = 0;
 
     // References
-    InputManager input;
     Animator animator;
     HealthController healthController;
 
@@ -50,28 +41,10 @@ public class HotBarManager : MonoBehaviour
     public event Action<ItemBase> ItemUnselectedEvent;
 
 
-    private void Awake()
+    protected virtual void Awake()
     {
-        input = InputManager.Instance;
         animator = GetComponentInChildren<Animator>();
         healthController = GetComponent<HealthController>();
-        defaultFOV = currentFOV = virtualCamera.m_Lens.FieldOfView;
-    }
-
-    private void OnEnable()
-    {
-        input.GetUseAction().performed += OnClick;
-        input.GetUseAction().started += OnPressStarted;
-        input.GetUseAction().performed += OnPressFinished;
-
-        input.GetAimAction().started += OnAim;
-        input.GetAimAction().canceled += OnAim;
-        input.GetReloadAction().performed += OnReload;
-        input.GetScrollAction().performed += OnScroll;
-        for(int i = 0; i < input.GetHotBarSlotActions().Count; i++)
-        {
-            input.GetHotBarSlotActions()[i].performed += (context) => OnHotBarSelect(i);
-        }
     }
 
     private void Start()
@@ -101,139 +74,32 @@ public class HotBarManager : MonoBehaviour
         if(leftArmRig.weight != desiredLeftArmWeight) { leftArmRig.weight = desiredLeftArmWeight; }
     }
 
-    private void OnDisable()
+    protected void QuickAction()
     {
-        input.GetUseAction().performed -= OnClick;
-        input.GetUseAction().started -= OnPressStarted;
-        input.GetUseAction().performed -= OnPressFinished;
-
-        input.GetAimAction().started -= OnAim;
-        input.GetAimAction().canceled -= OnAim;
-        input.GetScrollAction().performed -= OnScroll;
-        for (int i = 0; i < input.GetHotBarSlotActions().Count; i++)
-        {
-            input.GetHotBarSlotActions()[i].performed -= (context) => OnHotBarSelect(i);
-        }
+        hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyQuickAction();
     }
 
-    private void OnClick(InputAction.CallbackContext context)
+    protected void ChargeStart()
     {
-        if(context.interaction is TapInteraction)
-        {
-            hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyQuickAction();
-        }
+        hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyChargeStart();
     }
 
-    private void OnPressStarted(InputAction.CallbackContext context)
+    protected void ChargeRelease()
     {
-        if (context.interaction is SlowTapInteraction)
-        {
-            hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyChargeStart();
-        }
+        hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyChargeRelease();
     }
-
-    private void OnPressFinished(InputAction.CallbackContext context)
-    {
-        if (context.interaction is SlowTapInteraction)
-        {
-            hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>().NotifyChargeRelease();
-        }
-    }
-
-    #region Aiming
-    private void OnAim(InputAction.CallbackContext context)
-    {
-        if (hotBarItems.GetChild(currentIndex).TryGetComponent<ProjectileWeapon>(out ProjectileWeapon weapon))
-        {
-            if (context.started)
-            {
-                if (aimingCoroutine != null) StopCoroutine(aimingCoroutine);
-                aimingCoroutine = StartCoroutine(AimingCoroutine(currentFOV, ironSightFOV, weapon));
-
-            }
-            else if (context.canceled)
-            {
-                if (aimingCoroutine != null) StopCoroutine(aimingCoroutine);
-                aimingCoroutine = StartCoroutine(AimingCoroutine(currentFOV, defaultFOV, weapon));
-            }
-        }
-    }
-
-    private IEnumerator AimingCoroutine(float startFov, float targetFov, ProjectileWeapon weapon)
-    {
-        float dt = 0f;
-        float t = 0f;
-
-        if (startFov > targetFov)
-        {
-            while (t <= 1)
-            {
-                dt += Time.deltaTime;
-                t = dt / fovLerpSpeed;
-                LerpFOV(startFov, targetFov, t);
-                SinerpBetweenHipAndAim(weapon, weapon.HipPositionTransform, weapon.AdsPositionTransform, t);
-                yield return new WaitForEndOfFrame();
-                currentFOV = virtualCamera.m_Lens.FieldOfView;
-            }
-        }
-        else
-        {
-            while (t <= 1)
-            {
-                dt += Time.deltaTime;
-                t = dt / fovLerpSpeed;
-                LerpFOV(startFov, targetFov, t);
-                SinerpBetweenHipAndAim(weapon, weapon.AdsPositionTransform, weapon.HipPositionTransform, t);
-                yield return new WaitForEndOfFrame();
-                currentFOV = virtualCamera.m_Lens.FieldOfView;
-            }
-        }
-    }
-
-    private void LerpFOV(float current, float target, float time)
-    {
-        virtualCamera.m_Lens.FieldOfView = Mathf.Lerp(current, target, time);
-    }
-
-    private void SinerpBetweenHipAndAim(ProjectileWeapon weapon, Transform current, Transform target, float time)
-    {
-        time = Mathf.Sin(time * Mathf.PI * 0.5f);
-        weapon.transform.localPosition = Vector3.Lerp(current.localPosition, target.localPosition, time);
-    }
-    #endregion
-
-    #region Reload
-    private void OnReload(InputAction.CallbackContext context)
-    {
-        if(hotBarItems.GetChild(currentIndex).TryGetComponent<ProjectileWeapon>(out var weapon))
-        {
-            weapon.NotifyReload();
-        }
-    }
-
-
-    #endregion
 
     #region Item Switching
-    private void OnScroll(InputAction.CallbackContext context)
+    protected void NotifySelectItem(int index)
     {
         if (!currentItemBusy)
         {
-            Vector2 value = context.ReadValue<Vector2>();
-            if (value.y < 0f)
-            {
-                if (selectItem != null) { StopCoroutine(selectItem); }
-                StartCoroutine(SelectItem(currentIndex + 1));
-            }
-            if (value.y > 0f)
-            {
-                if (selectItem != null) { StopCoroutine(selectItem); }
-                StartCoroutine(SelectItem(currentIndex - 1));
-            }
+            if (selectItem != null) { StopCoroutine(selectItem); }
+            StartCoroutine(SelectItem(index));
         }
     }
 
-    private IEnumerator SelectItem(int index)
+    protected IEnumerator SelectItem(int index)
     {
         ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
         item.NotifyUnselected();
@@ -359,19 +225,21 @@ public class HotBarManager : MonoBehaviour
         }
         else throw new System.Exception("Arm rigs are missing ParentConstraints");
     }
+    #endregion
 
-    private void OnHotBarSelect(int i)
+    #region Reload
+    protected void Reload()
     {
-        throw new NotImplementedException();
+        ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
+        if (item is ProjectileWeapon)
+        {
+            ProjectileWeapon projectileWeapon = item as ProjectileWeapon;
+            projectileWeapon.NotifyReload();
+        }
     }
     #endregion
 
     #region Helper Functions
     public HealthController GetHealthController() { return healthController; }
     #endregion
-
-    private void OnApplicationQuit()
-    {
-        virtualCamera.m_Lens.FieldOfView = defaultFOV;
-    }
 }

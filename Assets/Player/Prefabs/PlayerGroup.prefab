@@ -1889,7 +1889,7 @@ GameObject:
   - component: {fileID: 5635726782122371114}
   - component: {fileID: 5554330665213578561}
   - component: {fileID: 2821701891044147292}
-  - component: {fileID: 1679846157717877696}
+  - component: {fileID: 4029401271789031204}
   - component: {fileID: 3871994539416771750}
   - component: {fileID: 6617243916692045157}
   - component: {fileID: 1562041867137430301}
@@ -1970,7 +1970,7 @@ MonoBehaviour:
   crouchSpeedMultiplier: 0.5
   angularSpeed: 1800
   animationSmoothingRate: 7
---- !u!114 &1679846157717877696
+--- !u!114 &4029401271789031204
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1979,20 +1979,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 3235928413076521751}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3f02ac5f277f2144b956c4e1dc72af75, type: 3}
+  m_Script: {fileID: 11500000, guid: baddcfac1547ec449b554709735ef827, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   hotBarItems: {fileID: 4313247527438561650}
-  virtualCamera: {fileID: 8349383903779635136}
   leftArmTarget: {fileID: 3681179624955372174}
   leftArmHint: {fileID: 8540938573173002208}
   RightArmTarget: {fileID: 7841456829703853333}
   RightArmHint: {fileID: 8722420425820019860}
   leftArmRig: {fileID: 156334415384104555}
   rightArmRig: {fileID: 555853346440756980}
+  timeToSwitch: 0.6
+  virtualCamera: {fileID: 8349383903779635136}
   ironSightFOV: 45
   fovLerpSpeed: 0.5
-  timeToSwitch: 1
 --- !u!114 &3871994539416771750
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3796,7 +3796,7 @@ Camera:
     height: 1
   near clip plane: 0.01
   far clip plane: 5000
-  field of view: 60
+  field of view: 53.83404
   orthographic: 0
   orthographic size: 10
   m_Depth: -1
@@ -4270,7 +4270,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 8295305323019168318}
   m_Lens:
-    FieldOfView: 60
+    FieldOfView: 53.83404
     OrthographicSize: 10
     NearClipPlane: 0.01
     FarClipPlane: 5000
