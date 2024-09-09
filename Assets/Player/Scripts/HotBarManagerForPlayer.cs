@@ -172,6 +172,7 @@ public class HotBarManagerForPlayer : HotBarManager
         throw new NotImplementedException();
     }
 
+
     private void OnApplicationQuit()
     {
         virtualCamera.m_Lens.FieldOfView = defaultFOV;

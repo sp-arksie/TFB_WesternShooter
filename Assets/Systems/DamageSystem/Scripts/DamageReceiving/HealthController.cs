@@ -47,7 +47,7 @@ public class HealthController : MonoBehaviour
     [SerializeField] TextMeshProUGUI debugRegenVal;
     [SerializeField] TextMeshProUGUI debugRegenTime;
     [SerializeField] TextMeshProUGUI debugBurningDamage;
-    float debugDAbsorbDuration = 0f;
+    //float debugDAbsorbDuration = 0f;
 
     [Header("DEBUG - Status effects")]
     [SerializeField] bool debugApplyBleeding = false;

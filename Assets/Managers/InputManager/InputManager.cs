@@ -90,6 +90,9 @@ public class InputManager : MonoBehaviour
     #region UI
 
     public Vector2 GetMousePosition() { return playerControls.UI.MousePosition.ReadValue<Vector2>(); }
+    public InputAction GetMousePositionAction() { return playerControls.UI.MousePosition; }
+    public InputAction GetLeftClickAction() { return playerControls.UI.LeftClick; }
+    public InputAction GetRightClickAction() { return playerControls.UI.RightClick; }
     public InputAction GetRotatedAction() { return playerControls.UI.Rotate; }
 
     #endregion
@@ -100,26 +103,6 @@ public class InputManager : MonoBehaviour
 
     private void RestrictSprint() { playerControls.Locomotion.Run.Disable(); }
     private void UnrestrictSprint() { playerControls.Locomotion.Run.Enable(); }
-    private void SetUIActionMap()
-    {
-        foreach(InputActionMap iam in inputActionMaps)
-        {
-            if(iam.name != uiActionMap)
-                iam.Disable();
-            else
-                iam.Enable();
-        }
-    }
-    private void SetGameplayActionMap()
-    {
-        foreach (InputActionMap iam in inputActionMaps)
-        {
-            if (iam.name != uiActionMap)
-                iam.Enable();
-            else
-                iam.Disable();
-        }
-    }
 
     public void SetActionMaps(string[] actionMaps, bool shouldSetActive)
     {
@@ -147,20 +130,5 @@ public class InputManager : MonoBehaviour
                     iam.Enable();
             }
         }
-
-        //foreach (InputActionMap iam in inputActionMaps)
-        //{
-            
-        //    foreach (string actionMapToBeActive in actionMaps)
-        //    {
-        //        if (iam == playerControls.asset.FindActionMap(actionMapToBeActive))
-        //            shouldSetActive = !shouldSetActive;
-        //    }
-
-        //    if (shouldSetActive)
-        //        iam.Disable();
-        //    else
-        //        iam.Enable();
-        //}
     }
 }

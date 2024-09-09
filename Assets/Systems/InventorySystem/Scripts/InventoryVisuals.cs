@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEditor;
+using UnityEngine.InputSystem;
 
 public class InventoryVisuals : MonoBehaviour
 {
@@ -26,11 +26,18 @@ public class InventoryVisuals : MonoBehaviour
 
     BufferItemData bufferItemData;
     GameObject itemBeingDragged;
-    Vector2Int currentHoveringCell = new(-1, -1);
+    GameObject currentHoveringCell;
+    Vector2Int notHoveringOverCell = new(-1, -1);
+    Vector2Int currentHoveringCellPosition = new(-1, -1);
     int currentHoveringInventoryId = -1;
 
     InputManager input;
     InventoryManager inventoryManager;
+    GraphicRaycaster graphicRaycaster;
+    PointerEventData pointerEventData;
+    EventSystem eventSystem;
+
+    List<RaycastResult> results = new();
 
 
     #region DEBUG
@@ -51,19 +58,28 @@ public class InventoryVisuals : MonoBehaviour
 
     private void Awake()
     {
+        input = InputManager.Instance;
+        inventoryManager = InventoryManager.Instance;
+        graphicRaycaster = GetComponent<GraphicRaycaster>();
+        eventSystem = GetComponent<EventSystem>();
+
         inventoryGridLayoutGroups = new GridLayoutGroup[InventoryCellsParent.childCount];
         for (int i = 0; i < InventoryCellsParent.childCount; i++)
         {
             inventoryGridLayoutGroups[i] = InventoryCellsParent.GetChild(i).GetComponent<GridLayoutGroup>();
         }
-        input = InputManager.Instance;
-        inventoryManager = InventoryManager.Instance;
 
         PrepareGridCells(true);
     }
 
     private void OnEnable()
     {
+        input.GetMousePositionAction().performed += OnMouseMove;
+        input.GetLeftClickAction().started += OnLeftClickPress;
+        input.GetLeftClickAction().canceled += OnLeftClickRelease;
+        input.GetRightClickAction().performed += OnRightClick;
+        input.GetRotatedAction().performed += OnTryRotateDraggedItem;
+
         if (inventoryManager.inventories.Count > 1)
         {
             InventoryCellsParent.GetChild(1).gameObject.SetActive(true);
@@ -80,26 +96,12 @@ public class InventoryVisuals : MonoBehaviour
         {
             InventoryCellsParent.GetChild(1).gameObject.SetActive(false);
             InventoryVisualsParent.GetChild(1).gameObject.SetActive(false);
-        }
-    }
 
-    private IEnumerator DrawInventoryEndOfFrame()
-    {
-        yield return new WaitForEndOfFrame();
-
-        DrawInventory();
-    }
-
-    private void Update()
-    {
-        timeSinceLastRotation += Time.deltaTime;
-
-        if (timeSinceLastRotation > rotationCooldown && Input.GetKey(KeyCode.Space) && itemBeingDragged != null && bufferItemData.gridCell.InventoryItem.CanRotate)
-        {
-            if (rotationCoroutine != null) StopCoroutine(rotationCoroutine);
-            timeSinceLastRotation = 0f;
-            RotateDraggedItem();
-            inventoryManager.inventories[bufferItemData.inventoryID].NotifyRotatedItem();
+            input.GetMousePositionAction().performed -= OnMouseMove;
+            input.GetLeftClickAction().started -= OnLeftClickPress;
+            input.GetLeftClickAction().canceled -= OnLeftClickRelease;
+            input.GetRightClickAction().performed -= OnRightClick;
+            input.GetRotatedAction().performed -= OnTryRotateDraggedItem;
         }
     }
 
@@ -125,12 +127,6 @@ public class InventoryVisuals : MonoBehaviour
                 GridCellUI gcui = go.GetComponent<GridCellUI>();
                 gcui.SetLocationInGrid(x, y);
                 gcui.SetId(i);
-
-                AddEvent(go, EventTriggerType.PointerEnter, delegate { OnPointerEnter(go); });
-                AddEvent(go, EventTriggerType.PointerExit, delegate { OnPointerExit(go); });
-                AddEvent(go, EventTriggerType.BeginDrag, delegate { OnBeginDrag(go); });
-                AddEvent(go, EventTriggerType.Drag, delegate { OnDrag(go); });
-                AddEvent(go, EventTriggerType.EndDrag, delegate { OnEndDrag(go); });
             }
         }
     }
@@ -144,26 +140,36 @@ public class InventoryVisuals : MonoBehaviour
                 Destroy(InventoryVisualsParent.GetChild(i).transform.GetChild(k).gameObject);
             }
 
-            Dictionary<Vector2Int, InventoryGridCell> container = inventoryManager.inventories[i].GetInventoryContainer();
-            foreach (KeyValuePair<string, List<Vector2Int>> kvp in inventoryManager.inventories[i].GetItemLocationTracker())
+            Dictionary<Vector2Int, InventoryGridCell> inventoryContainer = inventoryManager.inventories[i].GetInventoryContainer();
+            foreach (KeyValuePair<string, List<Vector2Int>> itemInTracker in inventoryManager.inventories[i].GetItemLocationTracker())
             {
-                GameObject go = Instantiate(container[kvp.Value[0]].InventoryItem.ItemVisual, InventoryVisualsParent.GetChild(i).transform, false);
-                go.GetComponentInChildren<TextMeshProUGUI>().text = GetItemAmountString(container[kvp.Value[0]].CurrentItemAmount);
+                InventoryGridCell itemCell = inventoryContainer[itemInTracker.Value[0]];
+                GameObject go = Instantiate(itemCell.InventoryItem.ItemVisual, InventoryVisualsParent.GetChild(i).transform, false);
+                go.GetComponentInChildren<TextMeshProUGUI>().text = GetItemAmountString(itemCell.CurrentItemAmount);
                 RectTransform rectItem = go.GetComponent<RectTransform>();
 
-                int itemWidth = container[kvp.Value[0]].CurrentItemOrientation.x;
-                int itemHeight = container[kvp.Value[0]].CurrentItemOrientation.y;
+                int itemWidth = itemCell.CurrentItemOrientation.x;
+                int itemHeight = itemCell.CurrentItemOrientation.y;
 
                 rectItem.anchorMin = firstCellRectTransform[i].anchorMin;
                 rectItem.anchorMax = firstCellRectTransform[i].anchorMax;
 
-                if (itemWidth != container[kvp.Value[0]].InventoryItem.ItemSizeInInventory.x || itemHeight != container[kvp.Value[0]].InventoryItem.ItemSizeInInventory.y)
+                if (itemWidth != itemCell.InventoryItem.ItemSizeInInventory.x || itemHeight != itemCell.InventoryItem.ItemSizeInInventory.y)
                     rectItem.rotation = RotateDrawnitem();
 
-                Vector2 anchoredPosition = GetAnchoredPosition(kvp, i);
+                Vector2 anchoredPosition = GetAnchoredPosition(itemInTracker, i);
                 rectItem.anchoredPosition = GetItemPosition(anchoredPosition, itemWidth, itemHeight, i);
             }
         }
+    }
+
+    // Children of the GridLayoutGroup get their anchors set after the 1st frame.
+    // Drawn items use the anchors to position the image, so need to delay to get the correct anchor.
+    private IEnumerator DrawInventoryEndOfFrame()
+    {
+        yield return new WaitForEndOfFrame();
+
+        DrawInventory();
     }
 
     private Vector2 GetAnchoredPosition(KeyValuePair<string, List<Vector2Int>> kvp, int i)
@@ -177,69 +183,89 @@ public class InventoryVisuals : MonoBehaviour
         return anchoredPosition + new Vector2((inventoryGridLayoutGroups[i].cellSize.x * 0.5f * (itemWidth - 1)), (inventoryGridLayoutGroups[i].cellSize.y * 0.5f * (itemHeight - 1)));
     }
 
-    private void AddEvent(GameObject cell, EventTriggerType eventTriggerType, UnityAction<BaseEventData> callback)
+    private void OnMouseMove(InputAction.CallbackContext context)
     {
-        EventTrigger eventTrigger = cell.GetComponent<EventTrigger>();
-        EventTrigger.Entry eventTriggerEntry = new EventTrigger.Entry();
-        eventTriggerEntry.eventID = eventTriggerType;
-        eventTriggerEntry.callback.AddListener(callback);
-        eventTrigger.triggers.Add(eventTriggerEntry);
-    }
+        pointerEventData = new PointerEventData(eventSystem);
+        pointerEventData.position = input.GetMousePosition();
 
-    public void OnPointerEnter(GameObject cell)
-    {
-        currentHoveringCell = cell.GetComponent<GridCellUI>().cellPosition;
-        currentHoveringInventoryId = cell.GetComponent<GridCellUI>().Id;
-    }
-
-    public void OnPointerExit(GameObject cell)
-    {
-        currentHoveringCell = new(-1, -1);
-    }
-
-    public void OnBeginDrag(GameObject cell)
-    {
-        GridCellUI selectedCell = cell.GetComponent<GridCellUI>();
-        Inventory inventory = inventoryManager.inventories[selectedCell.Id];
-
-        if (inventory.GetInventoryContainer()[selectedCell.cellPosition] != null)
+        results.Clear();
+        graphicRaycaster.Raycast(pointerEventData, results);
+        if (results.Count > 0)
         {
-            inventory.NotifyMovingItem(selectedCell.cellPosition, selectedCell.Id);
-            DrawInventory();
-            bufferItemData = inventory.GetBufferItemData();
+            GridCellUI gcui = results[0].gameObject.GetComponent<GridCellUI>();
+            currentHoveringCellPosition = gcui.cellPosition;
+            currentHoveringInventoryId = gcui.Id;
+            currentHoveringCell = results[0].gameObject;
+        }
+        else
+        {
+            currentHoveringCellPosition = notHoveringOverCell;
+            currentHoveringCell = null;
+        }
 
-            itemBeingDragged = Instantiate(bufferItemData.gridCell.InventoryItem.ItemVisual, InventoryVisualsParent.GetChild(selectedCell.Id).transform, false);
-            if (bufferItemData.shouldRotateOnDraw)
-                itemBeingDragged.GetComponent<RectTransform>().rotation = RotateDrawnitem();
-
-            itemBeingDragged.GetComponentInChildren<TextMeshProUGUI>().text = GetItemAmountString(bufferItemData.gridCell.CurrentItemAmount);
-
-            PrepareDraggedObject(cell, selectedCell.cellPosition, bufferItemData.shouldRotateOnDraw);
+        if (itemBeingDragged != null)
+        {
+            RectTransform rect = itemBeingDragged.GetComponent<RectTransform>();
+            rect.position = input.GetMousePosition();
         }
     }
 
-    public void OnDrag(GameObject cell)
+    private void OnLeftClickPress(InputAction.CallbackContext context)
     {
-        if (itemBeingDragged != null)
-            itemBeingDragged.GetComponent<RectTransform>().position = input.GetMousePosition();
+        if (currentHoveringCell != null)
+        {
+            GridCellUI selectedCell = currentHoveringCell.GetComponent<GridCellUI>();
+            Inventory inventory = inventoryManager.inventories[selectedCell.Id];
+
+            if (inventory.GetInventoryContainer()[selectedCell.cellPosition] != null)
+            {
+                inventory.NotifyMovingItem(selectedCell.cellPosition, selectedCell.Id);
+                DrawInventory();
+                bufferItemData = inventory.GetBufferItemData();
+
+                itemBeingDragged = Instantiate(bufferItemData.gridCell.InventoryItem.ItemVisual, InventoryVisualsParent.GetChild(selectedCell.Id).transform, false);
+                if (bufferItemData.shouldRotateOnDraw)
+                    itemBeingDragged.GetComponent<RectTransform>().rotation = RotateDrawnitem();
+
+                itemBeingDragged.GetComponentInChildren<TextMeshProUGUI>().text = GetItemAmountString(bufferItemData.gridCell.CurrentItemAmount);
+
+                PrepareDraggedObject(currentHoveringCell, selectedCell.cellPosition, bufferItemData.shouldRotateOnDraw);
+            }
+        }
     }
 
-    public void OnEndDrag(GameObject cell)
+    private void OnLeftClickRelease(InputAction.CallbackContext context)
     {
         if (itemBeingDragged != null)
         {
             Inventory inventory = inventoryManager.inventories[currentHoveringInventoryId];
 
-            if (!inventory.GetInventoryContainer().ContainsKey(currentHoveringCell))
+            if (!inventory.GetInventoryContainer().ContainsKey(currentHoveringCellPosition))
             {
                 inventory.NotifyFailedItemPlacement(bufferItemData.gridCell.CurrentItemAmount);
             }
             else
             {
-                inventory.NotifyPlaceItem(currentHoveringCell, bufferItemData);
+                inventory.NotifyPlaceItem(currentHoveringCellPosition, bufferItemData);
             }
             itemBeingDragged = null;
             DrawInventory();
+        }
+    }
+
+    private void OnRightClick(InputAction.CallbackContext context)
+    {
+
+    }
+
+    private void OnTryRotateDraggedItem(InputAction.CallbackContext context)
+    {
+        if ((Time.time - timeSinceLastRotation) > rotationCooldown && itemBeingDragged != null && bufferItemData.gridCell.InventoryItem.CanRotate)
+        {
+            if (rotationCoroutine != null) StopCoroutine(rotationCoroutine);
+            timeSinceLastRotation = Time.time;
+            RotateDraggedItem();
+            inventoryManager.inventories[bufferItemData.inventoryID].NotifyRotatedItem();
         }
     }
 
@@ -326,11 +352,15 @@ public class InventoryVisuals : MonoBehaviour
     private IEnumerator StartRotating(Quaternion startRotation, Quaternion finalRotation)
     {
         RectTransform rectItemBeingDragged = itemBeingDragged.GetComponent<RectTransform>();
-        while (timeSinceLastRotation <= rotationDuration)
+        float dt = 0f;
+        float t = 0f;
+
+        while (t <= 1f)
         {
-            float t = timeSinceLastRotation / rotationDuration;
+            t = dt / rotationDuration;
             rectItemBeingDragged.rotation = Quaternion.Lerp(startRotation, finalRotation, t);
             yield return new WaitForEndOfFrame();
+            dt += Time.deltaTime;
         }
         rectItemBeingDragged.rotation = finalRotation;
     }
@@ -344,6 +374,7 @@ public class InventoryVisuals : MonoBehaviour
     {
         return itemAmount == 1 ? "" : itemAmount.ToString();
     }
+
 
     //public void ClearLog()
     //{

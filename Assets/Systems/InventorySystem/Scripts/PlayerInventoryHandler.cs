@@ -70,4 +70,5 @@ public class PlayerInventoryHandler : MonoBehaviour
         foreach (Canvas c in otherCanvases) { c.gameObject.SetActive(true); }
         inventoryCanvas.gameObject.SetActive(false);
     }
+
 }

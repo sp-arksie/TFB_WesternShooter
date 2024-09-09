@@ -10,7 +10,7 @@ public class HotBarManagerForEntity : HotBarManager
 
     float shortRange = 10f;
     float mediumRange = 50f;
-    float longRange = 75f;
+    //float longRange = 75f;
 
     protected override void Awake()
     {
