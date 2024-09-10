@@ -8,5 +8,7 @@ public class HitInfo
 
     public WeaponCalliber weaponCalliber;
 
+    public ParticleSystem.MinMaxCurve damageFalloffCurve;
+
     public StatusEffect statusEffect;
 }

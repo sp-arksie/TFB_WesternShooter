@@ -24,7 +24,7 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
     public Transform BaseRotationTransform { get { return baseRotationTransform; } private set { baseRotationTransform = value; } }
 
 
-    public event Action SelectedEvent;
+    //public event Action SelectedEvent;
     
     Barrel barrel;
     Animator animator;
@@ -48,6 +48,7 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
 
     float effectiveRange;
     public float EffectiveRange { get => effectiveRange; private set => effectiveRange = value; }
+
 
     #region DEBUG
 
@@ -74,7 +75,7 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
         recoilBehaviour = GetComponent<RecoilBehaviour>();
         animator = GetComponentInChildren<Animator>();
 
-        effectiveRange = DamageFalloffDefinitions.GetEffectiveRange(damageBehaviour.GetWeaponCalliber());
+        //effectiveRange = DamageFalloffDefinitions.GetEffectiveRange(damageBehaviour.GetWeaponCalliber());
     }
 
     private void OnEnable()
@@ -117,7 +118,7 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
 
     internal override void NotifySelected(HotBarManager hotBarManager)
     {
-        SelectedEvent?.Invoke();
+        //SelectedEvent?.Invoke();
     }
 
     internal override void NotifyUnselected()
@@ -142,7 +143,11 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
     private void Shoot()
     {
         shotTime = Time.time;
-        barrel.Shoot(shootingBehaviour.GetMuzzleVelocity(), GetHitInfoToSend());
+        ItemInventoryMediator.AmmoInfo ammoInfo = ItemInventoryMediator.instance.GetAmmoInfo(ammoBehaviour.currentProjectileSelected);
+        Projectile projectile = ammoInfo.prefabToInstatiate.GetComponent<Projectile>();
+        Projectile.ProjectileBehaviour behaviour = projectile.GetProjectileBehaviour();
+
+        barrel.Shoot(shootingBehaviour.GetMuzzleVelocity(), behaviour.velocityModifier, ammoInfo.prefabToInstatiate, GetHitInfoToSend(projectile, behaviour));
         OnShakeCamera(this);
         recoilBehaviour.ApplyRecoil();
         ammoBehaviour.ConsumeAmmo();
@@ -150,13 +155,15 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
         InstantiateParticles();
     }
 
-    private HitInfo GetHitInfoToSend()
+    private HitInfo GetHitInfoToSend(Projectile projectile, Projectile.ProjectileBehaviour behaviour)
     {
         HitInfo hitInfo = new();
         hitInfo.baseDamage = damageBehaviour.GetBaseDamage();
         hitInfo.locationOfDamageSource = transform.position;
-        hitInfo.weaponCalliber = damageBehaviour.GetWeaponCalliber();
+        hitInfo.weaponCalliber = projectile.matchingCalliber;
 
+        hitInfo.damageFalloffCurve = projectile.damageFalloff;
+        hitInfo.statusEffect = behaviour.statusEffect;
         return hitInfo;
     }
 

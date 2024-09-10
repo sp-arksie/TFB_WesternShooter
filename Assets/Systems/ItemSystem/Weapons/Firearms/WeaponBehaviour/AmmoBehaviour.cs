@@ -9,6 +9,9 @@ public class AmmoBehaviour : MonoBehaviour
     [SerializeField] int magazineSize = 5;
     [SerializeField] float reloadTime = 1f;
     [SerializeField] float reloadStartDelay = 0f;
+    [SerializeField] WeaponCalliber weaponCalliber;
+
+    public Projectile.ProjectileType currentProjectileSelected { get; private set; } = Projectile.ProjectileType.Compact;
 
     int ammoInMagazine;
     int reserveAmmo;
@@ -27,13 +30,14 @@ public class AmmoBehaviour : MonoBehaviour
 
     private void Start()
     {
-        ammoInMagazine = 2;
+        ammoInMagazine = magazineSize;
         reserveAmmo = 100;
     }
 
     private void OnEnable()
     {
         if(debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}";
+        // update reserve ammo
     }
 
     internal bool GetHasBulletInMagazine()
@@ -81,7 +85,11 @@ public class AmmoBehaviour : MonoBehaviour
         reserveAmmo--;
     }
 
-    internal void ConsumeAmmo() { ammoInMagazine--; if(debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}"; }
+    internal void ConsumeAmmo()
+    {
+        ammoInMagazine--;
+        if(debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}";
+    }
 
     internal float GetReloadStartDelay()
     {

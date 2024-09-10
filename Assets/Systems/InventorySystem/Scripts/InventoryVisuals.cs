@@ -120,8 +120,6 @@ public class InventoryVisuals : MonoBehaviour
             {
                 GameObject go = Instantiate(cellVisualPrefab, Vector3.zero, Quaternion.identity, InventoryCellsParent.GetChild(i).transform);
                 RectTransform rectCell = go.GetComponent<RectTransform>();
-                rectCell.anchorMin = new(0, 1);
-                rectCell.anchorMax = new(0, 1);
                 if (x == 0 && y == 0) firstCellRectTransform[i] = rectCell;
                 go.GetComponentInChildren<TextMeshProUGUI>().text = $"{x}, {y}";
                 GridCellUI gcui = go.GetComponent<GridCellUI>();
@@ -140,10 +138,10 @@ public class InventoryVisuals : MonoBehaviour
                 Destroy(InventoryVisualsParent.GetChild(i).transform.GetChild(k).gameObject);
             }
 
-            Dictionary<Vector2Int, InventoryGridCell> inventoryContainer = inventoryManager.inventories[i].GetInventoryContainer();
-            foreach (KeyValuePair<string, List<Vector2Int>> itemInTracker in inventoryManager.inventories[i].GetItemLocationTracker())
+            Dictionary<Vector2Int, InventoryGridCell> inventoryContainer = inventoryManager.inventories[i].inventoryContainer;
+            foreach (KeyValuePair<string, List<Vector2Int>> item in inventoryManager.inventories[i].itemLocationTracker)
             {
-                InventoryGridCell itemCell = inventoryContainer[itemInTracker.Value[0]];
+                InventoryGridCell itemCell = inventoryContainer[item.Value[0]];
                 GameObject go = Instantiate(itemCell.InventoryItem.ItemVisual, InventoryVisualsParent.GetChild(i).transform, false);
                 go.GetComponentInChildren<TextMeshProUGUI>().text = GetItemAmountString(itemCell.CurrentItemAmount);
                 RectTransform rectItem = go.GetComponent<RectTransform>();
@@ -157,7 +155,7 @@ public class InventoryVisuals : MonoBehaviour
                 if (itemWidth != itemCell.InventoryItem.ItemSizeInInventory.x || itemHeight != itemCell.InventoryItem.ItemSizeInInventory.y)
                     rectItem.rotation = RotateDrawnitem();
 
-                Vector2 anchoredPosition = GetAnchoredPosition(itemInTracker, i);
+                Vector2 anchoredPosition = GetAnchoredPosition(item, i);
                 rectItem.anchoredPosition = GetItemPosition(anchoredPosition, itemWidth, itemHeight, i);
             }
         }

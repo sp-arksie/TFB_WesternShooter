@@ -18,6 +18,10 @@ public abstract class ItemBase : MonoBehaviour
     public event Action<bool> onUnskippableActionInProgress;
     public event Action<ICameraShaker> onShakeCamera;
 
+    public string instanceID { get; private set; }
+    public int currentAmount { get; protected set; }
+
+
     internal abstract void NotifyQuickAction();
 
     internal abstract void NotifyChargeStart();
@@ -36,5 +40,11 @@ public abstract class ItemBase : MonoBehaviour
     protected virtual void OnShakeCamera(ICameraShaker cameraShakeInfo)
     {
         onShakeCamera?.Invoke(cameraShakeInfo);
+    }
+
+    public void SetItemDataOnEquip(ItemInventoryMediator.EquippedItem item)
+    {
+        instanceID = item.instanceID;
+        currentAmount = item.amount;
     }
 }

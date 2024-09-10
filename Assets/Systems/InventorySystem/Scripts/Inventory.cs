@@ -8,8 +8,8 @@ public class Inventory : MonoBehaviour
     [SerializeField] int width = 2;
     [SerializeField] int height = 2;
 
-    private Dictionary<Vector2Int, InventoryGridCell> inventoryContainer = new();
-    private Dictionary<string, List<Vector2Int>> itemLocationTracker = new();
+    public Dictionary<Vector2Int, InventoryGridCell> inventoryContainer { get; private set; } = new();
+    public Dictionary<string, List<Vector2Int>> itemLocationTracker { get; private set; } = new();
 
     BufferItemData bufferItemData = new();
 
@@ -254,6 +254,11 @@ public class Inventory : MonoBehaviour
     }
 
     public void NotifyPlaceItem(Vector2Int selectedCell, BufferItemData bufferData)
+    {
+        TryPlaceItem(selectedCell, bufferData);
+    }
+
+    private void TryPlaceItem(Vector2Int selectedCell, BufferItemData bufferData)
     {
         bufferItemData = bufferData;
         Vector2Int selectedLocalCell = bufferItemData.selectedLocalCell;

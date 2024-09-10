@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: AmmoCrate
   description: 
-  itemVisual: {fileID: 5603032930518050570, guid: 2426673b1c279634191d8ddd83374784,
+  itemVisualPrefab: {fileID: 5603032930518050570, guid: 2426673b1c279634191d8ddd83374784,
     type: 3}
+  itemPhysicalPrefab: {fileID: 0}
   maximumStacks: 2
   itemSizeInInventory: {x: 2, y: 2}
   canRotate: 0

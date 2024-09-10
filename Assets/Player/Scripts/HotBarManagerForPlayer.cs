@@ -38,10 +38,13 @@ public class HotBarManagerForPlayer : HotBarManager
         input.GetAimAction().canceled += OnAim;
         input.GetReloadAction().performed += OnReload;
         input.GetScrollAction().performed += OnScroll;
+
         for (int i = 0; i < input.GetHotBarSlotActions().Count; i++)
         {
             input.GetHotBarSlotActions()[i].performed += (context) => OnHotBarSelect(i);
         }
+
+        ItemInventoryMediator.onItemEquipped += EquipItem;
     }
 
     private void OnDisable()
@@ -57,6 +60,8 @@ public class HotBarManagerForPlayer : HotBarManager
         {
             input.GetHotBarSlotActions()[i].performed -= (context) => OnHotBarSelect(i);
         }
+
+        ItemInventoryMediator.onItemEquipped -= EquipItem;
     }
 
     private void OnClick(InputAction.CallbackContext context)
@@ -172,6 +177,12 @@ public class HotBarManagerForPlayer : HotBarManager
         throw new NotImplementedException();
     }
 
+    private void EquipItem(ItemInventoryMediator.EquippedItem item)
+    {
+        GameObject go = Instantiate(item.prefabToInstantiate, hotBarItems.transform);
+        ItemBase itemBase = go.GetComponent<ItemBase>();
+        itemBase.SetItemDataOnEquip(item);
+    }
 
     private void OnApplicationQuit()
     {

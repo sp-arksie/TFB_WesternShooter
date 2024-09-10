@@ -40,7 +40,6 @@ public class HotBarManager : MonoBehaviour
     public event Action<ItemBase> ItemSelectedEvent;
     public event Action<ItemBase> ItemUnselectedEvent;
 
-
     protected virtual void Awake()
     {
         animator = GetComponentInChildren<Animator>();

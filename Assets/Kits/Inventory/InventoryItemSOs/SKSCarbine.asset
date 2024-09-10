@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: SKSCarbine
   description: 
-  itemVisual: {fileID: 8433656044884083818, guid: 9c30613d1847be040a17888925df4590,
+  itemVisualPrefab: {fileID: 8433656044884083818, guid: 9c30613d1847be040a17888925df4590,
     type: 3}
+  itemPhysicalPrefab: {fileID: 0}
   maximumStacks: 1
   itemSizeInInventory: {x: 4, y: 2}
   canRotate: 1

@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: MedicalItem
   description: 
-  itemVisual: {fileID: 7373119072988104252, guid: ce51183073b68d84abf22bd542c4c705,
+  itemVisualPrefab: {fileID: 7373119072988104252, guid: ce51183073b68d84abf22bd542c4c705,
     type: 3}
+  itemPhysicalPrefab: {fileID: 0}
   maximumStacks: 4
   itemSizeInInventory: {x: 1, y: 1}
   canRotate: 0

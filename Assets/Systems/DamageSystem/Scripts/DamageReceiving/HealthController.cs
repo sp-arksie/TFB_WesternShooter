@@ -187,7 +187,12 @@ public class HealthController : MonoBehaviour
         }
         else
         {
-            damage = currentDamageAbsorb * hitInfo.baseDamage * damageModifier * DamageFalloffDefinitions.GetDamageFalloffModifier(hitInfo, transform.position);
+            float distance = Vector3.Distance(transform.position, hitInfo.locationOfDamageSource);
+            float damageFalloffMultiplier = hitInfo.damageFalloffCurve.Evaluate(distance);
+
+            Debug.Log(damageFalloffMultiplier);
+
+            damage = currentDamageAbsorb * hitInfo.baseDamage * damageModifier * damageFalloffMultiplier;
         }
         
         return damage;

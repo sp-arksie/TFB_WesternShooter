@@ -1,8 +1,11 @@
 using Cinemachine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static PlayerInventoryHandler;
 
 public class PlayerInventoryHandler : MonoBehaviour
 {
@@ -13,8 +16,22 @@ public class PlayerInventoryHandler : MonoBehaviour
     Inventory playerInventory;
     InventoryManager inventoryManager;
     InputManager input;
+    ItemInventoryMediator iim;
 
     bool shouldOpenInventory = false;
+
+    #region DEBUG
+    [Header("Debug")]
+    [SerializeField] GameObject debugItemToEquip;
+    [SerializeField] bool debugEquipItem = false;
+    private void OnValidate()
+    {
+        if (debugEquipItem)
+        {
+            iim.DebugNotifyItemEquipped("1234", debugItemToEquip, 1);
+        }
+    }
+    #endregion
 
     private void Awake()
     {
@@ -22,6 +39,7 @@ public class PlayerInventoryHandler : MonoBehaviour
         inventoryManager = InventoryManager.Instance;
         inventoryManager.AddOverlappingInventory(playerInventory);
         input = InputManager.Instance;
+        iim = ItemInventoryMediator.instance;
     }
 
     private void OnEnable()
@@ -71,4 +89,10 @@ public class PlayerInventoryHandler : MonoBehaviour
         inventoryCanvas.gameObject.SetActive(false);
     }
 
+    //================================
+
+    public void NotifyInventoryClosed()
+    {
+        // TODO: need to update equipped items also
+    }
 }

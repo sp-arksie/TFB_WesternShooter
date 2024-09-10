@@ -28,7 +28,7 @@ public static class DamageModifierDefinitions
             case DamageModifier.Arms:
                 return 0.6f;
             default:
-                Debug.LogWarning($"{modifier} is an invalid DamageModifier or value in DamageModifierDefinitions has not been set.");
+                Debug.LogWarning($"{modifier} modifier value in DamageModifierDefinitions has not been set.");
                 return -1f;
         }
     }
