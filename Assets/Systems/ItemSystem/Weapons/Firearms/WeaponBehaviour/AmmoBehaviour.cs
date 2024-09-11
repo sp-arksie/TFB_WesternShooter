@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class AmmoBehaviour : MonoBehaviour
@@ -11,7 +13,10 @@ public class AmmoBehaviour : MonoBehaviour
     [SerializeField] float reloadStartDelay = 0f;
     [SerializeField] WeaponCalliber weaponCalliber;
 
-    public Projectile.ProjectileType currentProjectileSelected { get; private set; } = Projectile.ProjectileType.Compact;
+    public ProjectileType currentProjectileSelected { get; private set; } = ProjectileType.Compact;
+    List<ItemInventoryMediator.ProjectileInfo> availableProjectileTypes = new();
+
+    int availableProjectileTypesIndex = 0;
 
     int ammoInMagazine;
     int reserveAmmo;
@@ -20,6 +25,8 @@ public class AmmoBehaviour : MonoBehaviour
     bool reloadInProgress = false;
     Coroutine reloadCoroutine;
 
+    ItemInventoryMediator inventoryMediator;
+
     public event Action ReloadComplete;
 
     #region DEBUG
@@ -27,6 +34,11 @@ public class AmmoBehaviour : MonoBehaviour
     [SerializeField] TextMeshProUGUI debugAmmo;
 
     #endregion
+
+    private void Awake()
+    {
+        inventoryMediator = ItemInventoryMediator.instance;
+    }
 
     private void Start()
     {
@@ -37,7 +49,13 @@ public class AmmoBehaviour : MonoBehaviour
     private void OnEnable()
     {
         if(debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}";
-        // update reserve ammo
+
+        inventoryMediator.onAmmoTrackerUpdated += UpdateAvailableProjectileTypes;
+    }
+
+    private void OnDisable()
+    {
+        inventoryMediator.onAmmoTrackerUpdated -= UpdateAvailableProjectileTypes;
     }
 
     internal bool GetHasBulletInMagazine()
@@ -47,7 +65,7 @@ public class AmmoBehaviour : MonoBehaviour
 
     internal bool CanReload()
     {
-        return (reserveAmmo > 0) && (ammoInMagazine < magazineSize);
+        return (inventoryMediator.GetCurrentAmmoTypeAmount(currentProjectileSelected) > 0) && (ammoInMagazine < magazineSize);
     }
 
     internal void StartReload()
@@ -71,8 +89,12 @@ public class AmmoBehaviour : MonoBehaviour
         {
             yield return new WaitForSeconds(reloadTime);
             AddAmmoToMagazine();
+            
             if (debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}";
-            if ((reserveAmmo <= 0) || (ammoInMagazine >= magazineSize)) shouldReload = false;
+            
+            if ((inventoryMediator.GetCurrentAmmoTypeAmount(currentProjectileSelected) <= 0) ||
+                (ammoInMagazine >= magazineSize))
+                    shouldReload = false;
         }
         reloadInProgress = false;
         ReloadComplete.Invoke();
@@ -82,13 +104,42 @@ public class AmmoBehaviour : MonoBehaviour
     private void AddAmmoToMagazine()
     {
         ammoInMagazine++;
-        reserveAmmo--;
+        inventoryMediator.NotifyConsumeAmmo(currentProjectileSelected);
     }
 
-    internal void ConsumeAmmo()
+    internal void ConsumeMagazineAmmo()
     {
         ammoInMagazine--;
         if(debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}";
+    }
+
+    internal void SwitchAmmoType(int increaseDecreaseAmount)
+    {
+        availableProjectileTypesIndex += increaseDecreaseAmount;
+
+        if(availableProjectileTypesIndex < 0)
+            availableProjectileTypesIndex = availableProjectileTypes.Count - 1;
+        if(availableProjectileTypesIndex >= availableProjectileTypes.Count)
+            availableProjectileTypesIndex = 0;
+
+        currentProjectileSelected = availableProjectileTypes[availableProjectileTypesIndex].projectileType;
+        ammoInMagazine = 0;
+        StartReload();
+    }
+
+    private void UpdateAvailableProjectileTypes()
+    {
+        availableProjectileTypes = inventoryMediator.GetCompatibleProjectileTypes(weaponCalliber);
+
+        bool updatedIndex = false;
+        for(int i = 0; i < availableProjectileTypes.Count && updatedIndex == false; i++)
+        {
+            if (availableProjectileTypes[i].projectileType == currentProjectileSelected)
+            {
+                availableProjectileTypesIndex = i;
+                updatedIndex = true;
+            }
+        }
     }
 
     internal float GetReloadStartDelay()

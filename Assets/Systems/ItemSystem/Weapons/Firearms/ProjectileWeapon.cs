@@ -126,6 +126,13 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
         // NOOP
     }
 
+    internal void NotifyAmmoSwitch(int increaseDecrease)
+    {
+        // animate removing bullets
+        // after this delay. prompt to switch bullet type (only send value from input - index managed on AmmoBehaviour)
+        ammoBehaviour.SwitchAmmoType(increaseDecrease);
+    }
+
     protected override void OnShakeCamera(ICameraShaker cameraShakeInfo)
     {
         base.OnShakeCamera(cameraShakeInfo);
@@ -143,27 +150,26 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
     private void Shoot()
     {
         shotTime = Time.time;
-        ItemInventoryMediator.AmmoInfo ammoInfo = ItemInventoryMediator.instance.GetAmmoInfo(ammoBehaviour.currentProjectileSelected);
-        Projectile projectile = ammoInfo.prefabToInstatiate.GetComponent<Projectile>();
-        Projectile.ProjectileBehaviour behaviour = projectile.GetProjectileBehaviour();
+        ItemInventoryMediator.ProjectileInfo projectileInfo = ItemInventoryMediator.instance.GetProjectileInfo(ammoBehaviour.currentProjectileSelected);
+        Projectile projectile = projectileInfo.prefabToInstatiate.GetComponent<Projectile>();
 
-        barrel.Shoot(shootingBehaviour.GetMuzzleVelocity(), behaviour.velocityModifier, ammoInfo.prefabToInstatiate, GetHitInfoToSend(projectile, behaviour));
+        barrel.Shoot(shootingBehaviour.GetMuzzleVelocity(), projectileInfo, projectile, GetHitInfoToSend(projectile));
         OnShakeCamera(this);
         recoilBehaviour.ApplyRecoil();
-        ammoBehaviour.ConsumeAmmo();
+        ammoBehaviour.ConsumeMagazineAmmo();
         animator?.SetTrigger(shootHash);
         InstantiateParticles();
     }
 
-    private HitInfo GetHitInfoToSend(Projectile projectile, Projectile.ProjectileBehaviour behaviour)
+    private HitInfo GetHitInfoToSend(Projectile projectile)
     {
         HitInfo hitInfo = new();
         hitInfo.baseDamage = damageBehaviour.GetBaseDamage();
         hitInfo.locationOfDamageSource = transform.position;
-        hitInfo.weaponCalliber = projectile.matchingCalliber;
+        hitInfo.weaponCalliber = projectile.MatchingCalliber;
 
-        hitInfo.damageFalloffCurve = projectile.damageFalloff;
-        hitInfo.statusEffect = behaviour.statusEffect;
+        hitInfo.damageFalloffCurve = projectile.DamageFalloff;
+        hitInfo.statusEffect = projectile.StatusEffect;
         return hitInfo;
     }
 

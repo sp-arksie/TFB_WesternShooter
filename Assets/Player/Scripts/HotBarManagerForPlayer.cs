@@ -20,11 +20,13 @@ public class HotBarManagerForPlayer : HotBarManager
     float currentFOV;
 
     InputManager input;
+    ItemInventoryMediator inventoryMediator;
 
     protected override void Awake()
     {
         base.Awake();
         input = InputManager.Instance;
+        inventoryMediator = ItemInventoryMediator.instance;
         defaultFOV = currentFOV = virtualCamera.m_Lens.FieldOfView;
     }
 
@@ -38,13 +40,14 @@ public class HotBarManagerForPlayer : HotBarManager
         input.GetAimAction().canceled += OnAim;
         input.GetReloadAction().performed += OnReload;
         input.GetScrollAction().performed += OnScroll;
+        input.GetAmmoSwitchAction().performed += OnAmmoSwitch;
 
         for (int i = 0; i < input.GetHotBarSlotActions().Count; i++)
         {
             input.GetHotBarSlotActions()[i].performed += (context) => OnHotBarSelect(i);
         }
 
-        ItemInventoryMediator.onItemEquipped += EquipItem;
+        inventoryMediator.onItemEquipped += EquipItem;
     }
 
     private void OnDisable()
@@ -56,12 +59,14 @@ public class HotBarManagerForPlayer : HotBarManager
         input.GetAimAction().started -= OnAim;
         input.GetAimAction().canceled -= OnAim;
         input.GetScrollAction().performed -= OnScroll;
+        input.GetAmmoSwitchAction().performed -= OnAmmoSwitch;
+
         for (int i = 0; i < input.GetHotBarSlotActions().Count; i++)
         {
             input.GetHotBarSlotActions()[i].performed -= (context) => OnHotBarSelect(i);
         }
 
-        ItemInventoryMediator.onItemEquipped -= EquipItem;
+        inventoryMediator.onItemEquipped -= EquipItem;
     }
 
     private void OnClick(InputAction.CallbackContext context)
@@ -177,11 +182,23 @@ public class HotBarManagerForPlayer : HotBarManager
         throw new NotImplementedException();
     }
 
+    private void OnAmmoSwitch(InputAction.CallbackContext context)
+    {
+        ProjectileWeapon weapon = hotBarItems.GetChild(currentIndex).GetComponent<ProjectileWeapon>();
+        if(weapon != null)
+        {
+            Vector2 value = context.ReadValue<Vector2>();
+            int i = value.y > 0f ? 1 : -1;
+            weapon.NotifyAmmoSwitch(i);
+        }
+    }
+
     private void EquipItem(ItemInventoryMediator.EquippedItem item)
     {
         GameObject go = Instantiate(item.prefabToInstantiate, hotBarItems.transform);
         ItemBase itemBase = go.GetComponent<ItemBase>();
-        itemBase.SetItemDataOnEquip(item);
+        //itemBase.SetItemDataOnEquip(item);
+        itemBase.Init(item.prefabToInstantiate);
     }
 
     private void OnApplicationQuit()

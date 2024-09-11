@@ -28,7 +28,7 @@ public class PlayerInventoryHandler : MonoBehaviour
     {
         if (debugEquipItem)
         {
-            iim.DebugNotifyItemEquipped("1234", debugItemToEquip, 1);
+            //iim.DebugNotifyItemEquipped("1234", debugItemToEquip, 1);
         }
     }
     #endregion

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c2f3e0a892b2574daa06839b8796cda, type: 3}
+  m_Name: ReichsRevolverM1879
+  m_EditorClassIdentifier: 
+  itemName: Reichs Revolver M1879
+  description: 
+  itemVisualPrefab: {fileID: 973666125382893789, guid: cfeb4e42f3dbdea4dbe0ce5b3c5e0163,
+    type: 3}
+  itemPhysicalPrefab: {fileID: 7260630852269034988, guid: 08b15bc18ebb69b40a219382144b72ab,
+    type: 3}
+  maximumStacks: 1
+  itemSizeInInventory: {x: 2, y: 1}
+  canRotate: 1

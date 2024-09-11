@@ -303,6 +303,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ChangeAmmoType"",
+                    ""type"": ""Value"",
+                    ""id"": ""aa807928-e169-4c2d-9870-361a98906fcf"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -448,6 +457,39 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""Reload"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""One Modifier"",
+                    ""id"": ""f9e8ee35-fa3e-42b3-889d-7ff115d8acf9"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ChangeAmmoType"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""cb689e0f-c31a-42b0-a2b7-7c3e32824859"",
+                    ""path"": ""<Keyboard>/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ChangeAmmoType"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""cad3f1ed-28dd-4905-9d1a-99c86a202fd0"",
+                    ""path"": ""<Mouse>/scroll"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ChangeAmmoType"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         },
@@ -594,6 +636,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Actions_HotBarSlot6 = m_Actions.FindAction("HotBarSlot6", throwIfNotFound: true);
         m_Actions_HotBarSlot7 = m_Actions.FindAction("HotBarSlot7", throwIfNotFound: true);
         m_Actions_HotBarSlot8 = m_Actions.FindAction("HotBarSlot8", throwIfNotFound: true);
+        m_Actions_ChangeAmmoType = m_Actions.FindAction("ChangeAmmoType", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_MousePosition = m_UI.FindAction("MousePosition", throwIfNotFound: true);
@@ -793,6 +836,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Actions_HotBarSlot6;
     private readonly InputAction m_Actions_HotBarSlot7;
     private readonly InputAction m_Actions_HotBarSlot8;
+    private readonly InputAction m_Actions_ChangeAmmoType;
     public struct ActionsActions
     {
         private @PlayerControls m_Wrapper;
@@ -810,6 +854,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @HotBarSlot6 => m_Wrapper.m_Actions_HotBarSlot6;
         public InputAction @HotBarSlot7 => m_Wrapper.m_Actions_HotBarSlot7;
         public InputAction @HotBarSlot8 => m_Wrapper.m_Actions_HotBarSlot8;
+        public InputAction @ChangeAmmoType => m_Wrapper.m_Actions_ChangeAmmoType;
         public InputActionMap Get() { return m_Wrapper.m_Actions; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -858,6 +903,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @HotBarSlot8.started += instance.OnHotBarSlot8;
             @HotBarSlot8.performed += instance.OnHotBarSlot8;
             @HotBarSlot8.canceled += instance.OnHotBarSlot8;
+            @ChangeAmmoType.started += instance.OnChangeAmmoType;
+            @ChangeAmmoType.performed += instance.OnChangeAmmoType;
+            @ChangeAmmoType.canceled += instance.OnChangeAmmoType;
         }
 
         private void UnregisterCallbacks(IActionsActions instance)
@@ -901,6 +949,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @HotBarSlot8.started -= instance.OnHotBarSlot8;
             @HotBarSlot8.performed -= instance.OnHotBarSlot8;
             @HotBarSlot8.canceled -= instance.OnHotBarSlot8;
+            @ChangeAmmoType.started -= instance.OnChangeAmmoType;
+            @ChangeAmmoType.performed -= instance.OnChangeAmmoType;
+            @ChangeAmmoType.canceled -= instance.OnChangeAmmoType;
         }
 
         public void RemoveCallbacks(IActionsActions instance)
@@ -1060,6 +1111,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnHotBarSlot6(InputAction.CallbackContext context);
         void OnHotBarSlot7(InputAction.CallbackContext context);
         void OnHotBarSlot8(InputAction.CallbackContext context);
+        void OnChangeAmmoType(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c2f3e0a892b2574daa06839b8796cda, type: 3}
+  m_Name: CompactPoison
+  m_EditorClassIdentifier: 
+  itemName: Compact Poison Ammo
+  description: 
+  itemVisualPrefab: {fileID: 917975621489950565, guid: 7f6b16a0ac66b4149a1fda2b97d7b7ae,
+    type: 3}
+  itemPhysicalPrefab: {fileID: 5937567258442325396, guid: 9c01dcbab7a882a43ae6e84a1b540836,
+    type: 3}
+  maximumStacks: 6
+  itemSizeInInventory: {x: 1, y: 1}
+  canRotate: 0

@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using static ItemInventoryMediator;
 
@@ -8,174 +10,173 @@ public class ItemInventoryMediator : MonoBehaviour
 {
     public static ItemInventoryMediator instance { get; private set; }
 
-    public static event Action<EquippedItem> onItemEquipped;
+    public event Action<EquippedItem> onItemEquipped;
+    public event Action<int> onItemUnequipped;
+    public event Action onAmmoTrackerUpdated;
 
-    public static Dictionary<string, EquippedItem> equippedItemsTracker { get; private set; } = new();
-    public static Dictionary<Projectile.ProjectileType, List<AmmoInfo>> ammoTracker { get; private set; } = new();
+    public EquippedItem[] equippedItems { get; private set; } = new EquippedItem[8];
+
+    public Dictionary<ProjectileType, ProjectileInfo> projectileTracker { get; private set; } = new();
 
     [SerializeField] GameObject compactAmmoPrefab;
 
     private void Awake()
     {
-        instance = this;
+        if(instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(instance);
+        }
 
-        ammoTracker.Add(Projectile.ProjectileType.Compact, new List<AmmoInfo>() { new AmmoInfo("123456", compactAmmoPrefab, Projectile.ProjectileType.Compact, WeaponCalliber.SmallCalliber) });
+        //=================
+
+        ProjectileInfo pi = new(compactAmmoPrefab, ProjectileType.Compact, WeaponCalliber.SmallCalliber);
+        pi.amount = 100;
+        projectileTracker.Add(ProjectileType.Compact, pi);
     }
 
     #region Equippable Items
     public class EquippedItem
     {
-        public GameObject prefabToInstantiate { get; set; }
-        public string instanceID { get; private set; }
+        public GameObject prefabToInstantiate { get; private set; }
+        public string cellID { get; private set; }
         public int amount;
 
-        public EquippedItem(string id, GameObject prefabToInstantiate)
+        public EquippedItem(GameObject prefabToInstantiate, string cellID)
         {
-            instanceID = id;
             this.prefabToInstantiate = prefabToInstantiate;
         }
     }
 
-    public static void NotifyItemEquipped(InventoryGridCell itemInfo)
+    public void NotifyItemEquipped(InventoryGridCell itemInfo)
     {
-        EquippedItem equippedItem = new(itemInfo.cellID, itemInfo.InventoryItem.ItemPhysical);
+        EquippedItem equippedItem = new(itemInfo.InventoryItem.ItemPhysical, itemInfo.cellID);
         equippedItem.amount = itemInfo.CurrentItemAmount;
 
-        equippedItemsTracker.Add(equippedItem.instanceID, equippedItem);
-
-        onItemEquipped.Invoke(equippedItem);
+        int firstEmpty = Array.FindIndex(equippedItems, i => i == null);
+        equippedItems[firstEmpty] = equippedItem;
     }
 
-    public void DebugNotifyItemEquipped(string id, GameObject prefab, int amount)
+    public void NotifyItemUnequipped(InventoryGridCell itemInfo)
     {
-        EquippedItem ei = new(id, prefab);
-        ei.amount = amount;
-        equippedItemsTracker.Add(id, ei);
-        onItemEquipped.Invoke(ei);
+        bool unequipped = false;
+        for(int i = 0; i < equippedItems.Length && unequipped == false; i++)
+        {
+            if(itemInfo.cellID == equippedItems[i].cellID)
+            {
+                equippedItems[i] = null;
+                onItemUnequipped.Invoke(i);
+                unequipped = true;
+            }
+        }
     }
 
-    public static void NotifyItemUsed(string instanceID)
+    public void NotifyIdUpdate(string oldId, string newId)
     {
-        equippedItemsTracker[instanceID].amount -= 1;
+        int i = 0;
+        foreach(EquippedItem ei in equippedItems)
+        {
+            if(ei.cellID == oldId)
+            {
+                EquippedItem updatedItem = new(ei.prefabToInstantiate, newId);
+                updatedItem.amount = ei.amount;
+                equippedItems[i] = updatedItem;
+            }
+            i++;
+        }
     }
 
-    public static int QueryItemAmount(string instanceID)
+    public void NotifyItemUsed(int index)
     {
-        return equippedItemsTracker[instanceID].amount;
+        equippedItems[index].amount--;
+    }
+
+    public int CheckItemAmountAtIndex(int index)
+    {
+        return equippedItems[index].amount;
     }
     #endregion
 
     #region Ammo
-    public class AmmoInfo
+    public class ProjectileInfo
     {
         public GameObject prefabToInstatiate { get; private set; }
-        public Projectile.ProjectileType projectileType { get; private set; }
+        public ProjectileType projectileType { get; private set; }
         public WeaponCalliber matchingCalliber { get; private set; }
-        public string instanceID { get; private set; }
         public int amount;
 
-        public AmmoInfo(string id, GameObject prefabToInstantiate, Projectile.ProjectileType projectileType, WeaponCalliber matchingCalliber)
+        public ProjectileInfo(GameObject prefabToInstantiate, ProjectileType projectileType, WeaponCalliber matchingCalliber)
         {
-            this.instanceID = id;
             this.prefabToInstatiate = prefabToInstantiate;
             this.projectileType = projectileType;
             this.matchingCalliber = matchingCalliber;
         }
     }
 
-    public static void NotifyAmmoChange(Projectile.ProjectileType bulletType, int amount)
+    public void NotifyConsumeAmmo(ProjectileType projectileType)
     {
-        bool processFinished = false;
-        int amountToSubtract = amount;
-
-        for (int i = 0; i < ammoTracker[bulletType].Count && processFinished == false; i++)
-        {
-            if(ammoTracker[bulletType][i].amount - amountToSubtract > 0)
-            {
-                ammoTracker[bulletType][i].amount -= amountToSubtract;
-                processFinished = true;
-            }
-            else
-            {
-                amountToSubtract -= ammoTracker[bulletType][i].amount;
-                ammoTracker[bulletType][i].amount -= ammoTracker[bulletType][i].amount;
-            }
-        }
+        projectileTracker[projectileType].amount--;
     }
 
-    public AmmoInfo GetAmmoInfo(Projectile.ProjectileType bulletType)
+    public int GetCurrentAmmoTypeAmount(ProjectileType projectileType)
     {
-        return ammoTracker[bulletType][0];
+        return projectileTracker[projectileType].amount;
     }
 
-    public static int QueryCurrentAmmoTypeAmount(Projectile.ProjectileType bulletType)
+    public void UpdateAmmoTracker(Inventory inventory)
     {
-        int amount = 0;
-
-        for (int i = 0; i < ammoTracker[bulletType].Count; i++)
+        foreach(KeyValuePair<ProjectileType, ProjectileInfo> ammoType in projectileTracker)
         {
-            amount += ammoTracker[bulletType][i].amount;
+            ammoType.Value.amount = 0;
         }
 
-        return amount;
-    }
-
-    public static List<AmmoInfo> GetCompatibleAmmo(WeaponCalliber calliber)
-    {
-        List<AmmoInfo> results = new();
-
-        foreach (KeyValuePair<Projectile.ProjectileType, List<AmmoInfo>> ammo in ammoTracker)
+        foreach (KeyValuePair<string, List<Vector2Int>> item in inventory.itemLocationTracker)
         {
-            if (ammo.Value[0].matchingCalliber == calliber)
-            {
-                results.AddRange(ammo.Value);
-            }
-        }
-        return results;
-    }
+            InventoryGridCell igc = inventory.inventoryContainer[item.Value[0]];
 
-    public static void UpdateAmmoTracker(Dictionary<Vector2Int, InventoryGridCell> container, Dictionary<string, List<Vector2Int>> itemTracker)
-    {
-        foreach (KeyValuePair<string, List<Vector2Int>> item in itemTracker)
-        {
-            InventoryGridCell igc = container[item.Value[0]];
-            Projectile bullet = igc.InventoryItem.ItemPhysical.GetComponent<Projectile>();
-            if (bullet != null)
+            Projectile projectile = igc.InventoryItem.ItemPhysical.GetComponent<Projectile>();
+            if (projectile != null)
             {
-                // Completely new AmmoType has been added in inventory
-                if (!ammoTracker.ContainsKey(bullet.GetBulletType()))
+                if (projectileTracker.ContainsKey(projectile.projectileType))
                 {
-                    AmmoInfo ammoInfo = new(item.Key, igc.InventoryItem.ItemPhysical, bullet.projectileType, bullet.matchingCalliber);
-                    ammoInfo.amount = igc.CurrentItemAmount;
-                    List<AmmoInfo> infoList = new() { ammoInfo };
-                    ammoTracker[bullet.GetBulletType()] = infoList;
+                    projectileTracker[projectile.projectileType].amount += igc.CurrentItemAmount;
                 }
                 else
                 {
-                    foreach (AmmoInfo ai in ammoTracker[bullet.GetBulletType()])
-                    {
-                        // Update existing AmmoType that matches with the one in Inventory
-                        if (ai.instanceID == item.Key)
-                        {
-                            ai.amount = igc.CurrentItemAmount;
-                        }
-                        // New set of existing AmmoType has been added in Inventory
-                        else
-                        {
-                            AmmoInfo ammoInfo = new(item.Key, igc.InventoryItem.ItemPhysical, bullet.projectileType, bullet.matchingCalliber);
-                            ammoInfo.amount = igc.CurrentItemAmount;
-                            ammoTracker[bullet.GetBulletType()].Add(ammoInfo);
-                        }
+                    ProjectileInfo newAmmoType = new(igc.InventoryItem.ItemPhysical, projectile.projectileType, projectile.MatchingCalliber);
+                    newAmmoType.amount = igc.CurrentItemAmount;
 
-                        // Clean entries that have no ammo
-                        if(ai.amount == 0)
-                        {
-                            ammoTracker[bullet.GetBulletType()].Remove(ai);
-                        }
-                    }
+                    projectileTracker.Add(projectile.projectileType, newAmmoType);
                 }
             }
         }
+
+        DictionaryExtensions.RemoveAll(projectileTracker, (k, v) => v.amount == 0);
+
+        onAmmoTrackerUpdated.Invoke();
+    }
+
+    public List<ProjectileInfo> GetCompatibleProjectileTypes(WeaponCalliber calliber)
+    {
+        List<ProjectileInfo> results = new();
+
+        foreach(KeyValuePair<ProjectileType, ProjectileInfo> projectileType in projectileTracker)
+        {
+            if(projectileType.Value.matchingCalliber == calliber)
+            {
+                results.Add(projectileType.Value);
+            }
+        }
+
+        return results;
+    }
+
+    public ProjectileInfo GetProjectileInfo(ProjectileType projectileType)
+    {
+        return projectileTracker[projectileType];
     }
     #endregion
 }

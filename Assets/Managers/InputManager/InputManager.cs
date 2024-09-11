@@ -85,6 +85,7 @@ public class InputManager : MonoBehaviour
     public InputAction GetReloadAction() { return playerControls.Actions.Reload; }
     public InputAction GetScrollAction() { return playerControls.Actions.Scroll; }
     public List<InputAction> GetHotBarSlotActions() { return hotBarSlots; }
+    public InputAction GetAmmoSwitchAction() { return playerControls.Actions.ChangeAmmoType; }
     #endregion
 
     #region UI
