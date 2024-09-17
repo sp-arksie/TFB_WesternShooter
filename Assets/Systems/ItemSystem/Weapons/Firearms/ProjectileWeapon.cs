@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
+using UnityEngine.VFX;
 using UnityEngine.Video;
 
 public class ProjectileWeapon : ItemBase, ICameraShaker
@@ -183,11 +184,14 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
         {
             Instantiate(muzzleFlashPrefab, muzzleFlashParent);
         }
-        if (gunSmokePrefab && smokeEmissionPointsParent)
+        if (smokeEmissionPointsParent)
         {
             for (int i = 0; i < smokeEmissionPointsParent.childCount; i++)
             {
-                Instantiate(gunSmokePrefab, smokeEmissionPointsParent.GetChild(i));
+                //GameObject go = smokeEmissionPointsParent.GetChild(i).gameObject;
+                //GameObject clone = Instantiate(go, smokeEmissionPointsParent.transform);
+                //clone.SetActive(true);
+                smokeEmissionPointsParent.GetChild(i).GetComponentInChildren<VisualEffect>().SendEvent("OnPlay");
             }
         }
     }

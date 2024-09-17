@@ -25,4 +25,5 @@ public class ShootingBehaviour : MonoBehaviour
     }
 
     public float GetMuzzleVelocity() { return muzzlevelocity; }
+    public float GetSecondsBetweenShot() { return secondsBetweenShot; }
 }
