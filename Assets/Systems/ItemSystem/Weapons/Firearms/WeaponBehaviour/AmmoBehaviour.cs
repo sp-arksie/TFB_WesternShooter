@@ -13,7 +13,9 @@ public class AmmoBehaviour : MonoBehaviour
     [SerializeField] float reloadStartDelay = 0f;
     [SerializeField] WeaponCalliber weaponCalliber;
 
-    public ProjectileType currentProjectileSelected { get; private set; } = ProjectileType.Compact;
+    [SerializeField] ProjectileType currentProjectileSelected;
+    public ProjectileType CurrentProjectileSelected { get => currentProjectileSelected; }
+    
     List<ItemInventoryMediator.ProjectileInfo> availableProjectileTypes = new();
 
     int availableProjectileTypesIndex = 0;
@@ -37,7 +39,7 @@ public class AmmoBehaviour : MonoBehaviour
 
     private void Awake()
     {
-        inventoryMediator = ItemInventoryMediator.instance;
+        inventoryMediator = ItemInventoryMediator.Instance;
     }
 
     private void Start()
@@ -48,7 +50,7 @@ public class AmmoBehaviour : MonoBehaviour
 
     private void OnEnable()
     {
-        if(debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}";
+        //if(debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {inventoryMediator.GetCurrentAmmoTypeAmount(currentProjectileSelected)}";
 
         inventoryMediator.onAmmoTrackerUpdated += UpdateAvailableProjectileTypes;
     }
@@ -65,7 +67,7 @@ public class AmmoBehaviour : MonoBehaviour
 
     internal bool CanReload()
     {
-        return (inventoryMediator.GetCurrentAmmoTypeAmount(currentProjectileSelected) > 0) && (ammoInMagazine < magazineSize);
+        return (inventoryMediator.GetCurrentAmmoTypeAmount(CurrentProjectileSelected) > 0) && (ammoInMagazine < magazineSize);
     }
 
     internal void StartReload()
@@ -90,9 +92,9 @@ public class AmmoBehaviour : MonoBehaviour
             yield return new WaitForSeconds(reloadTime);
             AddAmmoToMagazine();
             
-            if (debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}";
+            if (debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {inventoryMediator.GetCurrentAmmoTypeAmount(CurrentProjectileSelected)}";
             
-            if ((inventoryMediator.GetCurrentAmmoTypeAmount(currentProjectileSelected) <= 0) ||
+            if ((inventoryMediator.GetCurrentAmmoTypeAmount(CurrentProjectileSelected) <= 0) ||
                 (ammoInMagazine >= magazineSize))
                     shouldReload = false;
         }
@@ -104,13 +106,13 @@ public class AmmoBehaviour : MonoBehaviour
     private void AddAmmoToMagazine()
     {
         ammoInMagazine++;
-        inventoryMediator.NotifyConsumeAmmo(currentProjectileSelected);
+        inventoryMediator.NotifyConsumeAmmo(CurrentProjectileSelected);
     }
 
     internal void ConsumeMagazineAmmo()
     {
         ammoInMagazine--;
-        if(debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {reserveAmmo}";
+        if(debugAmmo) debugAmmo.text = $"{ammoInMagazine}/{magazineSize}    Total: {inventoryMediator.GetCurrentAmmoTypeAmount(CurrentProjectileSelected)}";
     }
 
     internal void SwitchAmmoType(int increaseDecreaseAmount)
@@ -134,7 +136,7 @@ public class AmmoBehaviour : MonoBehaviour
         bool updatedIndex = false;
         for(int i = 0; i < availableProjectileTypes.Count && updatedIndex == false; i++)
         {
-            if (availableProjectileTypes[i].projectileType == currentProjectileSelected)
+            if (availableProjectileTypes[i].projectileType == CurrentProjectileSelected)
             {
                 availableProjectileTypesIndex = i;
                 updatedIndex = true;

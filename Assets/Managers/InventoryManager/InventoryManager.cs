@@ -25,8 +25,6 @@ public class InventoryManager : MonoBehaviour
 
     public void RemoveOverlappingInventory(Inventory inventory)
     {
-        int i = inventories.FindIndex(x =>
-            x.GetItemLocationTracker().ContainsKey(inventory.GetItemLocationTracker().ElementAt(0).Key));
-        inventories.RemoveAt(i);
+        inventories.RemoveAt(1);
     }
 }

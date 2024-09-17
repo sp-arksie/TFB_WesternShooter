@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class ToolTip : MonoBehaviour
 {
-    public static ToolTip Instance {  get; private set; }
+    public static ToolTip Instance { get; private set; }
 
     [SerializeField] RectTransform canvasRectTransform;
     [SerializeField] RectTransform backgroundRectTransform;
@@ -19,14 +19,18 @@ public class ToolTip : MonoBehaviour
 
     private void Awake()
     {
+        if(Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(Instance);
+        }
+
         tooltipRect = GetComponent<RectTransform>();
         input = InputManager.Instance;
         gameObject.SetActive(false);
-    }
-
-    private void Start()
-    {
-        //SetText("Hello World");
     }
 
     private void Update()

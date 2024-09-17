@@ -1,11 +1,8 @@
-using Cinemachine;
 using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Animations.Rigging;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Interactions;
 
 public class HotBarManager : MonoBehaviour
 {
@@ -46,7 +43,7 @@ public class HotBarManager : MonoBehaviour
         healthController = GetComponent<HealthController>();
     }
 
-    private void Start()
+    protected virtual void Start()
     {
         hasGunHash = Animator.StringToHash("HasGun");
         rightArmOnlyHash = Animator.StringToHash("RightHandOnly");
@@ -56,7 +53,8 @@ public class HotBarManager : MonoBehaviour
             hotBarItems.GetChild(i).gameObject.SetActive(false);
         }
         currentIndex = startingIndex;
-        PrepareStartingItem();
+        if(currentIndex > -1)
+            SelectItem(currentIndex);
     }
 
     private void PrepareStartingItem()
@@ -98,7 +96,7 @@ public class HotBarManager : MonoBehaviour
     #region Item Switching
     protected void NotifySelectItem(int index)
     {
-        if (!currentItemBusy)
+        if (!currentItemBusy && hotBarItems.childCount > 0)
         {
             if (selectItem != null) { StopCoroutine(selectItem); }
             StartCoroutine(SelectItem(index));
@@ -107,39 +105,50 @@ public class HotBarManager : MonoBehaviour
 
     protected IEnumerator SelectItem(int index)
     {
-        ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
-        item.NotifyUnselected();
-        item.onUnskippableActionInProgress -= SetItemBusy;
-        ItemUnselectedEvent?.Invoke(item);
+        if (currentIndex != -1)
+        {
+            ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
+            item.NotifyUnselected();
+            item.onUnskippableActionInProgress -= SetItemBusy;
+            ItemUnselectedEvent?.Invoke(item);
 
-        Transform current = item.transform;
-        Transform goal = item.HiddenTransform;
-        if(animateItemSwitch != null) StopCoroutine(animateItemSwitch);
-        yield return animateItemSwitch = StartCoroutine(AnimateItemSwitch(item, current, goal));
-        
-        UngrabPoints();
-        hotBarItems.GetChild(currentIndex).gameObject.SetActive(false);
+            Transform current = item.transform;
+            Transform goal = item.HiddenTransform;
+            if (animateItemSwitch != null) StopCoroutine(animateItemSwitch);
+            yield return animateItemSwitch = StartCoroutine(AnimateItemSwitch(item, current, goal));
 
+            UngrabPoints();
+            hotBarItems.GetChild(currentIndex).gameObject.SetActive(false);
+        }
 
-        if (index < 0)
+        if (index < -1)
             index = hotBarItems.childCount - 1;
         if (index > hotBarItems.childCount - 1)
-            index = 0;
+            index = -1;
         currentIndex = index;
 
+        if (currentIndex != -1)
+        {
+            animator.SetBool(hasGunHash, true);
 
-        hotBarItems.GetChild(currentIndex).gameObject.SetActive(true);
-        GrabPoints();
-        item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
-        item.NotifySelected(this);
-        item.onUnskippableActionInProgress += SetItemBusy;
-        ItemSelectedEvent?.Invoke(item);
-        animator.SetBool(rightArmOnlyHash, item.RightArmOnly);
+            ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
+            item.gameObject.SetActive(true);
+            GrabPoints();
+            item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
+            item.NotifySelected(this);
+            item.onUnskippableActionInProgress += SetItemBusy;
+            ItemSelectedEvent?.Invoke(item);
+            animator.SetBool(rightArmOnlyHash, item.RightArmOnly);
 
-        current = item.transform;
-        goal = item.HipPositionTransform;
-        if (animateItemSwitch != null) StopCoroutine(animateItemSwitch);
-        yield return StartCoroutine(AnimateItemSwitch(item, current, goal));
+            Transform current = item.transform;
+            Transform goal = item.HipPositionTransform;
+            if (animateItemSwitch != null) StopCoroutine(animateItemSwitch);
+            yield return StartCoroutine(AnimateItemSwitch(item, current, goal));
+        }
+        else
+        {
+            animator.SetBool(hasGunHash, false);
+        }
     }
 
     private void SetItemBusy(bool itemBusy)

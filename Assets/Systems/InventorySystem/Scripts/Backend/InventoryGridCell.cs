@@ -29,9 +29,9 @@ public class InventoryGridCell
         this.CurrentItemOrientation = currentItemOrientation;
     }
 
-    public void AddItemAmount(int amount)
+    public void AddSubtractItemAmount(int amountToAddOrSubtract)
     {
-        CurrentItemAmount += amount;
+        CurrentItemAmount += amountToAddOrSubtract;
     }
 
     public void ChangeItemOrientation()

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 
 public class Inventory : MonoBehaviour
@@ -12,6 +14,8 @@ public class Inventory : MonoBehaviour
     public Dictionary<string, List<Vector2Int>> itemLocationTracker { get; private set; } = new();
 
     BufferItemData bufferItemData = new();
+
+    public event Action<string, string> OnIdChange;
 
     #region DEBUG
 
@@ -81,7 +85,7 @@ public class Inventory : MonoBehaviour
 
     #endregion
 
-    private void Start()
+    private void Awake()
     {
         for (int i = 0; i < width; i++)
         {
@@ -151,14 +155,23 @@ public class Inventory : MonoBehaviour
             {
                 string guid = Guid.NewGuid().ToString();
                 foreach (Vector2Int offset in localOffsets) { AddToEmptyCell(itemToAdd, amountToAdd, selectedInventoryCell + offset, guid, itemDimensions); }
+
+                CheckForIdChange(guid);
             }
         }
         else
         {
             if (!inventoryContainer.ContainsKey(selectedInventoryCell))
+            {
                 itemsNotAdded = amountToAdd;
+            }
             else
-                AddToEmptyCell(itemToAdd, amountToAdd, selectedInventoryCell, Guid.NewGuid().ToString(), itemDimensions);
+            {
+                string guid = Guid.NewGuid().ToString();
+                AddToEmptyCell(itemToAdd, amountToAdd, selectedInventoryCell, guid, itemDimensions);
+
+                CheckForIdChange(guid);
+            }
         }
 
         return itemsNotAdded;
@@ -170,12 +183,14 @@ public class Inventory : MonoBehaviour
         {
             foreach (Vector2Int itemLocation in itemLocationTracker[inventoryContainer[selectedInventoryCell].cellID])
             {
-                inventoryContainer[itemLocation].AddItemAmount(amountToAdd);
+                inventoryContainer[itemLocation].AddSubtractItemAmount(amountToAdd);
+                CheckForIdChange(inventoryContainer[itemLocation].cellID);
             }
         }
         else
         {
-            inventoryContainer[selectedInventoryCell].AddItemAmount(amountToAdd);
+            inventoryContainer[selectedInventoryCell].AddSubtractItemAmount(amountToAdd);
+            CheckForIdChange(inventoryContainer[selectedInventoryCell].cellID);
         }
     }
 
@@ -192,6 +207,12 @@ public class Inventory : MonoBehaviour
             List<Vector2Int> list = new() { locationToAdd };
             itemLocationTracker.Add(guid, list);
         }
+    }
+
+    private void CheckForIdChange(string newId)
+    {
+        if (bufferItemData != null)
+            OnIdChange?.Invoke(bufferItemData.gridCell.cellID, newId);
     }
 
     private List<Vector2Int> GetItemLocalCellsWithOffset(Vector2Int itemDimensions, Vector2Int selectedItemLocalCell)
@@ -258,6 +279,12 @@ public class Inventory : MonoBehaviour
         TryPlaceItem(selectedCell, bufferData);
     }
 
+    public int NotifyPlaceItem(Vector2Int selectedCell, InventoryItemSO item, int amount, Vector2Int orientation, Vector2Int selectedLocalCell)
+    {
+        int amountNotAdded = TryPlaceItem(selectedCell, item, amount, orientation, selectedLocalCell);
+        return amountNotAdded;
+    }
+
     private void TryPlaceItem(Vector2Int selectedCell, BufferItemData bufferData)
     {
         bufferItemData = bufferData;
@@ -274,6 +301,14 @@ public class Inventory : MonoBehaviour
             if (bufferItemData.wasRotated) bufferItemData.gridCell.ChangeItemOrientation();
             PlaceInOriginalLocation(amountNotAdded);
         }
+
+        bufferData = null;
+    }
+
+    private int TryPlaceItem(Vector2Int selectedCell, InventoryItemSO item, int amount, Vector2Int orientation, Vector2Int selectedLocalCell)
+    {
+        int amountNotAdded = AddItemManual(item, amount, orientation, selectedLocalCell, selectedCell);
+        return amountNotAdded;
     }
 
     private Vector2Int RecalculateNewLocalCell(Vector2Int selectedLocalCell)
@@ -315,6 +350,71 @@ public class Inventory : MonoBehaviour
         }
     }
 
+    //public void NotifyUpdateAmmo(List<ItemInventoryMediator.ProjectileInfo> trackedProjectiles)
+    //{
+    //    UpdateAmmo(trackedProjectiles);
+    //}
+
+    public void NotifyUpdateProjectiles(Dictionary<ProjectileType, ItemInventoryMediator.ProjectileInfo> projectileTracker)
+    {
+        UpdateAmmo2(projectileTracker);
+    }
+
+    //private void UpdateAmmo(List<ItemInventoryMediator.ProjectileInfo> trackedProjectiles)
+    //{
+    //    foreach(ItemInventoryMediator.ProjectileInfo projectile in trackedProjectiles)
+    //    {
+    //        int amount = projectile.amount;
+    //        foreach(Vector2Int location in projectile.locationsInInventory)
+    //        {
+    //            inventoryContainer[location].AddSubtractItemAmount(-inventoryContainer[location].CurrentItemAmount);
+
+    //            if (inventoryContainer[location].InventoryItem.MaximumStacks < amount)
+    //            {
+    //                amount -= inventoryContainer[location].InventoryItem.MaximumStacks;
+    //            }
+    //            inventoryContainer[location].AddSubtractItemAmount(amount);
+
+    //            if (inventoryContainer[location].CurrentItemAmount == 0)
+    //                inventoryContainer[location] = null;
+    //        }
+    //    }
+    //}
+
+    private void UpdateAmmo2(Dictionary<ProjectileType, ItemInventoryMediator.ProjectileInfo> t)
+    {
+        foreach(KeyValuePair< ProjectileType, ItemInventoryMediator.ProjectileInfo> projectile in t)
+        {
+            if (projectile.Value.locationsInInventory.Count == 0)
+                break;
+
+            int totalToAdd = projectile.Value.amount;
+            int projectilesToAdd = totalToAdd;
+            int added = 0;
+            foreach (Vector2Int location in projectile.Value.locationsInInventory)
+            {
+                inventoryContainer[location].AddSubtractItemAmount(-inventoryContainer[location].CurrentItemAmount);
+
+                if (inventoryContainer[location].InventoryItem.MaximumStacks < projectilesToAdd)
+                {
+                    projectilesToAdd -= inventoryContainer[location].InventoryItem.MaximumStacks;
+                }
+                if(added != totalToAdd)
+                {
+                    inventoryContainer[location].AddSubtractItemAmount(projectilesToAdd);
+                    added += projectilesToAdd;
+                    projectilesToAdd = totalToAdd - added;
+                }
+
+                if (inventoryContainer[location].CurrentItemAmount == 0)
+                {
+                    itemLocationTracker.Remove(inventoryContainer[location].cellID);
+                    inventoryContainer[location] = null;
+                }
+            }
+        }
+    }
+
     #region WIP
 
     // =============================================================
@@ -349,8 +449,6 @@ public class Inventory : MonoBehaviour
 
     #region Helper Functions
 
-    public Dictionary<Vector2Int, InventoryGridCell> GetInventoryContainer() { return inventoryContainer; }
-    public Dictionary<string, List<Vector2Int>> GetItemLocationTracker() { return itemLocationTracker; }
     public BufferItemData GetBufferItemData() { return bufferItemData; }
     public Vector2Int GetInventoryDimensions() { return new Vector2Int(width, height); }
 

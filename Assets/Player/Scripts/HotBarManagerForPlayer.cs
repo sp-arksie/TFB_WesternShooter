@@ -26,8 +26,14 @@ public class HotBarManagerForPlayer : HotBarManager
     {
         base.Awake();
         input = InputManager.Instance;
-        inventoryMediator = ItemInventoryMediator.instance;
+        inventoryMediator = ItemInventoryMediator.Instance;
         defaultFOV = currentFOV = virtualCamera.m_Lens.FieldOfView;
+    }
+
+    protected override void Start()
+    {
+        base.Start();
+        currentIndex = -1;
     }
 
     private void OnEnable()
@@ -48,6 +54,7 @@ public class HotBarManagerForPlayer : HotBarManager
         }
 
         inventoryMediator.onItemEquipped += EquipItem;
+        inventoryMediator.onItemUnequipped += UnequipItem;
     }
 
     private void OnDisable()
@@ -67,11 +74,12 @@ public class HotBarManagerForPlayer : HotBarManager
         }
 
         inventoryMediator.onItemEquipped -= EquipItem;
+        inventoryMediator.onItemUnequipped -= UnequipItem;
     }
 
     private void OnClick(InputAction.CallbackContext context)
     {
-        if (context.interaction is TapInteraction)
+        if (context.interaction is TapInteraction && currentIndex != -1)
         {
             QuickAction();
         }
@@ -79,7 +87,7 @@ public class HotBarManagerForPlayer : HotBarManager
 
     private void OnPressStarted(InputAction.CallbackContext context)
     {
-        if (context.interaction is SlowTapInteraction)
+        if (context.interaction is SlowTapInteraction && currentIndex != -1)
         {
             ChargeStart();
         }
@@ -87,7 +95,7 @@ public class HotBarManagerForPlayer : HotBarManager
 
     private void OnPressFinished(InputAction.CallbackContext context)
     {
-        if (context.interaction is SlowTapInteraction)
+        if (context.interaction is SlowTapInteraction && currentIndex != -1)
         {
             ChargeRelease();
         }
@@ -96,20 +104,23 @@ public class HotBarManagerForPlayer : HotBarManager
     #region Aiming
     private void OnAim(InputAction.CallbackContext context)
     {
-        ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
-        if(item is ProjectileWeapon)
+        if(currentIndex != -1)
         {
-            ProjectileWeapon projectileWeapon = item as ProjectileWeapon;
-            if (context.started)
+            ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
+            if (item is ProjectileWeapon)
             {
-                if (aimingCoroutine != null) StopCoroutine(aimingCoroutine);
-                aimingCoroutine = StartCoroutine(AimingCoroutine(currentFOV, ironSightFOV, projectileWeapon));
+                ProjectileWeapon projectileWeapon = item as ProjectileWeapon;
+                if (context.started)
+                {
+                    if (aimingCoroutine != null) StopCoroutine(aimingCoroutine);
+                    aimingCoroutine = StartCoroutine(AimingCoroutine(currentFOV, ironSightFOV, projectileWeapon));
 
-            }
-            else if (context.canceled)
-            {
-                if (aimingCoroutine != null) StopCoroutine(aimingCoroutine);
-                aimingCoroutine = StartCoroutine(AimingCoroutine(currentFOV, defaultFOV, projectileWeapon));
+                }
+                else if (context.canceled)
+                {
+                    if (aimingCoroutine != null) StopCoroutine(aimingCoroutine);
+                    aimingCoroutine = StartCoroutine(AimingCoroutine(currentFOV, defaultFOV, projectileWeapon));
+                }
             }
         }
     }
@@ -196,9 +207,25 @@ public class HotBarManagerForPlayer : HotBarManager
     private void EquipItem(ItemInventoryMediator.EquippedItem item)
     {
         GameObject go = Instantiate(item.prefabToInstantiate, hotBarItems.transform);
+        go.SetActive(false);
         ItemBase itemBase = go.GetComponent<ItemBase>();
-        //itemBase.SetItemDataOnEquip(item);
         itemBase.Init(item.prefabToInstantiate);
+    }
+
+    private void UnequipItem(int index)
+    {
+        StartCoroutine(StartUnequip(index));
+    }
+
+    private IEnumerator StartUnequip(int index)
+    {
+        if (currentIndex == index)
+        {
+            yield return SelectItem(-1);
+        }
+        Destroy(hotBarItems.GetChild(index).gameObject);
+
+        yield return null;
     }
 
     private void OnApplicationQuit()

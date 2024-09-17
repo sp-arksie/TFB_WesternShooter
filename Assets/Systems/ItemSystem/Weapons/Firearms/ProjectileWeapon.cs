@@ -19,13 +19,13 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
     [SerializeField] Transform adsPositionTransform;
     [SerializeField] Transform shootingRotationTransform;
     [SerializeField] Transform baseRotationTransform;
-    public Transform AdsPositionTransform { get { return adsPositionTransform; } private set { adsPositionTransform = value; } }
-    public Transform ShootingRotationTransform { get { return shootingRotationTransform; } private set { shootingRotationTransform = value; } }
-    public Transform BaseRotationTransform { get { return baseRotationTransform; } private set { baseRotationTransform = value; } }
+    public Transform AdsPositionTransform { get => adsPositionTransform; private set => adsPositionTransform = value; }
+    public Transform ShootingRotationTransform { get => shootingRotationTransform; private set => shootingRotationTransform = value; }
+    public Transform BaseRotationTransform { get => baseRotationTransform; private set => baseRotationTransform = value; }
 
 
     //public event Action SelectedEvent;
-    
+
     Barrel barrel;
     Animator animator;
 
@@ -128,6 +128,8 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
 
     internal void NotifyAmmoSwitch(int increaseDecrease)
     {
+        // TODO: only switch if other types available
+
         // animate removing bullets
         // after this delay. prompt to switch bullet type (only send value from input - index managed on AmmoBehaviour)
         ammoBehaviour.SwitchAmmoType(increaseDecrease);
@@ -150,7 +152,7 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
     private void Shoot()
     {
         shotTime = Time.time;
-        ItemInventoryMediator.ProjectileInfo projectileInfo = ItemInventoryMediator.instance.GetProjectileInfo(ammoBehaviour.currentProjectileSelected);
+        ItemInventoryMediator.ProjectileInfo projectileInfo =  ItemInventoryMediator.Instance.projectileTracker[ammoBehaviour.CurrentProjectileSelected];
         Projectile projectile = projectileInfo.prefabToInstatiate.GetComponent<Projectile>();
 
         barrel.Shoot(shootingBehaviour.GetMuzzleVelocity(), projectileInfo, projectile, GetHitInfoToSend(projectile));
@@ -159,6 +161,8 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
         ammoBehaviour.ConsumeMagazineAmmo();
         animator?.SetTrigger(shootHash);
         InstantiateParticles();
+
+        
     }
 
     private HitInfo GetHitInfoToSend(Projectile projectile)

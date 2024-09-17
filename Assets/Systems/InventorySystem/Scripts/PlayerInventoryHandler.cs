@@ -16,7 +16,7 @@ public class PlayerInventoryHandler : MonoBehaviour
     Inventory playerInventory;
     InventoryManager inventoryManager;
     InputManager input;
-    ItemInventoryMediator iim;
+    ItemInventoryMediator inventoryMediator;
 
     bool shouldOpenInventory = false;
 
@@ -39,7 +39,7 @@ public class PlayerInventoryHandler : MonoBehaviour
         inventoryManager = InventoryManager.Instance;
         inventoryManager.AddOverlappingInventory(playerInventory);
         input = InputManager.Instance;
-        iim = ItemInventoryMediator.instance;
+        inventoryMediator = ItemInventoryMediator.Instance;
     }
 
     private void OnEnable()
@@ -71,6 +71,9 @@ public class PlayerInventoryHandler : MonoBehaviour
 
     private void OpenInventory()
     {
+        // update ammo changes to inv
+        playerInventory.NotifyUpdateProjectiles(inventoryMediator.projectileTracker);
+
         string[] actionMapsForInventory = new string[] { input.UiActionMap, input.InventoryActivatorActionMap };
         input.SetActionMaps(actionMapsForInventory, true);
         cinemachineInputProvider.enabled = false;
@@ -87,6 +90,8 @@ public class PlayerInventoryHandler : MonoBehaviour
 
         foreach (Canvas c in otherCanvases) { c.gameObject.SetActive(true); }
         inventoryCanvas.gameObject.SetActive(false);
+
+        inventoryMediator.UpdateAmmoTracker(playerInventory);
     }
 
     //================================

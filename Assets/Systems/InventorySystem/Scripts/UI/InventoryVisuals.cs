@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
@@ -27,12 +26,14 @@ public class InventoryVisuals : MonoBehaviour
     BufferItemData bufferItemData;
     GameObject itemBeingDragged;
     GameObject currentHoveringCell;
-    Vector2Int notHoveringOverCell = new(-1, -1);
-    Vector2Int currentHoveringCellPosition = new(-1, -1);
+    Vector2Int currentHoveringCellPosition = Vector2IntExtensions.Empty;
+    Vector2Int currentSelectedCellPosition = Vector2IntExtensions.Empty;
     int currentHoveringInventoryId = -1;
 
     InputManager input;
     InventoryManager inventoryManager;
+    ItemInventoryMediator inventoryMediator;
+
     GraphicRaycaster graphicRaycaster;
     PointerEventData pointerEventData;
     EventSystem eventSystem;
@@ -60,14 +61,11 @@ public class InventoryVisuals : MonoBehaviour
     {
         input = InputManager.Instance;
         inventoryManager = InventoryManager.Instance;
+        inventoryMediator = ItemInventoryMediator.Instance;
         graphicRaycaster = GetComponent<GraphicRaycaster>();
         eventSystem = GetComponent<EventSystem>();
-
         inventoryGridLayoutGroups = new GridLayoutGroup[InventoryCellsParent.childCount];
-        for (int i = 0; i < InventoryCellsParent.childCount; i++)
-        {
-            inventoryGridLayoutGroups[i] = InventoryCellsParent.GetChild(i).GetComponent<GridLayoutGroup>();
-        }
+        inventoryGridLayoutGroups = InventoryCellsParent.GetComponentsInChildren<GridLayoutGroup>(true);
 
         PrepareGridCells(true);
     }
@@ -82,12 +80,19 @@ public class InventoryVisuals : MonoBehaviour
 
         if (inventoryManager.inventories.Count > 1)
         {
+            ClearGridCells();
             InventoryCellsParent.GetChild(1).gameObject.SetActive(true);
             InventoryVisualsParent.GetChild(1).gameObject.SetActive(true);
             PrepareGridCells(false);
         }
 
         StartCoroutine(DrawInventoryEndOfFrame());
+
+        ContextMenu.OnEquipSelected += SendEquippedItemInfo;
+        ContextMenu.OnUnequipSelected += SendUnequippedItemInfo;
+        ContextMenu.OnContextMenuClose += ResetSelectedCell;
+
+        inventoryManager.inventories[0].OnIdChange += SendIdChangeInfo;
     }
 
     private void OnDisable()
@@ -96,13 +101,19 @@ public class InventoryVisuals : MonoBehaviour
         {
             InventoryCellsParent.GetChild(1).gameObject.SetActive(false);
             InventoryVisualsParent.GetChild(1).gameObject.SetActive(false);
-
-            input.GetMousePositionAction().performed -= OnMouseMove;
-            input.GetLeftClickAction().started -= OnLeftClickPress;
-            input.GetLeftClickAction().canceled -= OnLeftClickRelease;
-            input.GetRightClickAction().performed -= OnRightClick;
-            input.GetRotatedAction().performed -= OnTryRotateDraggedItem;
         }
+
+        input.GetMousePositionAction().performed -= OnMouseMove;
+        input.GetLeftClickAction().started -= OnLeftClickPress;
+        input.GetLeftClickAction().canceled -= OnLeftClickRelease;
+        input.GetRightClickAction().performed -= OnRightClick;
+        input.GetRotatedAction().performed -= OnTryRotateDraggedItem;
+
+        ContextMenu.OnEquipSelected -= SendEquippedItemInfo;
+        ContextMenu.OnUnequipSelected -= SendUnequippedItemInfo;
+        ContextMenu.OnContextMenuClose -= ResetSelectedCell;
+
+        inventoryManager.inventories[0].OnIdChange -= SendIdChangeInfo;
     }
 
     private void PrepareGridCells(bool isPlayerInventory)
@@ -126,6 +137,15 @@ public class InventoryVisuals : MonoBehaviour
                 gcui.SetLocationInGrid(x, y);
                 gcui.SetId(i);
             }
+        }
+    }
+
+    private void ClearGridCells()
+    {
+        Transform otherInventory = InventoryCellsParent.GetChild(1);
+        for (int i = 0; i < inventoryGridLayoutGroups[1].transform.childCount; i++)
+        {
+            Destroy(inventoryGridLayoutGroups[1].transform.GetChild(i).gameObject);
         }
     }
 
@@ -170,6 +190,11 @@ public class InventoryVisuals : MonoBehaviour
         DrawInventory();
     }
 
+    private Quaternion RotateDrawnitem()
+    {
+        return Quaternion.AngleAxis(90f, Vector3.forward);
+    }
+
     private Vector2 GetAnchoredPosition(KeyValuePair<string, List<Vector2Int>> kvp, int i)
     {
         return new Vector2(firstCellRectTransform[i].anchoredPosition.x + kvp.Value[0].x * inventoryGridLayoutGroups[i].cellSize.x,
@@ -183,39 +208,43 @@ public class InventoryVisuals : MonoBehaviour
 
     private void OnMouseMove(InputAction.CallbackContext context)
     {
-        pointerEventData = new PointerEventData(eventSystem);
-        pointerEventData.position = input.GetMousePosition();
+        if (currentSelectedCellPosition == Vector2IntExtensions.Empty)
+        {
+            pointerEventData = new PointerEventData(eventSystem);
+            pointerEventData.position = input.GetMousePosition();
 
-        results.Clear();
-        graphicRaycaster.Raycast(pointerEventData, results);
-        if (results.Count > 0)
-        {
-            GridCellUI gcui = results[0].gameObject.GetComponent<GridCellUI>();
-            currentHoveringCellPosition = gcui.cellPosition;
-            currentHoveringInventoryId = gcui.Id;
-            currentHoveringCell = results[0].gameObject;
-        }
-        else
-        {
-            currentHoveringCellPosition = notHoveringOverCell;
-            currentHoveringCell = null;
-        }
+            results.Clear();
+            graphicRaycaster.Raycast(pointerEventData, results);
+            if (results.Count > 0)
+            {
+                GridCellUI gcui = results[0].gameObject.GetComponent<GridCellUI>();
+                currentHoveringCellPosition = gcui.cellPosition;
+                currentHoveringInventoryId = gcui.Id;
+                currentHoveringCell = results[0].gameObject;
+            }
+            else
+            {
+                currentHoveringCellPosition = Vector2IntExtensions.Empty;
+                currentHoveringInventoryId = -1;
+                currentHoveringCell = null;
+            }
 
-        if (itemBeingDragged != null)
-        {
-            RectTransform rect = itemBeingDragged.GetComponent<RectTransform>();
-            rect.position = input.GetMousePosition();
+            if (itemBeingDragged != null)
+            {
+                RectTransform rect = itemBeingDragged.GetComponent<RectTransform>();
+                rect.position = input.GetMousePosition();
+            }
         }
     }
 
     private void OnLeftClickPress(InputAction.CallbackContext context)
     {
-        if (currentHoveringCell != null)
+        if (currentHoveringCell != null && currentSelectedCellPosition == Vector2IntExtensions.Empty)
         {
             GridCellUI selectedCell = currentHoveringCell.GetComponent<GridCellUI>();
             Inventory inventory = inventoryManager.inventories[selectedCell.Id];
 
-            if (inventory.GetInventoryContainer()[selectedCell.cellPosition] != null)
+            if (inventory.inventoryContainer[selectedCell.cellPosition] != null)
             {
                 inventory.NotifyMovingItem(selectedCell.cellPosition, selectedCell.Id);
                 DrawInventory();
@@ -232,39 +261,9 @@ public class InventoryVisuals : MonoBehaviour
         }
     }
 
-    private void OnLeftClickRelease(InputAction.CallbackContext context)
+    private string GetItemAmountString(int itemAmount)
     {
-        if (itemBeingDragged != null)
-        {
-            Inventory inventory = inventoryManager.inventories[currentHoveringInventoryId];
-
-            if (!inventory.GetInventoryContainer().ContainsKey(currentHoveringCellPosition))
-            {
-                inventory.NotifyFailedItemPlacement(bufferItemData.gridCell.CurrentItemAmount);
-            }
-            else
-            {
-                inventory.NotifyPlaceItem(currentHoveringCellPosition, bufferItemData);
-            }
-            itemBeingDragged = null;
-            DrawInventory();
-        }
-    }
-
-    private void OnRightClick(InputAction.CallbackContext context)
-    {
-
-    }
-
-    private void OnTryRotateDraggedItem(InputAction.CallbackContext context)
-    {
-        if ((Time.time - timeSinceLastRotation) > rotationCooldown && itemBeingDragged != null && bufferItemData.gridCell.InventoryItem.CanRotate)
-        {
-            if (rotationCoroutine != null) StopCoroutine(rotationCoroutine);
-            timeSinceLastRotation = Time.time;
-            RotateDraggedItem();
-            inventoryManager.inventories[bufferItemData.inventoryID].NotifyRotatedItem();
-        }
+        return itemAmount == 1 ? "" : itemAmount.ToString();
     }
 
     private void PrepareDraggedObject(GameObject cell, Vector2Int selectedCell, bool shouldRotate)
@@ -283,12 +282,6 @@ public class InventoryVisuals : MonoBehaviour
         //lerpToPivot = StartCoroutine(LerpToPivot());
         rectImage.position = input.GetMousePosition();
         SetAlpha();
-    }
-
-    private void SetAlpha()
-    {
-        Color color = itemBeingDragged.GetComponent<Image>().color;
-        itemBeingDragged.GetComponent<Image>().color = new Color(color.r, color.g, color.b, 0.75f);
     }
 
     private Vector2 GetNewPivot(Vector2Int selectedCell, bool shouldRotate)
@@ -333,6 +326,41 @@ public class InventoryVisuals : MonoBehaviour
         return new Vector2Int(x, y);
     }
 
+    private void SetAlpha()
+    {
+        Color color = itemBeingDragged.GetComponent<Image>().color;
+        itemBeingDragged.GetComponent<Image>().color = new Color(color.r, color.g, color.b, 0.75f);
+    }
+
+    private void OnLeftClickRelease(InputAction.CallbackContext context)
+    {
+        if (itemBeingDragged != null)
+        {
+            if(currentHoveringCellPosition != Vector2IntExtensions.Empty)
+            {
+                Inventory inventory = inventoryManager.inventories[currentHoveringInventoryId];
+                inventory.NotifyPlaceItem(currentHoveringCellPosition, bufferItemData);
+            }
+            else
+            {
+                inventoryManager.inventories[bufferItemData.inventoryID].NotifyFailedItemPlacement(bufferItemData.gridCell.CurrentItemAmount);
+            }
+            itemBeingDragged = null;
+            DrawInventory();
+        }
+    }
+
+    private void OnTryRotateDraggedItem(InputAction.CallbackContext context)
+    {
+        if ((Time.time - timeSinceLastRotation) > rotationCooldown && itemBeingDragged != null && bufferItemData.gridCell.InventoryItem.CanRotate)
+        {
+            if (rotationCoroutine != null) StopCoroutine(rotationCoroutine);
+            timeSinceLastRotation = Time.time;
+            RotateDraggedItem();
+            inventoryManager.inventories[bufferItemData.inventoryID].NotifyRotatedItem();
+        }
+    }
+
     private void RotateDraggedItem()
     {
         RectTransform rectItem = itemBeingDragged.GetComponent<RectTransform>();
@@ -363,16 +391,50 @@ public class InventoryVisuals : MonoBehaviour
         rectItemBeingDragged.rotation = finalRotation;
     }
 
-    private Quaternion RotateDrawnitem()
+    private void OnRightClick(InputAction.CallbackContext context)
     {
-        return Quaternion.AngleAxis(90f, Vector3.forward);
+        if(itemBeingDragged != null)
+        {
+            inventoryManager.inventories[bufferItemData.inventoryID].NotifyFailedItemPlacement(bufferItemData.gridCell.CurrentItemAmount);
+        }
+
+        if(currentHoveringInventoryId == 0 && inventoryManager.inventories[0].inventoryContainer[currentHoveringCellPosition] != null)
+        {
+            //input.GetMousePositionAction().performed -= OnMouseMove;
+
+            currentSelectedCellPosition = currentHoveringCellPosition;
+            string selectedItemName = inventoryManager.inventories[0].inventoryContainer[currentHoveringCellPosition].InventoryItem.name;
+            ContextMenu.NotifyOpenContextMenu(selectedItemName);
+
+            //input.GetMousePositionAction().performed += OnMouseMove;
+        }
     }
 
-    private string GetItemAmountString(int itemAmount)
+    private void SendEquippedItemInfo()
     {
-        return itemAmount == 1 ? "" : itemAmount.ToString();
+        // TODO: Check if already equipped etc
+
+        Debug.Log("SendEquippedItemInfo");
+        InventoryGridCell igc = inventoryManager.inventories[0].inventoryContainer[currentSelectedCellPosition];
+        inventoryMediator.NotifyItemEquipped(igc);
     }
 
+    private void SendUnequippedItemInfo()
+    {
+        InventoryGridCell igc = inventoryManager.inventories[0].inventoryContainer[currentSelectedCellPosition];
+        inventoryMediator.NotifyItemUnequipped(igc);
+    }
+
+    private void ResetSelectedCell()
+    {
+        Debug.Log("ResetSelectedCell");
+        currentSelectedCellPosition = Vector2IntExtensions.Empty;
+    }
+
+    private void SendIdChangeInfo(string oldId, string newId)
+    {
+        inventoryMediator.NotifyIdUpdate(oldId, newId);
+    }
 
     //public void ClearLog()
     //{

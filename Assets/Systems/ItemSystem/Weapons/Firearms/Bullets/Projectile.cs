@@ -17,7 +17,4 @@ public class Projectile : MonoBehaviour
     public ParticleSystem.MinMaxCurve DamageFalloff { get => damageFalloff; private set => damageFalloff = value; }
     public float VelocityModifier { get => velocityModifier; private set => velocityModifier = value; }
     public StatusEffect StatusEffect { get => statusEffect; private set => statusEffect = value; }
-
-
-    public ProjectileType GetBulletType() { return projectileType; }
 }
