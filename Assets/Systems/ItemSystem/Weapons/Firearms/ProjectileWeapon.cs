@@ -8,13 +8,12 @@ using UnityEngine;
 using UnityEngine.VFX;
 using UnityEngine.Video;
 
-public class ProjectileWeapon : ItemBase, ICameraShaker
+public class ProjectileWeapon : ItemBase
 {
     [Header("VFX")]
     [SerializeField] Transform muzzleFlashParent;
     [SerializeField] Transform smokeEmissionPointsParent;
     [SerializeField] GameObject muzzleFlashPrefab;
-    [SerializeField] GameObject gunSmokePrefab;
 
     [Header("Shooting + Aiming Transform")]
     [SerializeField] Transform adsPositionTransform;
@@ -25,15 +24,13 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
     public Transform BaseRotationTransform { get => baseRotationTransform; private set => baseRotationTransform = value; }
 
 
-    //public event Action SelectedEvent;
+    protected Barrel barrel;
+    protected Animator animator;
 
-    Barrel barrel;
-    Animator animator;
-
-    ShootingBehaviour shootingBehaviour;
-    AmmoBehaviour ammoBehaviour;
-    DamageBehaviour damageBehaviour;
-    RecoilBehaviour recoilBehaviour;
+    protected ShootingBehaviour shootingBehaviour;
+    protected AmmoBehaviour ammoBehaviour;
+    protected DamageBehaviour damageBehaviour;
+    protected RecoilBehaviour recoilBehaviour;
 
     int shootHash;
     int reloadHash;
@@ -41,14 +38,11 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
     int reloadStartDelayHash;
     int cockGunHash;
     int timeToCockHash;
-    Coroutine reloadStartDelay;
+    Coroutine reloadStartDelayCoroutine;
     Coroutine cockWeapon;
 
     bool isReloading = false;
-    float shotTime = 0f;
-
-    float effectiveRange;
-    public float EffectiveRange { get => effectiveRange; private set => effectiveRange = value; }
+    protected float shotTime = 0f;
 
 
     #region DEBUG
@@ -67,7 +61,7 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
 
     #endregion
 
-    private void Awake()
+    protected virtual void Awake()
     {
         barrel = GetComponentInChildren<Barrel>();
         shootingBehaviour = GetComponent<ShootingBehaviour>();
@@ -75,8 +69,6 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
         damageBehaviour = GetComponent<DamageBehaviour>();
         recoilBehaviour = GetComponent<RecoilBehaviour>();
         animator = GetComponentInChildren<Animator>();
-
-        //effectiveRange = DamageFalloffDefinitions.GetEffectiveRange(damageBehaviour.GetWeaponCalliber());
     }
 
     private void OnEnable()
@@ -119,7 +111,7 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
 
     internal override void NotifySelected(HotBarManager hotBarManager)
     {
-        //SelectedEvent?.Invoke();
+        // NOOP
     }
 
     internal override void NotifyUnselected()
@@ -127,53 +119,37 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
         // NOOP
     }
 
-    internal void NotifyAmmoSwitch(int increaseDecrease)
-    {
-        // TODO: only switch if other types available
-
-        // animate removing bullets
-        // after this delay. prompt to switch bullet type (only send value from input - index managed on AmmoBehaviour)
-        ammoBehaviour.SwitchAmmoType(increaseDecrease);
-    }
-
-    protected override void OnShakeCamera(ICameraShaker cameraShakeInfo)
-    {
-        base.OnShakeCamera(cameraShakeInfo);
-    }
-
     internal void NotifyReload()
     {
-        if (ammoBehaviour.CanReload() && !isReloading) Reload();
+        if (ammoBehaviour.GetCanReload() && !isReloading) Reload();
     }
     public bool CanShoot()
     {
         return ammoBehaviour.GetHasBulletInMagazine() && shootingBehaviour.GetCanShoot() && !isReloading;
     }
 
-    private void Shoot()
+    protected virtual void Shoot()
     {
         shotTime = Time.time;
-        ItemInventoryMediator.ProjectileInfo projectileInfo =  ItemInventoryMediator.Instance.projectileTracker[ammoBehaviour.CurrentProjectileSelected];
-        Projectile projectile = projectileInfo.prefabToInstatiate.GetComponent<Projectile>();
+        Projectile projectile = GetPrefabToInstantiate().GetComponent<Projectile>();
 
-        barrel.Shoot(shootingBehaviour.GetMuzzleVelocity(), projectileInfo, projectile, GetHitInfoToSend(projectile));
-        OnShakeCamera(this);
+        barrel.Shoot(shootingBehaviour.GetMuzzleVelocity(), GetPrefabToInstantiate(), projectile, GetHitInfoToSend(projectile));
         recoilBehaviour.ApplyRecoil();
-        ammoBehaviour.ConsumeMagazineAmmo();
+        ammoBehaviour.NotifyProjectileConsumed();
         animator?.SetTrigger(shootHash);
         InstantiateParticles();
-
-        
     }
+
+    protected virtual GameObject GetPrefabToInstantiate() { throw new NotImplementedException(); }
 
     private HitInfo GetHitInfoToSend(Projectile projectile)
     {
         HitInfo hitInfo = new();
         hitInfo.baseDamage = damageBehaviour.GetBaseDamage();
+        hitInfo.damageModifier = projectile.DamageModifier;
         hitInfo.locationOfDamageSource = transform.position;
         hitInfo.weaponCalliber = projectile.MatchingCalliber;
-
-        hitInfo.damageFalloffCurve = projectile.DamageFalloff;
+        hitInfo.damageFalloffCurve = damageBehaviour.GetDamageFalloffCurve();
         hitInfo.statusEffect = projectile.StatusEffect;
         return hitInfo;
     }
@@ -188,9 +164,6 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
         {
             for (int i = 0; i < smokeEmissionPointsParent.childCount; i++)
             {
-                //GameObject go = smokeEmissionPointsParent.GetChild(i).gameObject;
-                //GameObject clone = Instantiate(go, smokeEmissionPointsParent.transform);
-                //clone.SetActive(true);
                 smokeEmissionPointsParent.GetChild(i).GetComponentInChildren<VisualEffect>().SendEvent("OnPlay");
             }
         }
@@ -201,11 +174,11 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
         isReloading = true;
         animator.SetTrigger(reloadHash);
         animator.SetBool(isReloadingHash, true);
-        float delay = ammoBehaviour.GetReloadStartDelay();
+        float delay = ammoBehaviour.GetReloadStartOrFinishDelay();
         if (delay > 0)
         {
-            if(reloadStartDelay != null) StopCoroutine(reloadStartDelay);
-            reloadStartDelay = StartCoroutine(StartDelayReloadAnimation(delay));
+            if(reloadStartDelayCoroutine != null) StopCoroutine(reloadStartDelayCoroutine);
+            reloadStartDelayCoroutine = StartCoroutine(StartDelayReloadAnimation(delay));
             DOVirtual.DelayedCall(delay, () => ammoBehaviour.StartReload());
         }
         else
@@ -218,11 +191,11 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
     {
         animator.SetBool(isReloadingHash, false);
         ammoBehaviour.CancelReload();
-        float delay = ammoBehaviour.GetReloadStartDelay();
+        float delay = ammoBehaviour.GetReloadStartOrFinishDelay();
         if (delay > 0)
         {
-            if (reloadStartDelay != null) StopCoroutine(reloadStartDelay);
-            reloadStartDelay = StartCoroutine(StartDelayReloadAnimation(delay));
+            if (reloadStartDelayCoroutine != null) StopCoroutine(reloadStartDelayCoroutine);
+            reloadStartDelayCoroutine = StartCoroutine(StartDelayReloadAnimation(delay));
         }
         isReloading = false;
     }
@@ -258,10 +231,5 @@ public class ProjectileWeapon : ItemBase, ICameraShaker
             yield return new WaitForEndOfFrame();
             dt += Time.deltaTime;
         }
-    }
-
-    CameraShakeInfo ICameraShaker.ReturnCameraShakeInfo()
-    {
-        return recoilBehaviour.GetCameraShakeInfo();
     }
 }

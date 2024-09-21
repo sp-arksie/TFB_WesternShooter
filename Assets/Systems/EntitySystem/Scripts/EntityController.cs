@@ -1,26 +1,48 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Windows;
 
 public class EntityController : MonoBehaviour, IAnimatableEntity
 {
+    [SerializeField] float animationSmoothing = 50f;
+
     [Header("Senses")]
     [SerializeField] internal EntitySight sight;
 
     [Header("Melee")]
     [SerializeField] float minimumMeleeRange = 0.5f;
 
-    internal NavMeshAgent agent;
-    HotBarManagerForEntity hotBarManager;
+    [Header("Shooting")]
+    [SerializeField] float shootingCooldownMin = 2f;
+    [SerializeField] float shootingCooldownMax = 4f;
+    public float ShootingCooldownMin { get => shootingCooldownMin; private set => shootingCooldownMin = value; }
+    public float ShootingCooldownMax { get => shootingCooldownMax; private set => shootingCooldownMax = value; }
 
+    [Header("Strafing")]
+    [SerializeField] float maxLeftRightStrafeDistance = 4f;
+    [SerializeField] float maxFrontBackStrafeDistance = 0.5f;
+    [SerializeField] float strafeDestinationReachedThreshold = 0.3f;
+    [SerializeField] float maxTimeToReachStrafeDestination = 4f;
+    #region Strafing Properties
+    public float MaxLeftRightStrafeDistance { get => maxLeftRightStrafeDistance; private set => maxLeftRightStrafeDistance = value; }
+    public float MaxFrontBackStrafeDistance { get => maxFrontBackStrafeDistance; private set => maxFrontBackStrafeDistance = value; }
+    public float StrafeDestinationReachedThreshold { get => strafeDestinationReachedThreshold; private set => strafeDestinationReachedThreshold = value; }
+    public float NewStrafeDestinationTime { get; private set; }
+    public float MaxTimeToReachStrafeDestination { get => maxTimeToReachStrafeDestination; private set => maxTimeToReachStrafeDestination = value; }
+    public Vector3 CurrentStrafeValue { get; private set; } = Vector3.zero;
+    #endregion
+
+    public HotBarManagerForEntity HotBarManager { get; private set; }
+    public float LastQuickActionTime { get; private set; } = -10;
+
+    internal NavMeshAgent agent;
     BaseState currentState;
 
     Vector3 lastSeenTargetPosition = Vector3.zero;
     bool hasLastSeenTargetPosition = false;
-
-    //float minimumMeleeRange = 1f;
 
     Vector3 smoothedLocalMovement = Vector3.zero;
     //bool isRunning = false;
@@ -28,12 +50,27 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
-        hotBarManager = GetComponent<HotBarManagerForEntity>();
+        HotBarManager = GetComponent<HotBarManagerForEntity>();
+    }
+
+    private void OnEnable()
+    {
+        HotBarManager.OnQuickAction += SetLastQuickActionTime;
+    }
+
+    private void OnDisable()
+    {
+        HotBarManager.OnQuickAction -= SetLastQuickActionTime;
     }
 
     private void Update()
     {
         UpdateAnimation(agent.velocity);
+    }
+
+    private void SetLastQuickActionTime()
+    {
+        LastQuickActionTime = Time.time;
     }
 
     internal void SetOrMaintainState(BaseState stateToSetOrMaintain)
@@ -48,10 +85,53 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
 
     internal void ForgetLastSeenTargetPosition() { hasLastSeenTargetPosition = false; }
 
-    private void UpdateAnimation(Vector3 movementOnPlane)
+    Vector3 velocityLastFrame = Vector3.zero;
+    Vector3 normalisedVelocityLastFrame = Vector3.zero;
+    private void UpdateAnimation(Vector3 velocity)
     {
-        Vector3 localMovementBeingApplied = transform.InverseTransformDirection(movementOnPlane);
-        smoothedLocalMovement = localMovementBeingApplied.normalized;
+        //float speedPercent = velocity.magnitude / agent.speed;
+        //Vector3 localMovementBeingApplied = transform.InverseTransformDirection(velocity);
+        //Vector3 normalisedVelocity = new Vector3(
+        //    localMovementBeingApplied.normalized.x * speedPercent, localMovementBeingApplied.normalized.y * speedPercent, localMovementBeingApplied.normalized.z * speedPercent);
+
+        //smoothedLocalMovement = normalisedVelocity;
+
+        float maxSpeedPercent = agent.velocity.magnitude / agent.speed;
+        Vector3 localVelocity = transform.InverseTransformDirection(agent.velocity);
+        Vector3 normalisedVelocity = new Vector3(
+            localVelocity.normalized.x * maxSpeedPercent, localVelocity.normalized.y * maxSpeedPercent, localVelocity.normalized.z * maxSpeedPercent);
+        normalisedVelocity = Vector3.Lerp(normalisedVelocityLastFrame, normalisedVelocity, Time.deltaTime * animationSmoothing);
+        normalisedVelocityLastFrame = normalisedVelocity;
+
+        smoothedLocalMovement = normalisedVelocity;
+
+    }
+
+    internal void OrientEntityToTarget()
+    {
+        Vector3 targetPosition = sight.GetCurrentlyVisiblesToEntity()[0].entityVisible.transform.position;
+
+        Vector3 worldDirection = targetPosition - transform.position;
+        worldDirection.y = 0f;
+        Quaternion rotation = Quaternion.LookRotation(worldDirection, Vector3.up);
+
+        transform.rotation = rotation;
+    }
+
+    internal void SetStrafeValue()
+    {
+        // TODO: maybe some kind of check for verticality
+
+        float x = Random.Range(-maxLeftRightStrafeDistance, maxLeftRightStrafeDistance);
+        float z = Random.Range(-maxFrontBackStrafeDistance, maxFrontBackStrafeDistance);
+
+        if (x < 0.5f)
+            x += 1f;
+
+        Vector3 strafeDestination = new(x, transform.position.y, z);
+        CurrentStrafeValue = strafeDestination;
+
+        NewStrafeDestinationTime = Time.time;
     }
 
     #region Helper Functions
@@ -63,8 +143,6 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
     internal EntitySight.VisibleInMemory GetTarget() { return sight.GetCurrentlyVisiblesToEntity().Count > 0 ? sight.GetCurrentlyVisiblesToEntity()[0] : null; }
 
     internal float GetMinimumMeleeRange() { return minimumMeleeRange; }
-
-    internal HotBarManagerForEntity GetHotBarManager() { return hotBarManager; }
 
     #endregion
 

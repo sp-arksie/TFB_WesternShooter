@@ -678,13 +678,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 836496661908994862}
-  - component: {fileID: 8642982967482717018}
+  - component: {fileID: 223889432097047749}
   - component: {fileID: 2263995623025307130}
   - component: {fileID: 685148311279531722}
-  - component: {fileID: 1533708357364442446}
+  - component: {fileID: 3375502545688033084}
   - component: {fileID: 327123814307586961}
   m_Layer: 0
-  m_Name: ReichsrevolverM1879
+  m_Name: ReichsrevolverM1879_Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -710,7 +710,7 @@ Transform:
   - {fileID: 9216673380983818286}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8642982967482717018
+--- !u!114 &223889432097047749
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -719,7 +719,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7260630852269034988}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 598f9e5b9563c0c478d7d028195983a2, type: 3}
+  m_Script: {fileID: 11500000, guid: 5f8b1f6ca4fa4514283401dd2c9a4a24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   GrabPointsParent: {fileID: 7163200014956644466}
@@ -730,7 +730,6 @@ MonoBehaviour:
   smokeEmissionPointsParent: {fileID: 9216673380983818286}
   muzzleFlashPrefab: {fileID: 2982679562053618356, guid: 9cd3b93a8eac2cc42a6a907b9d640942,
     type: 3}
-  gunSmokePrefab: {fileID: 0}
   adsPositionTransform: {fileID: 7133511857174959042}
   shootingRotationTransform: {fileID: 4722298096884174761}
   baseRotationTransform: {fileID: 7388046166536495654}
@@ -762,7 +761,58 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseDamage: 50
---- !u!114 &1533708357364442446
+  damageFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: Infinity
+      outSlope: Infinity
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 30
+      value: 1
+      inSlope: -0.00038261432
+      outSlope: -0.00038261432
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.3868613
+      outWeight: 0.27940607
+    - serializedVersion: 3
+      time: 53.9539
+      value: 0.80738306
+      inSlope: -0.017549913
+      outSlope: -0.017549913
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 80.813545
+      value: 0.23800567
+      inSlope: -0.0137324305
+      outSlope: -0.0137324305
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.165778
+    - serializedVersion: 3
+      time: 125
+      value: 0
+      inSlope: -0.0005821051
+      outSlope: -0.0005821051
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.42373478
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &3375502545688033084
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -771,15 +821,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 7260630852269034988}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 917f1d2590ce02f41bc5b99b6491a20b, type: 3}
+  m_Script: {fileID: 11500000, guid: f02db54dae8ae1c4da547343a159fac1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   magazineSize: 5
   reloadTime: 1
-  reloadStartDelay: 0.4
+  reloadStartOrFinishDelay: 0.4
   weaponCalliber: 2
-  currentProjectileSelected: 0
   debugAmmo: {fileID: 0}
+  currentProjectileSelected: 0
 --- !u!114 &327123814307586961
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -158,7 +158,7 @@ public class ItemInventoryMediator : MonoBehaviour
         }
     }
 
-    public void NotifyConsumeAmmo(ProjectileType projectileType)
+    public void NotifyConsumeProjectile(ProjectileType projectileType)
     {
         projectileTracker[projectileType].amount--;
     }

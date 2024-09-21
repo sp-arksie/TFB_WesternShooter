@@ -2,9 +2,8 @@
 
 public enum ItemTypeForEntity
 {
-    LongRangedWeapon,
-    MediumRangedWeapon,
-    ShortRangedWeapon,
+    ProjectileWeapon,
+
     MeleeWeapon,
 
     Medical,

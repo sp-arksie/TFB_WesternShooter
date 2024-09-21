@@ -71,7 +71,7 @@ PrefabInstance:
     - target: {fileID: 8710978987234607200, guid: bfee002154b1c69489e75a027d8f75f8,
         type: 3}
       propertyPath: velocityModifier
-      value: 1.4
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8710978987234607200, guid: bfee002154b1c69489e75a027d8f75f8,
         type: 3}

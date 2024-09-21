@@ -156,11 +156,11 @@ public class HealthController : MonoBehaviour
         }
     }
 
-    private void OnHit(HitInfo hitInfo, DamageModifierDefinitions.DamageModifier damageModifier)
+    private void OnHit(HitInfo hitInfo, DamageModifierDefinitions.DamageModifier hitLocationModifier)
     {
         if(currentHealth > 0)
         {
-            float damageModifierValue = DamageModifierDefinitions.GetDamageModifierValue(damageModifier);
+            float damageModifierValue = DamageModifierDefinitions.GetDamageModifierValue(hitLocationModifier);
             float finaldamage = GetDamage(hitInfo, damageModifierValue);
             ReduceHealth(finaldamage);
 
@@ -174,7 +174,7 @@ public class HealthController : MonoBehaviour
         }
     }
 
-    private float GetDamage(HitInfo hitInfo, float damageModifier)
+    private float GetDamage(HitInfo hitInfo, float hitLocationModifier)
     {
         float damage = 0f;
         if(hitInfo.weaponCalliber == WeaponCalliber.None)
@@ -183,7 +183,7 @@ public class HealthController : MonoBehaviour
         }
         else if(hitInfo.weaponCalliber == WeaponCalliber.Melee)
         {
-            damage = currentDamageAbsorb * hitInfo.baseDamage * damageModifier;
+            damage = currentDamageAbsorb * hitInfo.baseDamage * hitInfo.damageModifier * hitLocationModifier;
         }
         else
         {
@@ -192,7 +192,7 @@ public class HealthController : MonoBehaviour
 
             Debug.Log(damageFalloffMultiplier);
 
-            damage = currentDamageAbsorb * hitInfo.baseDamage * damageModifier * damageFalloffMultiplier;
+            damage = currentDamageAbsorb * hitInfo.baseDamage * hitInfo.damageModifier * hitLocationModifier * damageFalloffMultiplier;
         }
         
         return damage;

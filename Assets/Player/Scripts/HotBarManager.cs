@@ -54,7 +54,7 @@ public class HotBarManager : MonoBehaviour
         }
         currentIndex = startingIndex;
         if(currentIndex > -1)
-            SelectItem(currentIndex);
+            NotifySelectItem(currentIndex);
     }
 
     private void PrepareStartingItem()

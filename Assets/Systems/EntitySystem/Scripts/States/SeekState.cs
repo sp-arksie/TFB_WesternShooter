@@ -6,8 +6,6 @@ using UnityEngine.AI;
 
 public class SeekState : BaseState
 {
-    List<EntityVisible> currentlyVisibleToEntity = new();
-
     private void OnEnable()
     {
         

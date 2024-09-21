@@ -107,9 +107,9 @@ public class HotBarManagerForPlayer : HotBarManager
         if(currentIndex != -1)
         {
             ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
-            if (item is ProjectileWeapon)
+            if (item is ProjectileWeaponForPlayer)
             {
-                ProjectileWeapon projectileWeapon = item as ProjectileWeapon;
+                ProjectileWeaponForPlayer projectileWeapon = item as ProjectileWeaponForPlayer;
                 if (context.started)
                 {
                     if (aimingCoroutine != null) StopCoroutine(aimingCoroutine);
@@ -125,7 +125,7 @@ public class HotBarManagerForPlayer : HotBarManager
         }
     }
 
-    private IEnumerator AimingCoroutine(float startFov, float targetFov, ProjectileWeapon weapon)
+    private IEnumerator AimingCoroutine(float startFov, float targetFov, ProjectileWeaponForPlayer weapon)
     {
         float dt = 0f;
         float t = 0f;
@@ -195,7 +195,7 @@ public class HotBarManagerForPlayer : HotBarManager
 
     private void OnAmmoSwitch(InputAction.CallbackContext context)
     {
-        ProjectileWeapon weapon = hotBarItems.GetChild(currentIndex).GetComponent<ProjectileWeapon>();
+        ProjectileWeaponForPlayer weapon = hotBarItems.GetChild(currentIndex).GetComponent<ProjectileWeaponForPlayer>();
         if(weapon != null)
         {
             Vector2 value = context.ReadValue<Vector2>();
@@ -209,7 +209,6 @@ public class HotBarManagerForPlayer : HotBarManager
         GameObject go = Instantiate(item.prefabToInstantiate, hotBarItems.transform);
         go.SetActive(false);
         ItemBase itemBase = go.GetComponent<ItemBase>();
-        itemBase.Init(item.prefabToInstantiate);
     }
 
     private void UnequipItem(int index)

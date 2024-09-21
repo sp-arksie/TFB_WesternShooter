@@ -24,10 +24,6 @@ public abstract class ItemBase : MonoBehaviour
 
     public GameObject prefabReference { get; private set; }
 
-    public void Init(GameObject prefabReference)
-    {
-        this.prefabReference = prefabReference;
-    }
 
     internal abstract void NotifyQuickAction();
 

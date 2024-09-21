@@ -87,7 +87,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6939552048582216912}
+  - {fileID: 7956087617417356564}
   - {fileID: 8589503034724776030}
   - {fileID: 4659996717899476311}
   - {fileID: 3781089523381691020}
@@ -2847,7 +2847,7 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 6327388458262702552}
   m_PrefabAsset: {fileID: 0}
---- !u!1001 &7770372480504526846
+--- !u!1001 &7346046920687164986
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -2878,17 +2878,17 @@ PrefabInstance:
     - target: {fileID: 836496661908994862, guid: 08b15bc18ebb69b40a219382144b72ab,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 836496661908994862, guid: 08b15bc18ebb69b40a219382144b72ab,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 836496661908994862, guid: 08b15bc18ebb69b40a219382144b72ab,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 836496661908994862, guid: 08b15bc18ebb69b40a219382144b72ab,
         type: 3}
@@ -2908,16 +2908,16 @@ PrefabInstance:
     - target: {fileID: 7260630852269034988, guid: 08b15bc18ebb69b40a219382144b72ab,
         type: 3}
       propertyPath: m_Name
-      value: ReichsrevolverM1879
+      value: ReichsrevolverM1879_Player
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 08b15bc18ebb69b40a219382144b72ab, type: 3}
---- !u!4 &6939552048582216912 stripped
+--- !u!4 &7956087617417356564 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 836496661908994862, guid: 08b15bc18ebb69b40a219382144b72ab,
     type: 3}
-  m_PrefabInstance: {fileID: 7770372480504526846}
+  m_PrefabInstance: {fileID: 7346046920687164986}
   m_PrefabAsset: {fileID: 0}
