@@ -41,7 +41,7 @@ public class ProjectileWeapon : ItemBase
     Coroutine reloadStartDelayCoroutine;
     Coroutine cockWeapon;
 
-    bool isReloading = false;
+    protected bool isReloading = false;
     protected float shotTime = 0f;
 
 

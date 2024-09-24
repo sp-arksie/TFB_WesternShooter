@@ -14,6 +14,8 @@ public class EntitySight : MonoBehaviour
     [SerializeField] LayerMask visibilityPointsLayerMask = Physics.DefaultRaycastLayers;
     [SerializeField] string[] acceptedTags = { "Untagged" };
 
+    public LayerMask ObjectOccluderLayerMask { get => objectOccluderLayerMask; }
+
     [System.Serializable]
     public class VisibleInMemory
     {

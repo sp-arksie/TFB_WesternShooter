@@ -4,36 +4,64 @@ using UnityEngine;
 
 public class StrafeState : BaseState
 {
+    [SerializeField] float minStrafeDuration = 2f;
+    [SerializeField] float maxStrafeDuration = 4f;
+
+    [Space(10)]
+    [SerializeField] float minCooldownBetweenStrafe = 0.5f;
+    [SerializeField] float maxCooldownBetweenStrafe = 3f;
+
+    float currentStrafeDuration = 0f;
+    float timeOfNewStrafeSet = 0f;
+    bool right = true;
+    float cooldownStartTime = 0f;
+    float cooldownDuration = 0f;
+    bool inCooldown = false;
+
     private void Update()
     {
         NotifyOrientEntityToTarget();
 
-        if (GetStrafeValue() != Vector3.zero)
+        if (!inCooldown)
         {
-            float distance = Vector3.Distance(transform.position, GetStrafeDestination());
-
-            if (distance < GetStrafeDestinationReachedThreshold() ||
-                (Time.time - GetTimeOfLastStrafeSet()) > GetMaxTimeToReachStrafeDestination())
-            {
-                SetStrafeValue();
-                GetAgent().SetDestination( GetStrafeDestination() );
-            }
+            SetStrafe(right);
         }
         else
         {
-            SetStrafeValue();
-            GetAgent().SetDestination(GetStrafeDestination());
+            CheckCooldown();
         }
+
+        NotifyOrientEntityToTarget();
     }
 
-    private Vector3 GetStrafeDestination()
+    private void SetStrafe(bool right)
     {
-        Vector3 currentPosition = GetAgent().transform.position;
-        Vector3 globalStrafeValue = GetAgent().transform.TransformDirection(GetStrafeValue());
+        int sign = right ? 1 : -1;
 
-        return new(
-            currentPosition.x + globalStrafeValue.x,
-            currentPosition.y + globalStrafeValue.y,
-            currentPosition.z + globalStrafeValue.z);
+        Vector3 direction = transform.TransformPoint(sign * Vector3.right);
+        GetAgent().SetDestination(direction);
+
+        if (Time.time - timeOfNewStrafeSet > currentStrafeDuration)
+            SetCooldown();
+    }
+
+    private void SetCooldown()
+    {
+        inCooldown = true;
+        cooldownStartTime = Time.time;
+        cooldownDuration = Random.Range(minCooldownBetweenStrafe, maxCooldownBetweenStrafe);
+    }
+
+    private void CheckCooldown()
+    {
+        if(Time.time - cooldownStartTime > cooldownDuration)
+        {
+            inCooldown = false;
+
+            right = Random.Range(0, 2) == 1 ? true : false;
+
+            timeOfNewStrafeSet = Time.time;
+            currentStrafeDuration = Random.Range(minStrafeDuration, maxStrafeDuration);
+        }
     }
 }

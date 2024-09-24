@@ -34,4 +34,6 @@ public class ProjectileWeaponForEntity : ProjectileWeapon
     {
         return ammoBehaviourForEntity.GetProjectilePrefabToShoot();
     }
+
+    internal bool GetIsReloading() { return isReloading; }
 }

@@ -9,7 +9,6 @@ public class ShootState : BaseState
 
     private void OnEnable()
     {
-        GetAgent().SetDestination(transform.position);
         weapon = GetHotBarManager().currentSelectedItem as ProjectileWeaponForEntity;
     }
 

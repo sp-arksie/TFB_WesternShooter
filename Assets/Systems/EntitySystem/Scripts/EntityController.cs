@@ -35,8 +35,24 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
     public Vector3 CurrentStrafeValue { get; private set; } = Vector3.zero;
     #endregion
 
+    [Header("Cover")]
+    [SerializeField] LayerMask staticOccludersLayerMask = Physics.DefaultRaycastLayers;
+    [SerializeField] int numberOfCollidersToSample = 10;
+    [SerializeField] float coverCheckingAreaRadius = 10f;
+    [Tooltip("-1 is most accurate and 1 is least")]
+    [SerializeField] [Range(-1f, 1f)] float hidingAccuracy = 0f;
+    [SerializeField] float coverDestinationReachedThreshold = 0.1f;
+    #region Cover Properties
+    public LayerMask StaticOccludersLayerMask { get => staticOccludersLayerMask; }
+    public int NumberOfCollidersToSample { get => numberOfCollidersToSample; }
+    public float CoverCheckingAreaRadius { get => coverCheckingAreaRadius; }
+    public float HidingAccuracy { get => hidingAccuracy; }
+    public float CoverDestinationReachedThreshold { get => coverDestinationReachedThreshold; }
+    #endregion
+
     public HotBarManagerForEntity HotBarManager { get; private set; }
     public float LastQuickActionTime { get; private set; } = -10;
+    public Vector3 CurrentCoverDestination { get; private set; }
 
     internal NavMeshAgent agent;
     BaseState currentState;
@@ -118,22 +134,6 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
         transform.rotation = rotation;
     }
 
-    internal void SetStrafeValue()
-    {
-        // TODO: maybe some kind of check for verticality
-
-        float x = Random.Range(-maxLeftRightStrafeDistance, maxLeftRightStrafeDistance);
-        float z = Random.Range(-maxFrontBackStrafeDistance, maxFrontBackStrafeDistance);
-
-        if (x < 0.5f)
-            x += 1f;
-
-        Vector3 strafeDestination = new(x, transform.position.y, z);
-        CurrentStrafeValue = strafeDestination;
-
-        NewStrafeDestinationTime = Time.time;
-    }
-
     #region Helper Functions
 
     internal bool GetHasLastSeenTargetPosition() { return hasLastSeenTargetPosition; }
@@ -143,6 +143,8 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
     internal EntitySight.VisibleInMemory GetTarget() { return sight.GetCurrentlyVisiblesToEntity().Count > 0 ? sight.GetCurrentlyVisiblesToEntity()[0] : null; }
 
     internal float GetMinimumMeleeRange() { return minimumMeleeRange; }
+
+    internal void NotifySetCoverDestination(Vector3 destination) { CurrentCoverDestination = destination; }
 
     #endregion
 

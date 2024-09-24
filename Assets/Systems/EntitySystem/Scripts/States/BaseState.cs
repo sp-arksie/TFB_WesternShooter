@@ -13,7 +13,10 @@ public class BaseState : MonoBehaviour
         entityController = gameObject.GetComponent<EntityController>();
     }
 
+    #region General
     protected NavMeshAgent GetAgent() { return entityController.agent; }
+    protected void NotifyOrientEntityToTarget() { entityController.OrientEntityToTarget(); }
+    #endregion
 
     #region Sight
     protected EntitySight GetSight() { return entityController.sight; }
@@ -21,16 +24,17 @@ public class BaseState : MonoBehaviour
     protected void ForgetLastSeenTargetPosition() { entityController.ForgetLastSeenTargetPosition(); }
     #endregion
 
+    #region Items
     protected HotBarManagerForEntity GetHotBarManager() { return entityController.HotBarManager; }
     protected bool GetCurrentItemBusy() { return entityController.HotBarManager.GetCurrentItemBusy(); }
-    protected void NotifyOrientEntityToTarget() { entityController.OrientEntityToTarget(); }
+    #endregion
 
-    #region Strafing
-    //internal bool GetHasStrafePositionSet() { return entityController.HasStrafePositionSet; }
-    internal Vector3 GetStrafeValue() { return entityController.CurrentStrafeValue; }
-    internal float GetStrafeDestinationReachedThreshold() { return entityController.StrafeDestinationReachedThreshold; }
-    internal void SetStrafeValue() { entityController.SetStrafeValue(); }
-    internal float GetMaxTimeToReachStrafeDestination() { return entityController.MaxTimeToReachStrafeDestination; }
-    internal float GetTimeOfLastStrafeSet() { return entityController.NewStrafeDestinationTime; }
+    #region Cover
+    protected int GetNumberOfCollidersToSample() { return entityController.NumberOfCollidersToSample; }
+    protected float GetCoverCheckingAreaRadius() { return entityController.CoverCheckingAreaRadius; }
+    protected LayerMask GetCoverObjectsLayerMask() { return entityController.StaticOccludersLayerMask; }
+    protected float GetHidingAccuracy() { return entityController.HidingAccuracy; }
+    protected void SetCoverDestination(Vector3 destination) { entityController.NotifySetCoverDestination(destination); }
+    protected Vector3 GetCurrentCoverDestination() { return entityController.CurrentCoverDestination; }
     #endregion
 }
