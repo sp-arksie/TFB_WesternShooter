@@ -41,7 +41,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1090358683787605788}
-  - component: {fileID: 2097473452622437015}
+  - component: {fileID: 2141483368979445223}
+  - component: {fileID: 2823021058509157248}
+  - component: {fileID: 3370803051680917969}
   m_Layer: 0
   m_Name: '{ReichsrevolverM1879}'
   m_TagString: Untagged
@@ -66,7 +68,7 @@ Transform:
   - {fileID: 7191599458367767232}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2097473452622437015
+--- !u!114 &2141483368979445223
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -75,20 +77,51 @@ MonoBehaviour:
   m_GameObject: {fileID: 3369660327736317415}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 598f9e5b9563c0c478d7d028195983a2, type: 3}
+  m_Script: {fileID: 11500000, guid: 8e6fe7e9c7633714e90ee08154a2f1ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GrabPointsParent: {fileID: 0}
-  magazineSize: 0
-  weaponCalliber: 1
   secondsBetweenShot: 1
-  muzzleVelocity: 30
-  muzzleFlashParent: {fileID: 7191599458367767232}
-  smokeEmissionPointsParent: {fileID: 0}
-  muzzleFlashPrefab: {fileID: 2982679562053618356, guid: 9cd3b93a8eac2cc42a6a907b9d640942,
-    type: 3}
-  gunSmokePrefab: {fileID: 0}
-  debugShoot: 0
+  muzzlevelocity: 60
+  bulletsPerShot: 1
+  applySpread: 0
+  maxSpread: {x: 0, y: 0}
+--- !u!114 &2823021058509157248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3369660327736317415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fc463f11a5832a4aa3d2f2b19023057, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseDamage: 50
+  damageFalloff:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &3370803051680917969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3369660327736317415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47738b2bfa774604ea43098ebe06a3df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recoilStrength: 12
+  recoilDirection: {x: 0, y: 1}
+  recoilAnimationSpeed: 0.1
+  recoilRecoveryTime: 0.5
+  recoveryStartDelay: 0
+  recoveryPercent: 0.9
 --- !u!1 &5918669663534924518
 GameObject:
   m_ObjectHideFlags: 0
@@ -133,8 +166,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 964c72f994fe60d4db79d4e4dd85d6d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  projectile: {fileID: 8921159995815080010, guid: bfee002154b1c69489e75a027d8f75f8,
-    type: 3}
 --- !u!1001 &6007780443667830226
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -34,7 +34,8 @@ public class DecisionHasPotentialCoverPosition : DecisionNode
             float dotProduct = GetPotentialCoverPosition(potentialCoverColliders[i].transform.position, targetPosition, out Vector3 potentialCoverPosition);
             if (dotProduct != operationFailed && dotProduct <= entityController.HidingAccuracy)
             {
-                entityController.NotifySetCoverDestination(potentialCoverPosition);
+                if( !entityController.IsMovingToCover )
+                    entityController.NotifySetCoverDestination(potentialCoverPosition);
                 suitableCoverFound = true;
             }
             else if (dotProduct != operationFailed)
@@ -44,7 +45,8 @@ public class DecisionHasPotentialCoverPosition : DecisionNode
                 dotProduct = GetPotentialCoverPosition(newSamplePosition, targetPosition, out potentialCoverPosition);
                 if (dotProduct != operationFailed && dotProduct <= entityController.HidingAccuracy)
                 {
-                    entityController.NotifySetCoverDestination(potentialCoverPosition);
+                    if (!entityController.IsMovingToCover)
+                        entityController.NotifySetCoverDestination(potentialCoverPosition);
                     suitableCoverFound = true;
                 }
             }
@@ -52,45 +54,6 @@ public class DecisionHasPotentialCoverPosition : DecisionNode
 
         return suitableCoverFound;
     }
-
-    //private void Update()
-    //{
-    //    for(int i  = 0; i <  potentialCoverColliders.Length; i++)
-    //    {
-    //        potentialCoverColliders[i] = null;
-    //    }
-
-    //    int numberOfPotentialColliders = Physics.OverlapSphereNonAlloc(transform.position, GetCoverCheckingAreaRadius(), potentialCoverColliders, GetCoverObjectsLayerMask());
-    //    Array.Sort(potentialCoverColliders, SortByClosestColliders);
-
-    //    Vector3 targetPosition = GetSight().GetCurrentlyVisiblesToEntity()[0].entityVisible.transform.position;
-
-    //    bool suitableCoverFound = false;
-    //    for(int i = 0; i < numberOfPotentialColliders && !suitableCoverFound; i++)
-    //    {
-    //        float dotProduct = GetPotentialCoverPosition(potentialCoverColliders[i].transform.position, targetPosition, out Vector3 potentialCoverPosition);
-    //        if (dotProduct != operationFailed && dotProduct <= GetHidingAccuracy())
-    //        {
-    //            SetCoverDestination(potentialCoverPosition);
-    //            suitableCoverFound = true;
-    //        }
-    //        else if(dotProduct != operationFailed)
-    //        {
-    //            Vector3 newSamplePosition = potentialCoverColliders[i].transform.position - (targetPosition - potentialCoverPosition) * 2f;
-    //            dotProduct = GetPotentialCoverPosition(newSamplePosition, targetPosition, out potentialCoverPosition);
-    //            if (dotProduct != operationFailed && dotProduct <= GetHidingAccuracy())
-    //            {
-    //                SetCoverDestination(potentialCoverPosition);
-    //                suitableCoverFound = true;
-    //            }
-    //        }
-    //    }
-
-    //    if (!suitableCoverFound)
-    //    {
-    //        // TODO: what happens if no cover found?
-    //    }
-    //}
 
     // Gets the closest Edge position from samplePosition (make sure NavMesh is baked, to detect obstacle edges)
     // Returns the dot product between the normal of the Edge that is returned and the Target.

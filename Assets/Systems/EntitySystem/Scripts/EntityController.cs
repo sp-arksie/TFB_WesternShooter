@@ -9,6 +9,13 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
 {
     [SerializeField] float animationSmoothing = 50f;
 
+    [Header("Locomotion")]
+    [SerializeField] float runSpeedMultiplier = 2f;
+    #region Locomotion Properties
+    public float BaseAgentSpeed { get; private set; }
+    public float RunSpeedMultiplier { get => runSpeedMultiplier; }
+    #endregion
+
     [Header("Senses")]
     [SerializeField] internal EntitySight sight;
 
@@ -53,8 +60,11 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
     public HotBarManagerForEntity HotBarManager { get; private set; }
     public float LastQuickActionTime { get; private set; } = -10;
     public Vector3 CurrentCoverDestination { get; private set; }
+    public bool IsMovingToCover { get; private set; } = false;
 
     internal NavMeshAgent agent;
+    HealthController healthController;
+    DecisionMaker decisionMaker;
     BaseState currentState;
 
     Vector3 lastSeenTargetPosition = Vector3.zero;
@@ -66,16 +76,22 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        healthController = GetComponent<HealthController>();
+        decisionMaker = GetComponent<DecisionMaker>();
         HotBarManager = GetComponent<HotBarManagerForEntity>();
+
+        BaseAgentSpeed = agent.speed;
     }
 
     private void OnEnable()
     {
+        healthController.OnHealthDepletedEvent += DisableComponentsOnDie;
         HotBarManager.OnQuickAction += SetLastQuickActionTime;
     }
 
     private void OnDisable()
     {
+        healthController.OnHealthDepletedEvent -= DisableComponentsOnDie;
         HotBarManager.OnQuickAction -= SetLastQuickActionTime;
     }
 
@@ -101,18 +117,10 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
 
     internal void ForgetLastSeenTargetPosition() { hasLastSeenTargetPosition = false; }
 
-    Vector3 velocityLastFrame = Vector3.zero;
     Vector3 normalisedVelocityLastFrame = Vector3.zero;
     private void UpdateAnimation(Vector3 velocity)
     {
-        //float speedPercent = velocity.magnitude / agent.speed;
-        //Vector3 localMovementBeingApplied = transform.InverseTransformDirection(velocity);
-        //Vector3 normalisedVelocity = new Vector3(
-        //    localMovementBeingApplied.normalized.x * speedPercent, localMovementBeingApplied.normalized.y * speedPercent, localMovementBeingApplied.normalized.z * speedPercent);
-
-        //smoothedLocalMovement = normalisedVelocity;
-
-        float maxSpeedPercent = agent.velocity.magnitude / agent.speed;
+        float maxSpeedPercent = agent.velocity.magnitude / BaseAgentSpeed;
         Vector3 localVelocity = transform.InverseTransformDirection(agent.velocity);
         Vector3 normalisedVelocity = new Vector3(
             localVelocity.normalized.x * maxSpeedPercent, localVelocity.normalized.y * maxSpeedPercent, localVelocity.normalized.z * maxSpeedPercent);
@@ -120,7 +128,6 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
         normalisedVelocityLastFrame = normalisedVelocity;
 
         smoothedLocalMovement = normalisedVelocity;
-
     }
 
     internal void OrientEntityToTarget()
@@ -134,6 +141,13 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
         transform.rotation = rotation;
     }
 
+    private void DisableComponentsOnDie()
+    {
+        decisionMaker.enabled = false;
+        currentState.enabled = false;
+        agent.enabled = false;
+    }
+
     #region Helper Functions
 
     internal bool GetHasLastSeenTargetPosition() { return hasLastSeenTargetPosition; }
@@ -145,6 +159,10 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
     internal float GetMinimumMeleeRange() { return minimumMeleeRange; }
 
     internal void NotifySetCoverDestination(Vector3 destination) { CurrentCoverDestination = destination; }
+    internal void SetIsMovingToCover(bool value) { IsMovingToCover = value; }
+
+    internal void NotifyRun() { agent.speed = BaseAgentSpeed * RunSpeedMultiplier; }
+    internal void NotifyStopRun() { agent.speed = BaseAgentSpeed; }
 
     #endregion
 

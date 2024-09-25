@@ -18,6 +18,11 @@ public class BaseState : MonoBehaviour
     protected void NotifyOrientEntityToTarget() { entityController.OrientEntityToTarget(); }
     #endregion
 
+    #region Locomotion
+    protected void StartRun() { entityController.NotifyRun(); }
+    protected void StopRun() { entityController.NotifyStopRun(); }
+    #endregion
+
     #region Sight
     protected EntitySight GetSight() { return entityController.sight; }
     protected Vector3 GetLastSeenTargetPosition() { return entityController.GetLastSeenTargetPosition(); }
@@ -36,5 +41,7 @@ public class BaseState : MonoBehaviour
     protected float GetHidingAccuracy() { return entityController.HidingAccuracy; }
     protected void SetCoverDestination(Vector3 destination) { entityController.NotifySetCoverDestination(destination); }
     protected Vector3 GetCurrentCoverDestination() { return entityController.CurrentCoverDestination; }
+    protected void SetIsMovingToCover(bool value) { entityController.SetIsMovingToCover(value); }
+    protected bool GetIsMovingToCover() { return entityController.IsMovingToCover; }
     #endregion
 }

@@ -23,7 +23,7 @@ public class HotBarManager : MonoBehaviour
     protected bool currentItemBusy = false;
 
     // Items index
-    int startingIndex = 0;
+    protected int startingIndex = 0;
     protected int currentIndex = 0;
 
     // References

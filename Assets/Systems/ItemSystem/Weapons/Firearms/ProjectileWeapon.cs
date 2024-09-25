@@ -8,6 +8,9 @@ using UnityEngine;
 using UnityEngine.VFX;
 using UnityEngine.Video;
 
+[RequireComponent(typeof(ShootingBehaviour))]
+[RequireComponent(typeof(DamageBehaviour))]
+[RequireComponent(typeof(RecoilBehaviour))]
 public class ProjectileWeapon : ItemBase
 {
     [Header("VFX")]
@@ -133,7 +136,7 @@ public class ProjectileWeapon : ItemBase
         shotTime = Time.time;
         Projectile projectile = GetPrefabToInstantiate().GetComponent<Projectile>();
 
-        barrel.Shoot(shootingBehaviour.GetMuzzleVelocity(), GetPrefabToInstantiate(), projectile, GetHitInfoToSend(projectile));
+        barrel.Shoot(shootingBehaviour, GetPrefabToInstantiate(), projectile, GetHitInfoToSend(projectile));
         recoilBehaviour.ApplyRecoil();
         ammoBehaviour.NotifyProjectileConsumed();
         animator?.SetTrigger(shootHash);
@@ -172,8 +175,8 @@ public class ProjectileWeapon : ItemBase
     private void Reload()
     {
         isReloading = true;
-        animator.SetTrigger(reloadHash);
-        animator.SetBool(isReloadingHash, true);
+        animator?.SetTrigger(reloadHash);
+        animator?.SetBool(isReloadingHash, true);
         float delay = ammoBehaviour.GetReloadStartOrFinishDelay();
         if (delay > 0)
         {
@@ -189,7 +192,7 @@ public class ProjectileWeapon : ItemBase
 
     private void StopReload()
     {
-        animator.SetBool(isReloadingHash, false);
+        animator?.SetBool(isReloadingHash, false);
         ammoBehaviour.CancelReload();
         float delay = ammoBehaviour.GetReloadStartOrFinishDelay();
         if (delay > 0)
@@ -205,7 +208,7 @@ public class ProjectileWeapon : ItemBase
         float t = 0f;
         while (t / delay <= 1)
         {
-            animator.SetFloat(reloadStartDelayHash, t/delay);
+            animator?.SetFloat(reloadStartDelayHash, t / delay);
             t += Time.deltaTime;
             yield return new WaitForEndOfFrame();
         }
@@ -214,7 +217,7 @@ public class ProjectileWeapon : ItemBase
 
     private void ProceedGunAnimation()
     {
-        animator.SetTrigger(cockGunHash);
+        animator?.SetTrigger(cockGunHash);
         if(cockWeapon != null) { StopCoroutine(cockWeapon); }
         cockWeapon = StartCoroutine(CockWeapon());
     }
@@ -227,7 +230,7 @@ public class ProjectileWeapon : ItemBase
         while (t <= 1)
         {
             t = dt / timeToCock;
-            animator.SetFloat(timeToCockHash, t);
+            animator?.SetFloat(timeToCockHash, t);
             yield return new WaitForEndOfFrame();
             dt += Time.deltaTime;
         }

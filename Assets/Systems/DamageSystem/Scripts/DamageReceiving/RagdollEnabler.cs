@@ -9,7 +9,6 @@ public class RagdollEnabler : MonoBehaviour
     [SerializeField] bool startInRagdoll = false;
 
     Animator animator;
-    NavMeshAgent agent;
     Rigidbody[] rigidBodies;
     Joint[] joints;
 
@@ -18,7 +17,6 @@ public class RagdollEnabler : MonoBehaviour
         rigidBodies = ragdollRoot.GetComponentsInChildren<Rigidbody>();
         joints = ragdollRoot.GetComponentsInChildren<Joint>();
         animator = GetComponentInChildren<Animator>();
-        agent = GetComponent<NavMeshAgent>();
 
         if (startInRagdoll)
             EnableRagdoll();
@@ -29,7 +27,6 @@ public class RagdollEnabler : MonoBehaviour
     internal void EnableAnimator()
     {
         animator.enabled = true;
-        agent.enabled = true;
 
         foreach (Rigidbody rb in rigidBodies)
         {
@@ -45,7 +42,6 @@ public class RagdollEnabler : MonoBehaviour
     internal void EnableRagdoll()
     {
         animator.enabled = false;
-        agent.enabled = false;
 
         foreach (Rigidbody rb in rigidBodies)
         {

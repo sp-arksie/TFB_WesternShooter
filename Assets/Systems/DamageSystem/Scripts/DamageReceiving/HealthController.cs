@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
@@ -11,6 +12,8 @@ public class HealthController : MonoBehaviour
     [SerializeField] float baseHealth = 100f;
     [SerializeField] Transform damageReceiversParent;
     [SerializeField] bool receivesStatusEffects = true;
+
+    public event Action OnHealthDepletedEvent;
 
     public enum ActionOnHealthDepleted
     {
@@ -272,6 +275,8 @@ public class HealthController : MonoBehaviour
 
     private void OnHealthDepleted()
     {
+        OnHealthDepletedEvent?.Invoke();
+
         switch (actionOnHealthDepleted)
         {
             case ActionOnHealthDepleted.None:

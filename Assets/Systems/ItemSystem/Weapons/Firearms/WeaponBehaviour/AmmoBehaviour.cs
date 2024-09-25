@@ -24,6 +24,17 @@ public class AmmoBehaviour : MonoBehaviour
     #region DEBUG
 
     [SerializeField] TextMeshProUGUI debugAmmo;
+    [SerializeField] int debugAddAmmoAmount = 100;
+    [SerializeField] bool debugAddAmmo;
+
+    private void OnValidate()
+    {
+        if (debugAddAmmo)
+        {
+            debugAddAmmo = false;
+            ammoInMagazine += debugAddAmmoAmount;
+        }
+    }
 
     #endregion
 

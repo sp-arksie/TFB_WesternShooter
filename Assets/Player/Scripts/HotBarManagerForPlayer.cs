@@ -1,8 +1,5 @@
 using Cinemachine;
 using System.Collections;
-using System.Collections.Generic;
-using System.Security.Claims;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem.Interactions;
 using UnityEngine.InputSystem;
@@ -32,8 +29,8 @@ public class HotBarManagerForPlayer : HotBarManager
 
     protected override void Start()
     {
+        startingIndex = -1;
         base.Start();
-        currentIndex = -1;
     }
 
     private void OnEnable()

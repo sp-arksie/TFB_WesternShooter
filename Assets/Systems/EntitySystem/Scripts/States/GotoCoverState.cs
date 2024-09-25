@@ -6,6 +6,8 @@ public class GotoCoverState : BaseState
 {
     private void OnEnable()
     {
+        SetIsMovingToCover(true);
+        StartRun();
         GetAgent().SetDestination( GetCurrentCoverDestination() );
     }
 }

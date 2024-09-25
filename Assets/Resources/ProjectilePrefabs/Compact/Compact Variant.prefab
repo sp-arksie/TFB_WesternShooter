@@ -8,6 +8,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5408791042732066109, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8148897296667661270, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8651845449858847708, guid: bfee002154b1c69489e75a027d8f75f8,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -58,6 +68,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8721562298655472063, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8921159995815080010, guid: bfee002154b1c69489e75a027d8f75f8,
         type: 3}
       propertyPath: m_Name
@@ -93,76 +108,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _projectileType: 0
   matchingCalliber: 2
-  damageFalloff:
-    m_Mode: 1
-    m_CurveMultiplier: 1
-    m_CurveMin:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    m_CurveMax:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 1
-        inSlope: -Infinity
-        outSlope: -Infinity
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 30
-        value: 1
-        inSlope: -0.0005064166
-        outSlope: -0.0005064166
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.49760365
-        outWeight: 0.33333334
-      - serializedVersion: 3
-        time: 69.79047
-        value: 0.75977784
-        inSlope: -0.016679984
-        outSlope: -0.016679984
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.16384552
-        outWeight: 0.22041932
-      - serializedVersion: 3
-        time: 92.871826
-        value: 0.4098816
-        inSlope: -0.013567308
-        outSlope: -0.013567308
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.25898913
-        outWeight: 0.22220817
-      - serializedVersion: 3
-        time: 117.55496
-        value: 0.10138347
-        inSlope: -0.0056533604
-        outSlope: -0.0056533604
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.23263195
-      - serializedVersion: 3
-        time: 150
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    m_ConstantMin: 0
-    m_ConstantMax: 0
+  damageModifier: 1
   velocityModifier: 1
   statusEffect: 0
