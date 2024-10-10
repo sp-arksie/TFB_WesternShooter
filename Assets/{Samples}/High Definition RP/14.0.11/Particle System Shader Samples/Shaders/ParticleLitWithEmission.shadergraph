@@ -257,7 +257,6 @@
     "m_OutputNode": {
         "m_Id": ""
     },
-    "m_SubDatas": [],
     "m_ActiveTargets": [
         {
             "m_Id": "fe9183da9587480caa220413e9d9d56f"
@@ -481,7 +480,8 @@
     "m_TessellationShapeFactor": 0.75,
     "m_TessellationBackFaceCullEpsilon": -0.25,
     "m_TessellationMaxDisplacement": 0.009999999776482582,
-    "m_Version": 1,
+    "m_DebugSymbols": false,
+    "m_Version": 2,
     "inspectorFoldoutMask": 1
 }
 
@@ -725,6 +725,7 @@
     "m_BackThenFrontRendering": false,
     "m_TransparentDepthPrepass": false,
     "m_TransparentDepthPostpass": false,
+    "m_TransparentPerPixelSorting": false,
     "m_SupportLodCrossFade": false
 }
 
@@ -879,6 +880,7 @@
     "m_TessellationShapeFactor": 0.75,
     "m_TessellationBackFaceCullEpsilon": -0.25,
     "m_TessellationMaxDisplacement": 0.009999999776482582,
+    "m_DebugSymbols": false,
     "m_Version": 1,
     "inspectorFoldoutMask": 0
 }
@@ -889,6 +891,7 @@
     "m_ObjectId": "5d1aa424a94646b096a29817494f7071",
     "m_RayTracing": false,
     "m_MaterialType": 0,
+    "m_MaterialTypeMask": 2,
     "m_RefractionModel": 0,
     "m_SSSTransmission": true,
     "m_EnergyConservingSpecular": true,
@@ -995,6 +998,7 @@
     "m_ObjectId": "6f221de80d0a4a03933a96603433581b",
     "m_RayTracing": false,
     "m_MaterialType": 0,
+    "m_MaterialTypeMask": 2,
     "m_RefractionModel": 0,
     "m_SSSTransmission": true,
     "m_EnergyConservingSpecular": true,
@@ -1264,6 +1268,7 @@
     "m_BackThenFrontRendering": false,
     "m_TransparentDepthPrepass": false,
     "m_TransparentDepthPostpass": false,
+    "m_TransparentPerPixelSorting": false,
     "m_SupportLodCrossFade": false
 }
 
@@ -1893,6 +1898,6 @@
     ],
     "m_CustomEditorGUI": "",
     "m_SupportVFX": false,
-    "m_SupportComputeForVertexSetup": false
+    "m_SupportLineRendering": false
 }
 

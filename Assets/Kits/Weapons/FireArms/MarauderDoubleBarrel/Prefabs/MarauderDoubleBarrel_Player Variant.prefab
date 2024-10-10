@@ -112,7 +112,7 @@ MonoBehaviour:
   hiddenTransform: {fileID: 1889729791691431508}
   muzzleFlashParent: {fileID: 7505593467157559426}
   smokeEmissionPointsParent: {fileID: 6037663602492495929}
-  muzzleFlashPrefab: {fileID: 2982679562053618356, guid: 9cd3b93a8eac2cc42a6a907b9d640942,
+  muzzleFlashPrefab: {fileID: 1246147520253883632, guid: 69aaf17a7543fbe4ca7db70ad2a767b5,
     type: 3}
   adsPositionTransform: {fileID: 3127095026418527865}
   shootingRotationTransform: {fileID: 5039987407068490420}
@@ -131,7 +131,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   magazineSize: 2
-  reloadTime: 0.4
+  reloadTime: 0.8
   reloadStartOrFinishDelay: 1
   weaponCalliber: 0
   debugAmmo: {fileID: 0}

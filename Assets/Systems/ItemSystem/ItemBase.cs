@@ -1,5 +1,4 @@
 using System;
-using UnityEditor.Build.Content;
 using UnityEngine;
 
 public abstract class ItemBase : MonoBehaviour
@@ -18,12 +17,8 @@ public abstract class ItemBase : MonoBehaviour
 
     public event Action<bool> onUnskippableActionInProgress;
     public event Action<ICameraShaker> onShakeCamera;
-
-    public string instanceID { get; private set; }
-    public int currentAmount { get; protected set; }
-
-    public GameObject prefabReference { get; private set; }
-
+    public event Action activateLeftArm;
+    public event Action deactivateLeftArm;
 
     internal abstract void NotifyQuickAction();
 
@@ -43,5 +38,15 @@ public abstract class ItemBase : MonoBehaviour
     protected virtual void OnShakeCamera(ICameraShaker cameraShakeInfo)
     {
         onShakeCamera?.Invoke(cameraShakeInfo);
+    }
+
+    protected virtual void ActivateLeftArm()
+    {
+        activateLeftArm?.Invoke();
+    }
+
+    protected virtual void DeactivateLeftArm()
+    {
+        deactivateLeftArm?.Invoke();
     }
 }

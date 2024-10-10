@@ -1,12 +1,8 @@
 using DG.Tweening;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using TMPro;
 using UnityEngine;
 using UnityEngine.VFX;
-using UnityEngine.Video;
 
 [RequireComponent(typeof(ShootingBehaviour))]
 [RequireComponent(typeof(DamageBehaviour))]
@@ -26,7 +22,6 @@ public class ProjectileWeapon : ItemBase
     public Transform ShootingRotationTransform { get => shootingRotationTransform; private set => shootingRotationTransform = value; }
     public Transform BaseRotationTransform { get => baseRotationTransform; private set => baseRotationTransform = value; }
 
-
     protected Barrel barrel;
     protected Animator animator;
 
@@ -41,11 +36,17 @@ public class ProjectileWeapon : ItemBase
     int reloadStartDelayHash;
     int cockGunHash;
     int timeToCockHash;
+    int reloadTimeHash;
     Coroutine reloadStartDelayCoroutine;
+    Coroutine reloadAnimationCoroutine;
     Coroutine cockWeapon;
+
+    Coroutine reloadCoroutine;
+    Coroutine stopReloadCoroutine;
 
     protected bool isReloading = false;
     protected float shotTime = 0f;
+    bool cockGunFinished = true;
 
 
     #region DEBUG
@@ -77,7 +78,7 @@ public class ProjectileWeapon : ItemBase
     private void OnEnable()
     {
         ammoBehaviour.ReloadComplete += StopReload;
-        recoilBehaviour.OnRecoilComplete += ProceedGunAnimation;
+        //recoilBehaviour.OnRecoilComplete += ProceedGunAnimation;
     }
 
     private void Start()
@@ -88,12 +89,13 @@ public class ProjectileWeapon : ItemBase
         reloadStartDelayHash = Animator.StringToHash("ReloadStartDelay");
         cockGunHash = Animator.StringToHash("CockGun");
         timeToCockHash = Animator.StringToHash("TimeToCock");
+        reloadTimeHash = Animator.StringToHash("ReloadTime");
     }
 
     private void OnDisable()
     {
         ammoBehaviour.ReloadComplete -= StopReload;
-        recoilBehaviour.OnRecoilComplete -= ProceedGunAnimation;
+        //recoilBehaviour.OnRecoilComplete -= ProceedGunAnimation;
     }
 
     internal override void NotifyQuickAction()
@@ -124,11 +126,16 @@ public class ProjectileWeapon : ItemBase
 
     internal void NotifyReload()
     {
-        if (ammoBehaviour.GetCanReload() && !isReloading) Reload();
+        //if (ammoBehaviour.GetCanReload() && !isReloading) Reload();
+        if (ammoBehaviour.GetCanReload() && !isReloading)
+        {
+            if(reloadCoroutine != null) { StopCoroutine(reloadCoroutine); }
+            reloadCoroutine = StartCoroutine(Reload());
+        }
     }
     public bool CanShoot()
     {
-        return ammoBehaviour.GetHasBulletInMagazine() && shootingBehaviour.GetCanShoot() && !isReloading;
+        return ammoBehaviour.GetHasBulletInMagazine() && shootingBehaviour.GetCanShoot() && !isReloading && cockGunFinished;
     }
 
     protected virtual void Shoot()
@@ -140,7 +147,11 @@ public class ProjectileWeapon : ItemBase
         recoilBehaviour.ApplyRecoil();
         ammoBehaviour.NotifyProjectileConsumed();
         animator?.SetTrigger(shootHash);
+        
         InstantiateParticles();
+
+        cockGunFinished = false;
+        SetWhenToStartWeaponCock();
     }
 
     protected virtual GameObject GetPrefabToInstantiate() { throw new NotImplementedException(); }
@@ -172,35 +183,59 @@ public class ProjectileWeapon : ItemBase
         }
     }
 
-    private void Reload()
+    //private void Reload()
+    //{
+    //    isReloading = true;
+    //    animator?.SetTrigger(reloadHash);
+    //    animator?.SetBool(isReloadingHash, true);
+    //    float delay = ammoBehaviour.GetReloadStartOrFinishDelay();
+    //    float reloadTime = ammoBehaviour.GetReloadTime();
+    //    if (delay > 0)
+    //    {
+    //        if(reloadStartDelayCoroutine != null) StopCoroutine(reloadStartDelayCoroutine);
+    //        reloadStartDelayCoroutine = StartCoroutine(StartDelayReloadAnimation(delay));
+    //        DOVirtual.DelayedCall(delay + delay * 0.1f, () => 
+    //            {
+    //                ammoBehaviour.StartReload();
+    //                if(reloadAnimationCoroutine != null) StopCoroutine(reloadAnimationCoroutine);
+    //                StartCoroutine(ReloadAnimation(reloadTime));
+    //            });
+    //    }
+    //    else
+    //    {
+    //        ammoBehaviour.StartReload();
+
+    //        if (reloadAnimationCoroutine != null) StopCoroutine(reloadAnimationCoroutine);
+    //        StartCoroutine(ReloadAnimation(reloadTime));
+    //    }
+    //}
+
+    private IEnumerator Reload()
     {
         isReloading = true;
         animator?.SetTrigger(reloadHash);
         animator?.SetBool(isReloadingHash, true);
+
+        if(RightArmOnly) { ActivateLeftArm(); }
+        
         float delay = ammoBehaviour.GetReloadStartOrFinishDelay();
+        float reloadTime = ammoBehaviour.GetReloadTime();
+
         if (delay > 0)
         {
-            if(reloadStartDelayCoroutine != null) StopCoroutine(reloadStartDelayCoroutine);
-            reloadStartDelayCoroutine = StartCoroutine(StartDelayReloadAnimation(delay));
-            DOVirtual.DelayedCall(delay, () => ammoBehaviour.StartReload());
+            if (reloadStartDelayCoroutine != null) StopCoroutine(reloadStartDelayCoroutine);
+            yield return reloadStartDelayCoroutine = StartCoroutine(StartDelayReloadAnimation(delay));
         }
-        else
-        {
-            ammoBehaviour.StartReload();
-        }
+
+        ammoBehaviour.StartReload();
+        if (reloadAnimationCoroutine != null) StopCoroutine(reloadAnimationCoroutine);
+        yield return reloadAnimationCoroutine = StartCoroutine(ReloadAnimation(reloadTime));
     }
 
     private void StopReload()
     {
-        animator?.SetBool(isReloadingHash, false);
-        ammoBehaviour.CancelReload();
-        float delay = ammoBehaviour.GetReloadStartOrFinishDelay();
-        if (delay > 0)
-        {
-            if (reloadStartDelayCoroutine != null) StopCoroutine(reloadStartDelayCoroutine);
-            reloadStartDelayCoroutine = StartCoroutine(StartDelayReloadAnimation(delay));
-        }
-        isReloading = false;
+        if(stopReloadCoroutine != null) StopCoroutine(stopReloadCoroutine);
+        stopReloadCoroutine = StartCoroutine(StopReloadCoroutine());
     }
 
     private IEnumerator StartDelayReloadAnimation(float delay)
@@ -212,27 +247,96 @@ public class ProjectileWeapon : ItemBase
             t += Time.deltaTime;
             yield return new WaitForEndOfFrame();
         }
+
         yield return null;
+    }
+
+    private IEnumerator ReloadAnimation(float timeToReload)
+    {
+        float t = 0f;
+        while (isReloading)
+        {
+            while (t / timeToReload <= 1)
+            {
+                animator?.SetFloat(reloadTimeHash, t / timeToReload);
+                t += Time.deltaTime;
+                yield return new WaitForEndOfFrame();
+            }
+            t = 0f;
+        }
+        yield return null;
+    }
+
+    private IEnumerator StopReloadCoroutine()
+    {
+        animator?.SetBool(isReloadingHash, false);
+        isReloading = false;
+        ammoBehaviour.CancelReload();
+
+        float delay = ammoBehaviour.GetReloadStartOrFinishDelay();
+        if (delay > 0)
+        {
+            if (reloadStartDelayCoroutine != null) StopCoroutine(reloadStartDelayCoroutine);
+            yield return reloadStartDelayCoroutine = StartCoroutine(StartDelayReloadAnimation(delay));
+        }
+
+        if(RightArmOnly) DeactivateLeftArm();
     }
 
     private void ProceedGunAnimation()
     {
-        animator?.SetTrigger(cockGunHash);
-        if(cockWeapon != null) { StopCoroutine(cockWeapon); }
-        cockWeapon = StartCoroutine(CockWeapon());
+        //animator?.SetTrigger(cockGunHash);
+        //if(cockWeapon != null) { StopCoroutine(cockWeapon); }
+        //cockWeapon = StartCoroutine(CockWeapon());
     }
 
-    private IEnumerator CockWeapon()
+    //private IEnumerator CockWeapon()
+    //{
+    //    float dt = 0f;
+    //    float t = 0f;
+    //    float timeToCock = shootingBehaviour.SecondsBetweenShot - (Time.time - shotTime);
+    //    if(timeToCock > 0)
+    //    {
+    //        while (t <= 1)
+    //        {
+    //            t = dt / timeToCock;
+    //            animator?.SetFloat(timeToCockHash, t);
+    //            yield return new WaitForEndOfFrame();
+    //            dt += Time.deltaTime;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        animator?.SetFloat(timeToCockHash, 1f);
+    //    }
+
+    //    cockGunFinished = true;
+    //}
+
+    private IEnumerator CockWeapon(float animationLength)
     {
+        animator?.SetTrigger(cockGunHash);
+
         float dt = 0f;
         float t = 0f;
-        float timeToCock = shootingBehaviour.SecondsBetweenShot - (Time.time - shotTime);
+
         while (t <= 1)
         {
-            t = dt / timeToCock;
+            t = dt / animationLength;
             animator?.SetFloat(timeToCockHash, t);
             yield return new WaitForEndOfFrame();
             dt += Time.deltaTime;
         }
+
+
+        cockGunFinished = true;
+    }
+
+    private void SetWhenToStartWeaponCock()
+    {
+        float delay = shootingBehaviour.SecondsBetweenShot * shootingBehaviour.TimeToCockStartPercent;
+        float animationTime = shootingBehaviour.SecondsBetweenShot - delay;
+
+        DOVirtual.DelayedCall(delay, () => cockWeapon = StartCoroutine(CockWeapon(animationTime)));
     }
 }

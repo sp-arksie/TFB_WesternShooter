@@ -136,7 +136,7 @@ MonoBehaviour:
   hiddenTransform: {fileID: 6465865114733005964}
   muzzleFlashParent: {fileID: 3146833435395811930}
   smokeEmissionPointsParent: {fileID: 1173436353378192097}
-  muzzleFlashPrefab: {fileID: 2982679562053618356, guid: 9cd3b93a8eac2cc42a6a907b9d640942,
+  muzzleFlashPrefab: {fileID: 1246147520253883632, guid: 69aaf17a7543fbe4ca7db70ad2a767b5,
     type: 3}
   adsPositionTransform: {fileID: 7559108837386288289}
   shootingRotationTransform: {fileID: 464808628742764652}

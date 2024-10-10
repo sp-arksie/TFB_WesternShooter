@@ -104,4 +104,9 @@ public class AmmoBehaviour : MonoBehaviour
     {
         return reloadStartOrFinishDelay;
     }
+
+    internal float GetReloadTime()
+    {
+        return reloadTime;
+    }
 }

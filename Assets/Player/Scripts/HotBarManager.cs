@@ -110,6 +110,8 @@ public class HotBarManager : MonoBehaviour
             ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
             item.NotifyUnselected();
             item.onUnskippableActionInProgress -= SetItemBusy;
+            item.activateLeftArm -= ActivateLeftArmConstraints;
+            item.deactivateLeftArm -= DeactivateLeftArmConstraints;
             ItemUnselectedEvent?.Invoke(item);
 
             Transform current = item.transform;
@@ -129,16 +131,18 @@ public class HotBarManager : MonoBehaviour
 
         if (currentIndex != -1)
         {
-            animator.SetBool(hasGunHash, true);
-
             ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
-            item.gameObject.SetActive(true);
-            GrabPoints();
-            item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
             item.NotifySelected(this);
             item.onUnskippableActionInProgress += SetItemBusy;
+            item.activateLeftArm += ActivateLeftArmConstraints;
+            item.deactivateLeftArm += DeactivateLeftArmConstraints;
             ItemSelectedEvent?.Invoke(item);
+
+            animator.SetBool(hasGunHash, true);
             animator.SetBool(rightArmOnlyHash, item.RightArmOnly);
+
+            item.gameObject.SetActive(true);
+            GrabPoints();
 
             Transform current = item.transform;
             Transform goal = item.HipPositionTransform;
@@ -177,8 +181,8 @@ public class HotBarManager : MonoBehaviour
         Transform grabPointsParent = weapon.GrabPointsParent;
         if (weapon.RightArmOnly)
         {
-            UnapplyConstraint(grabPointsParent.GetChild(0), RightArmTarget);
-            UnapplyConstraint(grabPointsParent.GetChild(1), RightArmHint);
+            UnapplyConstraint(grabPointsParent.GetChild(2), RightArmTarget);
+            UnapplyConstraint(grabPointsParent.GetChild(3), RightArmHint);
         }
         else
         {
@@ -187,6 +191,7 @@ public class HotBarManager : MonoBehaviour
             UnapplyConstraint(grabPointsParent.GetChild(2), RightArmTarget);
             UnapplyConstraint(grabPointsParent.GetChild(3), RightArmHint);
         }
+
         desiredLeftArmWeight = 0;
         desiredRightArmWeight = 0;
     }
@@ -201,7 +206,6 @@ public class HotBarManager : MonoBehaviour
                 constrainedObject.RemoveSource(i);
             }
         }
-        else throw new System.Exception("Arm rigs are missing ParentConstraints");
     }
 
     private void GrabPoints()
@@ -210,8 +214,8 @@ public class HotBarManager : MonoBehaviour
         Transform grabPointsParent = weapon.GrabPointsParent;
         if (weapon.RightArmOnly)
         {
-            ApplyConstraint(grabPointsParent.GetChild(0), RightArmTarget);
-            ApplyConstraint(grabPointsParent.GetChild(1), RightArmHint);
+            ApplyConstraint(grabPointsParent.GetChild(2), RightArmTarget);
+            ApplyConstraint(grabPointsParent.GetChild(3), RightArmHint);
             desiredRightArmWeight = 1;
         }
         else
@@ -238,7 +242,26 @@ public class HotBarManager : MonoBehaviour
             constrainedObject.constraintActive = true;
 
         }
-        else throw new System.Exception("Arm rigs are missing ParentConstraints");
+    }
+
+    private void ActivateLeftArmConstraints()
+    {
+        ItemBase weapon = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
+        Transform grabPointsParent = weapon.GrabPointsParent;
+
+        ApplyConstraint(grabPointsParent.GetChild(0), leftArmTarget);
+        ApplyConstraint(grabPointsParent.GetChild(1), leftArmHint);
+        desiredLeftArmWeight = 1;
+    }
+
+    private void DeactivateLeftArmConstraints()
+    {
+        ItemBase weapon = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
+        Transform grabPointsParent = weapon.GrabPointsParent;
+
+        UnapplyConstraint(grabPointsParent.GetChild(0), leftArmTarget);
+        UnapplyConstraint(grabPointsParent.GetChild(1), leftArmHint);
+        desiredLeftArmWeight = 0;
     }
     #endregion
 
