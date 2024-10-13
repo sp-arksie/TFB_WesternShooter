@@ -1,10 +1,4 @@
-using Cinemachine;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.Rendering.HighDefinition;
 
 public class PlayerController : MonoBehaviour, IAnimatableEntity
 {

@@ -8,7 +8,7 @@ TerrainLayer:
   m_PrefabAsset: {fileID: 0}
   m_Name: ClumpMud
   m_DiffuseTexture: {fileID: 2800000, guid: 8a3ef1722a8fd3a4c8353e18116e7a19, type: 3}
-  m_NormalMapTexture: {fileID: 2800000, guid: 2a6a7e98a8983324e8aeca94a705844e, type: 3}
+  m_NormalMapTexture: {fileID: 2800000, guid: a4a37f7a6ffedc448ad87a9046c1534f, type: 3}
   m_MaskMapTexture: {fileID: 2800000, guid: 46f89ecbdfea35d4ea6a8203d7d0cfb1, type: 3}
   m_TileSize: {x: 2, y: 2}
   m_TileOffset: {x: 0, y: 0}
@@ -17,7 +17,7 @@ TerrainLayer:
   m_Smoothness: 0
   m_NormalScale: 1
   m_DiffuseRemapMin: {x: 0, y: 0, z: 0, w: 0}
-  m_DiffuseRemapMax: {x: 0.4037736, y: 0.3702644, z: 0.36491993, w: 1}
-  m_MaskMapRemapMin: {x: 0.32781297, y: 0, z: 0, w: 0.5188368}
-  m_MaskMapRemapMax: {x: 0.5278131, y: 1, z: 1, w: 0.5733247}
+  m_DiffuseRemapMax: {x: 0.09433961, y: 0.09433961, z: 0.09433961, w: 1}
+  m_MaskMapRemapMin: {x: 0.70435935, y: 0, z: 0, w: 0}
+  m_MaskMapRemapMax: {x: 1, y: 1, z: 1, w: 0.567866}
   m_SmoothnessSource: 1

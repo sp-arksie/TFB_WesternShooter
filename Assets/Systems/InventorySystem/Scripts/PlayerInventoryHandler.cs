@@ -88,7 +88,7 @@ public class PlayerInventoryHandler : MonoBehaviour
         input.SetActionMaps(actionMapsForInventory, false);
         cinemachineInputProvider.enabled = true;
 
-        foreach (Canvas c in otherCanvases) { c.gameObject.SetActive(true); }
+        foreach (Canvas c in otherCanvases) { if(c != null) c.gameObject.SetActive(true); }
         inventoryCanvas.gameObject.SetActive(false);
 
         inventoryMediator.UpdateAmmoTracker(playerInventory);
