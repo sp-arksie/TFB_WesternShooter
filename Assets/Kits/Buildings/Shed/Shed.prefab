@@ -117,7 +117,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1632771599874519502}
   - component: {fileID: 7168008786715324922}
-  m_Layer: 0
+  m_Layer: 19
   m_Name: BackWallCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -170,7 +170,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2819988487512319573}
   - component: {fileID: 5683905870309139034}
-  m_Layer: 0
+  m_Layer: 19
   m_Name: LeftWallCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -362,7 +362,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8369695418362677007}
   - component: {fileID: 7519739248648913993}
-  m_Layer: 0
+  m_Layer: 19
   m_Name: RightWallCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -470,6 +470,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -5994492870784934184, guid: eb6e6427559fa734f8683e3788cfc324,
         type: 3}
+      propertyPath: m_Layer
+      value: 19
+      objectReference: {fileID: 0}
+    - target: {fileID: -5994492870784934184, guid: eb6e6427559fa734f8683e3788cfc324,
+        type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
@@ -483,6 +488,11 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: 5368c9aa477af6a47b6a1798a5eb707e, type: 2}
+    - target: {fileID: -1562555523992718197, guid: eb6e6427559fa734f8683e3788cfc324,
+        type: 3}
+      propertyPath: m_Layer
+      value: 19
+      objectReference: {fileID: 0}
     - target: {fileID: -1562555523992718197, guid: eb6e6427559fa734f8683e3788cfc324,
         type: 3}
       propertyPath: m_StaticEditorFlags

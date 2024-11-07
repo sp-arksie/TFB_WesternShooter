@@ -44,18 +44,20 @@ public class EntitySight : MonoBehaviour
                 if(entityVisible != null)
                 {
                     bool lineOfSightConfirmed = false;
-                    if (entityVisible.VisibilityPointsParent)
-                    {
-                        for (int i = 0; i < entityVisible.VisibilityPointsParent.childCount && !lineOfSightConfirmed; i++)
-                        {
-                            Transform visibilityPoint = entityVisible.VisibilityPointsParent.GetChild(i);
-                            lineOfSightConfirmed = ConfirmLineOfSight(visibilityPoint);
-                        }
-                    }
-                    else
-                    {
-                        lineOfSightConfirmed = ConfirmLineOfSight(entityVisible.transform);
-                    }
+                    //if (entityVisible.VisibilityPointsParent)
+                    //{
+                    //    for (int i = 0; i < entityVisible.VisibilityPointsParent.childCount && !lineOfSightConfirmed; i++)
+                    //    {
+                    //        Transform visibilityPoint = entityVisible.VisibilityPointsParent.GetChild(i);
+                    //        lineOfSightConfirmed = ConfirmLineOfSight(visibilityPoint);
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    lineOfSightConfirmed = ConfirmLineOfSight(entityVisible.transform);
+                    //}
+
+                    lineOfSightConfirmed = CheckHasLineOfSight(entityVisible);
 
                     if (lineOfSightConfirmed) ManageVisibles(entityVisible);
                 }
@@ -70,6 +72,19 @@ public class EntitySight : MonoBehaviour
                 1 : 0);
     }
 
+    private bool CheckHasLineOfSight(EntityVisible entityVisible)
+    {
+        bool lineOfSightConfirmed = false;
+
+        for (int i = 0; i < entityVisible.VisibilityPointsParent.childCount && !lineOfSightConfirmed; i++)
+        {
+            Transform visibilityPoint = entityVisible.VisibilityPointsParent.GetChild(i);
+            lineOfSightConfirmed = ConfirmLineOfSight(visibilityPoint);
+        }
+
+        return lineOfSightConfirmed;
+    }
+
     private bool ConfirmLineOfSight(Transform visibilityPoint)
     {
         Vector3 direction = visibilityPoint.position - transform.position;
@@ -77,6 +92,7 @@ public class EntitySight : MonoBehaviour
         
         if(Physics.Raycast(transform.position, direction, out RaycastHit hit, direction.magnitude, objectOccluderLayerMask | visibilityPointsLayerMask))
         {
+            //Debug.Log($"Hit layerMask: {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
             lineOfSightConfirmed = ((1 << hit.collider.gameObject.layer) & visibilityPointsLayerMask) != 0;
         }
         return lineOfSightConfirmed;
@@ -95,6 +111,11 @@ public class EntitySight : MonoBehaviour
             }
             visibleInMemory.lastSeenTime = Time.time;
         }
+    }
+
+    public bool NotifyCheckLineOfSight(EntityVisible entityVisible)
+    {
+        return CheckHasLineOfSight(entityVisible);
     }
 
     public List<VisibleInMemory> GetCurrentlyVisiblesToEntity()

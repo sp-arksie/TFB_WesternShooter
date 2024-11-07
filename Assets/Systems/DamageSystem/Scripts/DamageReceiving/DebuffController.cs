@@ -85,7 +85,6 @@ public class DebuffController : MonoBehaviour
 
     private IEnumerator ApplyPoison()
     {
-        currentStatusEffects[StatusEffect.Poison] = true;
         yield return new WaitForSeconds(StatusEffectsDefinitions.poisonEffectDuration);
         currentStatusEffects[StatusEffect.Poison] = false;
     }

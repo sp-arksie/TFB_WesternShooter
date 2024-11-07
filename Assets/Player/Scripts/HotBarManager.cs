@@ -67,7 +67,7 @@ public class HotBarManager : MonoBehaviour
         animator.SetBool(rightArmOnlyHash, item.RightArmOnly);
         ItemSelectedEvent?.Invoke(item);
         item.onUnskippableActionInProgress += SetItemBusy;
-        GrabPoints();
+        GrabPoints(item);
     }
 
     float desiredRightArmWeight = 0;
@@ -99,7 +99,7 @@ public class HotBarManager : MonoBehaviour
         if (!currentItemBusy && hotBarItems.childCount > 0)
         {
             if (selectItem != null) { StopCoroutine(selectItem); }
-            StartCoroutine(SelectItem(index));
+            selectItem = StartCoroutine(SelectItem(index));
         }
     }
 
@@ -108,18 +108,14 @@ public class HotBarManager : MonoBehaviour
         if (currentIndex != -1)
         {
             ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
-            item.NotifyUnselected();
-            item.onUnskippableActionInProgress -= SetItemBusy;
-            item.activateLeftArm -= ActivateLeftArmConstraints;
-            item.deactivateLeftArm -= DeactivateLeftArmConstraints;
-            ItemUnselectedEvent?.Invoke(item);
+            UnsubscribeItem(item);
 
             Transform current = item.transform;
             Transform goal = item.HiddenTransform;
             if (animateItemSwitch != null) StopCoroutine(animateItemSwitch);
             yield return animateItemSwitch = StartCoroutine(AnimateItemSwitch(item, current, goal));
 
-            UngrabPoints();
+            UngrabPoints(item);
             hotBarItems.GetChild(currentIndex).gameObject.SetActive(false);
         }
 
@@ -132,17 +128,13 @@ public class HotBarManager : MonoBehaviour
         if (currentIndex != -1)
         {
             ItemBase item = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
-            item.NotifySelected(this);
-            item.onUnskippableActionInProgress += SetItemBusy;
-            item.activateLeftArm += ActivateLeftArmConstraints;
-            item.deactivateLeftArm += DeactivateLeftArmConstraints;
-            ItemSelectedEvent?.Invoke(item);
+            SubscribeItem(item);
 
             animator.SetBool(hasGunHash, true);
             animator.SetBool(rightArmOnlyHash, item.RightArmOnly);
 
             item.gameObject.SetActive(true);
-            GrabPoints();
+            GrabPoints(item);
 
             Transform current = item.transform;
             Transform goal = item.HipPositionTransform;
@@ -153,6 +145,24 @@ public class HotBarManager : MonoBehaviour
         {
             animator.SetBool(hasGunHash, false);
         }
+    }
+
+    private void UnsubscribeItem(ItemBase item)
+    {
+        item.NotifyUnselected();
+        item.onUnskippableActionInProgress -= SetItemBusy;
+        item.activateLeftArm -= ActivateLeftArmConstraints;
+        item.deactivateLeftArm -= DeactivateLeftArmConstraints;
+        ItemUnselectedEvent?.Invoke(item);
+    }
+
+    private void SubscribeItem(ItemBase item)
+    {
+        item.NotifySelected(this);
+        item.onUnskippableActionInProgress += SetItemBusy;
+        item.activateLeftArm += ActivateLeftArmConstraints;
+        item.deactivateLeftArm += DeactivateLeftArmConstraints;
+        ItemSelectedEvent?.Invoke(item);
     }
 
     private void SetItemBusy(bool itemBusy)
@@ -175,11 +185,10 @@ public class HotBarManager : MonoBehaviour
         item.transform.localRotation = goal.localRotation;
     }
     
-    private void UngrabPoints()
+    private void UngrabPoints(ItemBase item)
     {
-        ItemBase weapon = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
-        Transform grabPointsParent = weapon.GrabPointsParent;
-        if (weapon.RightArmOnly)
+        Transform grabPointsParent = item.GrabPointsParent;
+        if (item.RightArmOnly)
         {
             UnapplyConstraint(grabPointsParent.GetChild(2), RightArmTarget);
             UnapplyConstraint(grabPointsParent.GetChild(3), RightArmHint);
@@ -208,11 +217,10 @@ public class HotBarManager : MonoBehaviour
         }
     }
 
-    private void GrabPoints()
+    private void GrabPoints(ItemBase item)
     {
-        ItemBase weapon = hotBarItems.GetChild(currentIndex).GetComponent<ItemBase>();
-        Transform grabPointsParent = weapon.GrabPointsParent;
-        if (weapon.RightArmOnly)
+        Transform grabPointsParent = item.GrabPointsParent;
+        if (item.RightArmOnly)
         {
             ApplyConstraint(grabPointsParent.GetChild(2), RightArmTarget);
             ApplyConstraint(grabPointsParent.GetChild(3), RightArmHint);
@@ -276,6 +284,38 @@ public class HotBarManager : MonoBehaviour
         }
     }
     #endregion
+
+    public void NotifyRemoveItem(GameObject itemToRemove)
+    {
+        RemoveItem(itemToRemove);
+    }
+
+    private void RemoveItem(GameObject itemToRemoveGO)
+    {
+        int indexItemToRemove = 0;
+
+        for (int i = 0; i < hotBarItems.childCount; i++)
+        {
+            if (itemToRemoveGO == hotBarItems.GetChild(i).gameObject)
+                indexItemToRemove = i;
+        }
+
+        ItemBase itemToRemove = hotBarItems.GetChild(indexItemToRemove).GetComponent<ItemBase>();
+
+        if (currentIndex == indexItemToRemove)
+        {
+            UnsubscribeItem(itemToRemove);
+            UngrabPoints(itemToRemove);
+            currentIndex = -1;
+
+            if (selectItem != null) { StopCoroutine(selectItem); }
+            selectItem = StartCoroutine(SelectItem(indexItemToRemove - 1));
+        }
+
+        itemToRemove.transform.parent = null;
+
+        Debug.Log(currentIndex);
+    }
 
     #region Helper Functions
     public HealthController GetHealthController() { return healthController; }

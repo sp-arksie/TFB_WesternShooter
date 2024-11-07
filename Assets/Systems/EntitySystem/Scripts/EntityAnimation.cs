@@ -18,7 +18,6 @@ public class EntityAnimation : MonoBehaviour
     private void Awake()
     {
         animator = GetComponentInChildren<Animator>();
-        input = InputManager.Instance;
         animatableEntity = GetComponent<IAnimatableEntity>();
 
         xSpeedHash = Animator.StringToHash("XSpeed");
@@ -34,6 +33,6 @@ public class EntityAnimation : MonoBehaviour
         animator.SetFloat(zSpeedHash, animatableEntity.GetZSpeed());
         animator.SetFloat(ySpeedHash, animatableEntity.GetYSpeed());
         animator.SetBool(groundedHash, animatableEntity.GetIsGrounded());
-        animator.SetBool(crouchingHash, input.GetIsCrouching());
+        animator.SetBool(crouchingHash, animatableEntity.GetIsCrouching());
     }
 }

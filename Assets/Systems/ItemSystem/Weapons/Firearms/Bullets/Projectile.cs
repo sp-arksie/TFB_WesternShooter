@@ -17,4 +17,10 @@ public class Projectile : MonoBehaviour
     public float DamageModifier { get => damageModifier; private set => damageModifier = value; }
     public float VelocityModifier { get => velocityModifier; private set => velocityModifier = value; }
     public StatusEffect StatusEffect { get => statusEffect; private set => statusEffect = value; }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        gameObject.SetActive(false);
+        Destroy(gameObject);
+    }
 }

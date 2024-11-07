@@ -169,7 +169,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8645170799761517703}
   - component: {fileID: 2231409497045062771}
-  m_Layer: 0
+  m_Layer: 19
   m_Name: RightWall (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -222,7 +222,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7603138606453246276}
   - component: {fileID: 3631499527445902719}
-  m_Layer: 0
+  m_Layer: 19
   m_Name: LeftWall (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -328,7 +328,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9130967401322936939}
   - component: {fileID: 5755440586411415216}
-  m_Layer: 0
+  m_Layer: 19
   m_Name: BackWall (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -601,7 +601,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3439329496901620573}
   - component: {fileID: 7767682794033604884}
-  m_Layer: 0
+  m_Layer: 19
   m_Name: LeftWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -654,7 +654,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3691952235391168356}
   - component: {fileID: 5459064723711317550}
-  m_Layer: 0
+  m_Layer: 19
   m_Name: BackWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1058,7 +1058,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1369585283001578547}
   - component: {fileID: 61074914562403475}
-  m_Layer: 0
+  m_Layer: 19
   m_Name: LeftWall (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1111,7 +1111,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2731570868941384902}
   - component: {fileID: 6573119018935393128}
-  m_Layer: 0
+  m_Layer: 19
   m_Name: LeftWall (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1535,7 +1535,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3264300854879283144}
   - component: {fileID: 7974701261762300269}
-  m_Layer: 0
+  m_Layer: 19
   m_Name: RightWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1588,7 +1588,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8725936405865645634}
   - component: {fileID: 7173883142494492448}
-  m_Layer: 0
+  m_Layer: 19
   m_Name: RightWall (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

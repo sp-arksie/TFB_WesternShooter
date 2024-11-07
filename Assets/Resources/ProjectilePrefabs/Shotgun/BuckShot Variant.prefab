@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &8787931272651458052
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3471858847796292106, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[1].time
+      value: 0.090210825
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471858847796292106, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[2].time
+      value: 0.41131592
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471858847796292106, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[0].value
+      value: 0.027239144
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471858847796292106, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[1].value
+      value: 0.050032288
+      objectReference: {fileID: 0}
+    - target: {fileID: 8148897296667661270, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651845449858847708, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 242.38583
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651845449858847708, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 27.505093
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651845449858847708, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 91.516685
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651845449858847708, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651845449858847708, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651845449858847708, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651845449858847708, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651845449858847708, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651845449858847708, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651845449858847708, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8710978987234607200, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: _projectileType
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 8710978987234607200, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: matchingCalliber
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8721562298655472063, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_Name
+      value: DebugTrail
+      objectReference: {fileID: 0}
+    - target: {fileID: 8721562298655472063, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8921159995815080010, guid: bfee002154b1c69489e75a027d8f75f8,
+        type: 3}
+      propertyPath: m_Name
+      value: BuckShot Variant
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: bfee002154b1c69489e75a027d8f75f8, type: 3}

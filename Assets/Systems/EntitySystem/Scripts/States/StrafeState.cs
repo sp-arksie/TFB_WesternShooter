@@ -8,8 +8,8 @@ public class StrafeState : BaseState
     [SerializeField] float maxStrafeDuration = 4f;
 
     [Space(10)]
-    [SerializeField] float minCooldownBetweenStrafe = 0.5f;
-    [SerializeField] float maxCooldownBetweenStrafe = 3f;
+    [SerializeField] float minCooldownBetweenStrafe = 2.5f;
+    [SerializeField] float maxCooldownBetweenStrafe = 4f;
 
     float currentStrafeDuration = 0f;
     float timeOfNewStrafeSet = 0f;
@@ -17,6 +17,11 @@ public class StrafeState : BaseState
     float cooldownStartTime = 0f;
     float cooldownDuration = 0f;
     bool inCooldown = false;
+
+    private void OnEnable()
+    {
+        StopRun();
+    }
 
     private void Update()
     {

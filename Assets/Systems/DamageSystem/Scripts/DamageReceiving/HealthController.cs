@@ -1,11 +1,7 @@
-using DG.Tweening;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Net.Http.Headers;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class HealthController : MonoBehaviour
 {
@@ -28,7 +24,7 @@ public class HealthController : MonoBehaviour
     float burnedHealth = 0f;
     float currentDamageAbsorb = 1f;
 
-    RagdollEnabler ragdollEnabler;
+    RagdollController ragdollController;
     DamageReceiver[] damageReceivers;
     DebuffController debuffController;
     BuffController buffController;
@@ -69,7 +65,7 @@ public class HealthController : MonoBehaviour
             hitInfo.baseDamage = debugDamageAmount;
             hitInfo.weaponCalliber = debugCalliber;
             hitInfo.statusEffect = debugStatustatusEffect;
-            OnHit(hitInfo, debugDamageModifier);
+            //OnHit(hitInfo, debugDamageModifier);
         }
         if(debugApplyBleeding)
         {
@@ -127,7 +123,7 @@ public class HealthController : MonoBehaviour
         damageReceivers = damageReceiversParent.GetComponentsInChildren<DamageReceiver>();
         if(actionOnHealthDepleted == ActionOnHealthDepleted.EnableRagdoll)
         {
-            ragdollEnabler = GetComponent<RagdollEnabler>();
+            ragdollController = GetComponent<RagdollController>();
         }
         debuffController = GetComponent<DebuffController>();
         buffController = GetComponent<BuffController>();
@@ -159,10 +155,12 @@ public class HealthController : MonoBehaviour
         }
     }
 
-    private void OnHit(HitInfo hitInfo, DamageModifierDefinitions.DamageModifier hitLocationModifier)
+    private void OnHit(HitInfo hitInfo, DamageModifierDefinitions.DamageModifier hitLocationModifier, Rigidbody receiverOfHit)
     {
         if(currentHealth > 0)
         {
+            StoreInfoForPotentialRagdoll(hitInfo, receiverOfHit);
+
             float damageModifierValue = DamageModifierDefinitions.GetDamageModifierValue(hitLocationModifier);
             float finaldamage = GetDamage(hitInfo, damageModifierValue);
             ReduceHealth(finaldamage);
@@ -288,8 +286,31 @@ public class HealthController : MonoBehaviour
                 Destroy(gameObject);
                 break;
             case ActionOnHealthDepleted.EnableRagdoll:
-                ragdollEnabler.EnableRagdoll();
+                ragdollController.EnableRagdoll();
+                ragdollController.NotifyApplyDynamicRagdoll(lastReceiverOfDamage, GetForceToApply());
                 break;
         }
+    }
+
+    HitInfo lastHitInfo = new();
+    Rigidbody lastReceiverOfDamage;
+    private void StoreInfoForPotentialRagdoll(HitInfo hitInfo, Rigidbody receiverOfHit)
+    {
+        lastHitInfo = hitInfo;
+        lastReceiverOfDamage = receiverOfHit;
+    }
+
+    private Vector3 GetForceToApply()
+    {
+        Vector3 direction = -(lastHitInfo.locationOfDamageSource - lastReceiverOfDamage.transform.position).normalized;
+        float forceModifier = 1f;
+        if(lastHitInfo.damageFalloffCurve != null)
+        {
+            float distance = Vector3.Distance(lastHitInfo.locationOfDamageSource, transform.position);
+            forceModifier = lastHitInfo.damageFalloffCurve.Evaluate(distance);
+        }
+        float forceMagnitude = lastHitInfo.baseDamage * forceModifier * 1.5f;
+        
+        return direction * forceMagnitude;
     }
 }

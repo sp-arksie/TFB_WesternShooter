@@ -8,6 +8,7 @@ public class ReloadState : BaseState
     {
         StopRun();
         SetIsMovingToCover(false);
+        GetAgent().SetDestination(transform.position);
     }
 
     private void Update()

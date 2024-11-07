@@ -24,7 +24,6 @@ public class WindmillSwivel : MonoBehaviour
     private void Start()
     {
         StartCoroutine(Swivel());
-        //StartCoroutine(Rotate());
     }
 
     IEnumerator Swivel()
@@ -57,29 +56,6 @@ public class WindmillSwivel : MonoBehaviour
 
             float pauseDuration = Random.Range(pauseBetweenSwivel, pauseBetweenSwivel * pauseDurationVariance);
             yield return new WaitForSeconds(pauseDuration);
-        }
-    }
-
-    [SerializeField] Transform blades;
-    float revolutionTime = 6f;
-    IEnumerator Rotate()
-    {
-        while (true)
-        {
-            float dt = 0;
-            Quaternion start = blades.transform.rotation;
-            Quaternion end = blades.transform.rotation * Quaternion.AngleAxis(120, Vector3.right);
-            float fraction = revolutionTime / 3;
-
-            while (dt < fraction)
-            {
-                Quaternion newRotation = Quaternion.Lerp(start, end, dt / fraction);
-                blades.transform.rotation = newRotation;
-                yield return null;
-
-                dt += Time.deltaTime;
-            }
-            blades.transform.rotation = end;
         }
     }
 }

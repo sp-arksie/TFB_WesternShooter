@@ -16,38 +16,44 @@ public class DecisionHasPotentialCoverPosition : DecisionNode
 
     protected override bool CheckCondition()
     {
-        for (int i = 0; i < potentialCoverColliders.Length; i++)
-        {
-            potentialCoverColliders[i] = null;
-        }
-
-        int numberOfPotentialColliders = Physics.OverlapSphereNonAlloc(
-            transform.position, entityController.CoverCheckingAreaRadius, potentialCoverColliders, entityController.StaticOccludersLayerMask);
-
-        Array.Sort(potentialCoverColliders, SortByClosestColliders);
-
-        Vector3 targetPosition = entityController.sight.GetCurrentlyVisiblesToEntity()[0].entityVisible.transform.position;
-
         bool suitableCoverFound = false;
-        for (int i = 0; i < numberOfPotentialColliders && !suitableCoverFound; i++)
-        {
-            float dotProduct = GetPotentialCoverPosition(potentialCoverColliders[i].transform.position, targetPosition, out Vector3 potentialCoverPosition);
-            if (dotProduct != operationFailed && dotProduct <= entityController.HidingAccuracy)
-            {
-                if( !entityController.IsMovingToCover )
-                    entityController.NotifySetCoverDestination(potentialCoverPosition);
-                suitableCoverFound = true;
-            }
-            else if (dotProduct != operationFailed)
-            {
-                Vector3 newSamplePosition = potentialCoverColliders[i].transform.position - (targetPosition - potentialCoverPosition) * 2f;
 
-                dotProduct = GetPotentialCoverPosition(newSamplePosition, targetPosition, out potentialCoverPosition);
+        if (entityController.IsMovingToCover)
+        {
+            suitableCoverFound = true;
+        }
+        else
+        {
+            for (int i = 0; i < potentialCoverColliders.Length; i++)
+            {
+                potentialCoverColliders[i] = null;
+            }
+
+            int numberOfPotentialColliders = Physics.OverlapSphereNonAlloc(
+                transform.position, entityController.CoverCheckingAreaRadius, potentialCoverColliders, entityController.StaticOccludersLayerMask);
+
+            Array.Sort(potentialCoverColliders, SortByClosestColliders);
+
+            Vector3 targetPosition = entityController.sight.GetCurrentlyVisiblesToEntity()[0].entityVisible.transform.position;
+
+            for (int i = 0; i < numberOfPotentialColliders && !suitableCoverFound; i++)
+            {
+                float dotProduct = GetPotentialCoverPosition(potentialCoverColliders[i].transform.position, targetPosition, out Vector3 potentialCoverPosition);
                 if (dotProduct != operationFailed && dotProduct <= entityController.HidingAccuracy)
                 {
-                    if (!entityController.IsMovingToCover)
-                        entityController.NotifySetCoverDestination(potentialCoverPosition);
+                    entityController.NotifySetCoverDestination(potentialCoverPosition);
                     suitableCoverFound = true;
+                }
+                else if (dotProduct != operationFailed)
+                {
+                    Vector3 newSamplePosition = potentialCoverColliders[i].transform.position - (targetPosition - potentialCoverPosition) * 2f;
+
+                    dotProduct = GetPotentialCoverPosition(newSamplePosition, targetPosition, out potentialCoverPosition);
+                    if (dotProduct != operationFailed && dotProduct <= entityController.HidingAccuracy)
+                    {
+                        entityController.NotifySetCoverDestination(potentialCoverPosition);
+                        suitableCoverFound = true;
+                    }
                 }
             }
         }

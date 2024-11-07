@@ -21,7 +21,7 @@ TagManager:
   - 
   - 
   - Projectile
-  - 
+  - Throwable
   - 
   - 
   - Object Occluder
@@ -33,7 +33,7 @@ TagManager:
   - 
   - 
   - 
-  - 
+  - DamageReceiver
   - 
   - VisibleToEntity
   - VisibilityPoint

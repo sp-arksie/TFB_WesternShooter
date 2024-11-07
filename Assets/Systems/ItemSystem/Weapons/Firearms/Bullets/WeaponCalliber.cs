@@ -6,5 +6,6 @@ public enum WeaponCalliber
     Melee,
     SmallCalliber,
     MediumCalliber,
-    LargeCalliber
+    LargeCalliber,
+    Shotgun,
 }

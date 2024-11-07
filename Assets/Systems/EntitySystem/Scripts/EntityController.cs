@@ -29,11 +29,13 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
     public float ShootingCooldownMax { get => shootingCooldownMax; private set => shootingCooldownMax = value; }
 
     [Header("Strafing")]
+    [SerializeField] float minimumDistanceFromTarget = 5f;
     [SerializeField] float maxLeftRightStrafeDistance = 4f;
     [SerializeField] float maxFrontBackStrafeDistance = 0.5f;
     [SerializeField] float strafeDestinationReachedThreshold = 0.3f;
     [SerializeField] float maxTimeToReachStrafeDestination = 4f;
     #region Strafing Properties
+    public float MinimumDistanceFromTarget { get => minimumDistanceFromTarget; }
     public float MaxLeftRightStrafeDistance { get => maxLeftRightStrafeDistance; private set => maxLeftRightStrafeDistance = value; }
     public float MaxFrontBackStrafeDistance { get => maxFrontBackStrafeDistance; private set => maxFrontBackStrafeDistance = value; }
     public float StrafeDestinationReachedThreshold { get => strafeDestinationReachedThreshold; private set => strafeDestinationReachedThreshold = value; }
@@ -45,7 +47,7 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
     [Header("Cover")]
     [SerializeField] LayerMask staticOccludersLayerMask = Physics.DefaultRaycastLayers;
     [SerializeField] int numberOfCollidersToSample = 10;
-    [SerializeField] float coverCheckingAreaRadius = 10f;
+    [SerializeField] float coverCheckingAreaRadius = 6f;
     [Tooltip("-1 is most accurate and 1 is least")]
     [SerializeField] [Range(-1f, 1f)] float hidingAccuracy = 0f;
     [SerializeField] float coverDestinationReachedThreshold = 0.1f;
@@ -71,7 +73,6 @@ public class EntityController : MonoBehaviour, IAnimatableEntity
     bool hasLastSeenTargetPosition = false;
 
     Vector3 smoothedLocalMovement = Vector3.zero;
-    //bool isRunning = false;
 
     private void Awake()
     {

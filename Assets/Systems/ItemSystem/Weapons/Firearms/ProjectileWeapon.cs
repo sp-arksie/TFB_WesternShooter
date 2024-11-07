@@ -183,33 +183,6 @@ public class ProjectileWeapon : ItemBase
         }
     }
 
-    //private void Reload()
-    //{
-    //    isReloading = true;
-    //    animator?.SetTrigger(reloadHash);
-    //    animator?.SetBool(isReloadingHash, true);
-    //    float delay = ammoBehaviour.GetReloadStartOrFinishDelay();
-    //    float reloadTime = ammoBehaviour.GetReloadTime();
-    //    if (delay > 0)
-    //    {
-    //        if(reloadStartDelayCoroutine != null) StopCoroutine(reloadStartDelayCoroutine);
-    //        reloadStartDelayCoroutine = StartCoroutine(StartDelayReloadAnimation(delay));
-    //        DOVirtual.DelayedCall(delay + delay * 0.1f, () => 
-    //            {
-    //                ammoBehaviour.StartReload();
-    //                if(reloadAnimationCoroutine != null) StopCoroutine(reloadAnimationCoroutine);
-    //                StartCoroutine(ReloadAnimation(reloadTime));
-    //            });
-    //    }
-    //    else
-    //    {
-    //        ammoBehaviour.StartReload();
-
-    //        if (reloadAnimationCoroutine != null) StopCoroutine(reloadAnimationCoroutine);
-    //        StartCoroutine(ReloadAnimation(reloadTime));
-    //    }
-    //}
-
     private IEnumerator Reload()
     {
         isReloading = true;

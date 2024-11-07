@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -16,6 +13,7 @@ public class BaseState : MonoBehaviour
     #region General
     protected NavMeshAgent GetAgent() { return entityController.agent; }
     protected void NotifyOrientEntityToTarget() { entityController.OrientEntityToTarget(); }
+    protected float GetMinimumDistanceFromTarget() { return entityController.MinimumDistanceFromTarget; }
     #endregion
 
     #region Locomotion
